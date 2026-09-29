@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Air-Conditioning Simulation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#EDF1F3;
+    --panel:#FFFFFF;
+    --ink:#14212A;
+    --ink-soft:#55636C;
+    --line:#D6DEE3;
+    --cold:#2A6F8E;    --cold-soft:#DBEAF0;
+    --hot:#BC4A2B;     --hot-soft:#F4DED5;
+    --warm:#DE9127;    --warm-soft:#FaEBD3;
+    --mix:#6B7A83;     --mix-soft:#E5EAEC;
+    --ok:#3E7D5A;      --ok-soft:#E1EFE7;
+    --hi-tint:#FBF1E4;  /* high-pressure side wash */
+    --lo-tint:#E7F1F5;  /* low-pressure side wash */
+    --radius:14px;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif; line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{ font-family:'Space Grotesk',system-ui,sans-serif; margin:0; }
+
+  .wrap{ max-width:1140px; margin:0 auto; padding:44px 22px 72px; }
+
+  header.page{ max-width:680px; margin-bottom:34px; }
+  header.page .eyebrow{
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px;
+    color:var(--cold); margin-bottom:10px; letter-spacing:.02em;
+  }
+  header.page h1{ font-size:clamp(27px,4vw,37px); font-weight:700; letter-spacing:-.01em; line-height:1.12; }
+  header.page p{ margin-top:12px; font-size:16px; color:var(--ink-soft); max-width:64ch; }
+
+  .board{ display:grid; grid-template-columns:1.12fr 1fr; gap:26px; align-items:start; }
+  @media (max-width:900px){ .board{ grid-template-columns:1fr; } }
+
+  .panel{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:22px; }
+
+  /* ---------- stage / diagram column ---------- */
+  .stage-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px; min-height:30px; }
+  .stage-name{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14px; color:var(--ink-soft); }
+  .back-btn{
+    font-family:'Inter',sans-serif; font-size:13px; font-weight:500;
+    border:1px solid var(--line); background:var(--panel); color:var(--ink);
+    padding:6px 12px; border-radius:8px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:6px; transition:border-color .15s ease, background .15s ease;
+  }
+  .back-btn:hover{ border-color:var(--ink-soft); background:var(--bg); }
+
+  .diagram-panel svg{ width:100%; height:auto; display:block; }
+
+  .zone-bg.indoor{ fill:var(--lo-tint); opacity:.6; }
+  .zone-bg.outdoor{ fill:var(--warm-soft); opacity:.4; }
+  .zone-label{ font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:600; fill:var(--ink-soft); }
+  .wall{ fill:#C4CCD1; }
+  .wall-gap{ fill:var(--panel); stroke:#C4CCD1; stroke-width:2; }
+
+  .node-box{ fill:var(--panel); stroke:var(--line); stroke-width:2; transition:stroke .2s ease; }
+  .node{ cursor:pointer; }
+  .node:hover .node-box{ stroke:var(--ink-soft); }
+  .node.active .node-box{ stroke:var(--ink); stroke-width:2.5; }
+  .zoomable:hover .node-box{ stroke:var(--cold); }
+
+  .node-label{ font-family:'Space Grotesk',sans-serif; font-size:14.5px; font-weight:600; fill:var(--ink); }
+  .node-sub{ font-family:'Inter',sans-serif; font-size:11px; fill:var(--ink-soft); }
+  .zoom-tag{ font-family:'Inter',sans-serif; font-size:9.5px; font-weight:600; fill:var(--cold); }
+
+  .pipe{ fill:none; stroke-width:9; stroke-linecap:round; }
+  .pipe.cold{ stroke:#B7D6E2; } .pipe.hot{ stroke:#EBC3B4; }
+  .pipe.warm{ stroke:#F2D8A8; } .pipe.mix{ stroke:#CBD3D7; }
+
+  .mini-coil{ fill:none; stroke-width:3; stroke-linecap:round; opacity:.9; }
+
+  .particle{ r:5.5; }
+  .particle.cold{ fill:var(--cold); } .particle.hot{ fill:var(--hot); }
+  .particle.warm{ fill:var(--warm); } .particle.mix{ fill:var(--mix); }
+
+  @keyframes flowA{ from{ offset-distance:0%; } to{ offset-distance:100%; } }
+  .p1{ offset-path:path('M 250,455 L 390,455'); animation:flowA 3.4s linear infinite; }
+  .p2{ offset-path:path('M 480,400 L 480,220'); animation:flowA 3.4s linear infinite; animation-delay:-.85s; }
+  .p3{ offset-path:path('M 390,165 L 250,165'); animation:flowA 3.4s linear infinite; animation-delay:-1.7s; }
+  .p4{ offset-path:path('M 160,220 L 160,400'); animation:flowA 3.4s linear infinite; animation-delay:-2.55s; }
+
+  .stream-label{ font-family:'Inter',sans-serif; font-size:11px; font-style:italic; fill:var(--ink-soft); }
+  .side-label{ font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:600; letter-spacing:.03em; }
+  .side-label.hi{ fill:var(--hot); } .side-label.lo{ fill:var(--cold); }
+
+  .flow-line.heat{ stroke:var(--hot); fill:none; }
+  .flow-line.power{ stroke:var(--ink); fill:none; }
+  .flow-label{ font-family:'Inter',sans-serif; font-size:11.5px; font-weight:500; }
+  .flow-label.heat{ fill:var(--hot); } .flow-label.power{ fill:var(--ink); }
+  .air-arrow{ stroke:var(--ink-soft); stroke-width:1.6; stroke-dasharray:4 3; fill:none; }
+
+  .diagram-hint{ margin:14px 2px 0; font-size:12.5px; color:var(--ink-soft); }
+  .diagram-hint b{ color:var(--ink); font-weight:600; }
+
+  /* ---------- info column ---------- */
+  .progress{ display:flex; gap:7px; flex-wrap:wrap; margin-bottom:9px; }
+  .chip{
+    font-family:'Inter',sans-serif; font-size:12.5px; font-weight:500;
+    padding:6px 12px; border-radius:8px; border:1px solid var(--line);
+    background:var(--panel); color:var(--ink-soft); cursor:pointer;
+    transition:background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .chip:hover{ border-color:var(--ink-soft); }
+  .chip.visited{ color:var(--ink); border-color:var(--mix); }
+  .chip.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .chip .dot{ display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--mix); margin-right:6px; vertical-align:middle; opacity:0; transition:opacity .15s ease; }
+  .chip.visited .dot{ opacity:1; }
+  .chip.active .dot{ background:#fff; opacity:1; }
+
+  .progress-caption{ font-size:12.5px; color:var(--ink-soft); margin-bottom:18px; }
+
+  .empty h2{ font-size:19px; margin-bottom:9px; }
+  .empty p{ font-size:14.5px; color:var(--ink-soft); }
+
+  .content h2{ font-size:21px; margin-bottom:4px; }
+  .phase-badge{
+    display:inline-flex; align-items:center; gap:8px; margin:10px 0 14px;
+    font-family:'Space Grotesk',sans-serif; font-size:12.5px; font-weight:600;
+    padding:6px 12px; border-radius:20px; background:var(--mix-soft); color:var(--ink);
+  }
+  .phase-badge .sw{ width:9px; height:9px; border-radius:50%; }
+  .phase-badge .to{ color:var(--ink-soft); font-weight:500; }
+
+  .content .desc{ font-size:14.5px; color:var(--ink); }
+
+  .callout{ margin-top:14px; padding:14px 16px; border-radius:10px; font-size:13.5px; }
+  .callout .k{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12px; letter-spacing:.02em; margin-bottom:5px; display:flex; align-items:center; gap:7px; }
+  .callout .k .tag{ font-size:10px; font-weight:600; padding:2px 7px; border-radius:5px; background:rgba(0,0,0,.06); }
+
+  .callout.law{ background:var(--mix-soft); border-left:3px solid var(--ink-soft); }
+  .callout.law .k{ color:var(--ink); }
+  .callout.system{ background:var(--lo-tint); border-left:3px solid var(--cold); }
+  .callout.system .k{ color:var(--cold); }
+  .callout.heat{ background:var(--hot-soft); border-left:3px solid var(--hot); }
+  .callout.heat .k{ color:var(--hot); }
+  .callout.pressure{ background:var(--warm-soft); border-left:3px solid var(--warm); }
+  .callout.pressure .k{ color:#a86a13; }
+
+  .callout.air{ background:var(--cold-soft); border-left:3px solid var(--cold); }
+  .callout.air .k{ color:var(--cold); }
+  .hum-row{ display:flex; gap:10px; margin:10px 0 4px; }
+  .hum-cell{ flex:1; background:rgba(255,255,255,.6); border-radius:8px; padding:9px 11px; }
+  .hum-cell .h{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:11px; color:var(--ink-soft); margin-bottom:3px; }
+  .hum-cell .v{ font-size:12.5px; }
+  .hum-cell .v b{ font-weight:600; }
+
+  .reset-link{
+    display:inline-block; margin-top:20px; background:none; border:none;
+    font-family:'Inter',sans-serif; font-size:12.5px; color:var(--ink-soft);
+    text-decoration:underline; cursor:pointer; padding:0;
+  }
+  .reset-link:hover{ color:var(--ink); }
+
+  footer.note{ margin-top:30px; font-size:12.5px; color:var(--ink-soft); max-width:74ch; }
+
+  /* ---------- self-check quiz ---------- */
+  .quiz-panel{ margin-top:26px; }
+  .quiz-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .quiz-head h2{ font-size:21px; }
+  .quiz-head .sub{ font-size:13px; color:var(--ink-soft); margin-top:4px; }
+  .quiz-progress{ font-size:12.5px; color:var(--ink-soft); font-family:'Space Grotesk',sans-serif; font-weight:600; white-space:nowrap; }
+  .quiz-dots{ display:flex; gap:6px; margin:14px 0 20px; }
+  .quiz-dot{ width:26px; height:5px; border-radius:3px; background:var(--mix-soft); transition:background .2s ease; }
+  .quiz-dot.done{ background:var(--mix); }
+  .quiz-dot.current{ background:var(--ink); }
+  .quiz-q{ font-size:16px; font-weight:500; margin:0 0 16px; max-width:72ch; }
+  .quiz-opts{ display:flex; flex-direction:column; gap:9px; max-width:660px; }
+  .quiz-opt{ text-align:left; font-family:'Inter',sans-serif; font-size:14.5px; padding:12px 15px; border-radius:9px; border:1px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer; transition:border-color .15s ease, background .15s ease; display:flex; gap:11px; align-items:flex-start; }
+  .quiz-opt:hover:not(.locked){ border-color:var(--ink-soft); }
+  .quiz-opt .mark{ font-family:'Space Grotesk',sans-serif; font-weight:600; color:var(--ink-soft); flex:none; }
+  .quiz-opt.locked{ cursor:default; }
+  .quiz-opt.correct{ border-color:var(--ok); background:var(--ok-soft); }
+  .quiz-opt.correct .mark{ color:var(--ok); }
+  .quiz-opt.wrong{ border-color:var(--hot); background:var(--hot-soft); }
+  .quiz-opt.wrong .mark{ color:var(--hot); }
+  .quiz-feedback{ margin-top:15px; font-size:14px; padding:13px 15px; border-radius:9px; background:var(--mix-soft); max-width:660px; }
+  .quiz-feedback strong{ font-family:'Space Grotesk',sans-serif; display:block; margin-bottom:4px; font-size:13px; }
+  .quiz-feedback.good{ background:var(--ok-soft); }
+  .quiz-feedback.bad{ background:var(--hot-soft); }
+  .quiz-nav{ display:flex; gap:10px; align-items:center; margin-top:16px; flex-wrap:wrap; }
+  .quiz-next{ font-family:'Inter',sans-serif; font-size:14px; font-weight:600; padding:10px 18px; border-radius:9px; border:1px solid var(--ink); background:var(--ink); color:#fff; cursor:pointer; transition:opacity .15s ease; }
+  .quiz-next:hover{ opacity:.9; }
+  .quiz-retry{ font-family:'Inter',sans-serif; font-size:14px; font-weight:600; padding:10px 18px; border-radius:9px; border:1px solid var(--ink-soft); background:var(--panel); color:var(--ink); cursor:pointer; transition:background .15s ease; }
+  .quiz-retry:hover{ background:var(--bg); }
+  .quiz-summary h3{ font-size:20px; margin-bottom:8px; }
+  .quiz-summary .score{ font-family:'Space Grotesk',sans-serif; font-size:15px; color:var(--ink); }
+  .quiz-summary .score b{ font-weight:700; }
+  .quiz-restart{ display:block; margin-top:20px; padding-top:16px; border-top:1px solid var(--line); font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-soft); text-decoration:underline; background:none; border-left:none; border-right:none; border-bottom:none; cursor:pointer; }
+  .quiz-restart:hover{ color:var(--ink); }
+
+  /* realistic-unit overview */
+  .unit-box{ stroke:var(--ink-soft); stroke-width:1.6; }
+  .unit-indoor{ fill:#EDF5F8; }
+  .unit-outdoor{ fill:#FBF4EA; }
+  .unit-title{ font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:600; fill:var(--ink-soft); }
+  .comp-name{ font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:600; fill:var(--ink); }
+  .comp-sub{ font-family:'Inter',sans-serif; font-size:10.5px; fill:var(--ink-soft); }
+  .label-chip{ fill:#fff; opacity:.85; }
+  .label-chip-in{ fill:#E8F1F4; }
+  .label-chip-out{ fill:#FBF4EA; }
+  .leader{ stroke:var(--ink-soft); stroke-width:1; opacity:.45; }
+  .ctx{ stroke:var(--ink-soft); stroke-width:1.4; fill:none; opacity:.36; stroke-linecap:round; stroke-linejoin:round; }
+  .ctx-label{ font-family:'Inter',sans-serif; font-size:10px; font-style:italic; fill:var(--ink-soft); opacity:.8; }
+  .valve-sym{ fill:none; stroke:var(--mix); stroke-width:2.2; stroke-linejoin:round; }
+  .comp-body{ fill:rgba(255,255,255,0.22); stroke:var(--hot); stroke-width:2.2; }
+  .bolt{ fill:var(--ink); }
+  .pipe-core{ fill:none; stroke:#fff; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; opacity:.55; }
+  .airstream{ fill:none; stroke-width:2; stroke-linecap:round; opacity:.7; }
+  .airstream.cool{ stroke:var(--cold); }
+  .airstream.warm{ stroke:var(--warm); }
+  .air-tag{ font-family:'Inter',sans-serif; font-size:10.5px; font-style:italic; }
+  .air-tag.cool{ fill:var(--cold); }
+  .air-tag.warm{ fill:var(--warm); }
+  .ctx-label{ font-family:'Inter',sans-serif; font-size:10px; font-style:italic; fill:var(--ink-soft); }
+  .zoom-tag{ font-family:'Inter',sans-serif; font-size:9.5px; font-weight:600; fill:var(--cold); }
+  .hl{ fill:none; stroke:none; stroke-width:2; transition:stroke .15s ease; }
+  .hit{ fill:transparent; cursor:pointer; }
+  .node:hover .hl{ stroke:#C4CDD2; }
+  .node.active .hl{ stroke:#9AA8B0; }
+  .zoomable:hover .hl{ stroke:#9EC6D8; }
+
+  @media (prefers-reduced-motion: reduce){
+    .particle{ animation:none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <div class="eyebrow">Air-conditioning simulation</div>
+    <h1>How air-conditioning cools a room</h1>
+    <p>An air conditioner doesn't create cold — it moves heat out of the room and releases it outside. Think of it like a water pump: a pump can push water uphill, against the direction it would naturally flow, and in the same way an air conditioner "pumps" heat from the cooler room to the warmer outdoors — the opposite of the direction heat moves on its own. Forcing heat the "wrong" way takes energy, which is why the unit has to be powered. Four components and one circulating refrigerant do the job. Click any of them to see how.</p>
+  </header>
+
+  <div class="board">
+
+    <!-- ============ LEFT: DIAGRAM ============ -->
+    <div class="panel diagram-panel">
+      <div class="stage-head">
+        <span class="stage-name" id="stage-name">Full loop</span>
+        <button class="back-btn" id="back-btn" hidden>&larr; Back to full loop</button>
+      </div>
+
+      <!-- overview + detail get swapped inside here -->
+      <div id="diagram-host"></div>
+
+      <div id="overview-hints">
+        <p class="diagram-hint">This is a split system: an <b>indoor unit</b> (evaporator + expansion valve) and an <b>outdoor unit</b> (compressor + condenser), joined by two pipes through the wall. One continuous loop of <b>refrigerant</b> runs through it all, and its colour shows what state the refrigerant is in: <b>blue</b> = cold refrigerant (a low-pressure liquid–gas mix that boils into cold gas), <b>red</b> = hot high-pressure gas (straight after the compressor), <b>amber</b> = warm high-pressure liquid (after it has condensed).</p>
+        <p class="diagram-hint">Each unit is a <b>heat exchanger</b>. The indoor unit draws in <b>warm air from the room</b>, passes it over the cold coil to take heat out of it, and blows <b>cool air back into the room</b>. The outdoor unit does the opposite: it draws in <b>ambient outdoor air</b>, passes it over the hot coil to dump heat into it, and blows <b>warm air outside</b>. The outdoor unit actually releases <b>more heat than the room lost</b>, because it must also get rid of the energy the compressor used.</p>
+        <p class="diagram-hint">The refrigerant is a <b>fixed mass going round a closed loop</b>, yet each component is an <b>open system</b> with flow through it — that is the open-vs-closed distinction in one picture.</p>
+        <p class="diagram-hint">Tap <b>any component</b> to zoom in and watch how it works — the coils changing phase, the compressor squeezing, the valve throttling.</p>
+      </div>
+      <div id="detail-hints" hidden>
+        <p class="diagram-hint" id="detail-hint-text"></p>
+      </div>
+    </div>
+
+    <!-- ============ RIGHT: INFO ============ -->
+    <div class="panel info-panel">
+      <div class="progress" id="progress"></div>
+      <div class="progress-caption" id="progress-caption">0 of 4 explored</div>
+
+      <div id="empty" class="empty">
+        <h2>Pick a component to begin</h2>
+        <p>Select any part of the loop — in the diagram or from the buttons above — to see what it does and how the two laws of thermodynamics show up in it.</p>
+      </div>
+
+      <div id="content" class="content" hidden>
+        <h2 id="c-title"></h2>
+        <div class="phase-badge" id="c-phase"></div>
+        <p class="desc" id="c-desc"></p>
+        <div id="c-callouts"></div>
+      </div>
+
+      <button class="reset-link" id="reset-btn">Reset progress</button>
+    </div>
+
+  </div>
+
+  <div class="panel quiz-panel">
+    <div class="quiz-head">
+      <div>
+        <h2>Check your understanding</h2>
+        <div class="sub">Six quick questions. Pick an answer to see whether it's right and why.</div>
+      </div>
+      <div class="quiz-progress" id="quiz-progress"></div>
+    </div>
+    <div class="quiz-dots" id="quiz-dots"></div>
+
+    <div id="quiz-body">
+      <p class="quiz-q" id="quiz-q"></p>
+      <div class="quiz-opts" id="quiz-opts"></div>
+      <div class="quiz-feedback" id="quiz-feedback" hidden></div>
+      <div class="quiz-nav">
+        <button class="quiz-retry" id="quiz-retry" hidden>Try again</button>
+        <button class="quiz-next" id="quiz-next" hidden></button>
+      </div>
+    </div>
+
+    <div class="quiz-summary" id="quiz-summary" hidden>
+      <h3>Nice work</h3>
+      <div class="score" id="quiz-score"></div>
+    </div>
+
+    <button class="quiz-restart" id="quiz-reset-all">Restart quiz</button>
+  </div>
+
+  <footer class="note">
+    A teaching model, not to scale. The refrigerant is drawn as a single loop of tubing; real systems add a receiver, filter-drier and other parts. The expansion valve is shown indoors at the evaporator inlet, so both pipes crossing the wall stay single-phase (warm liquid in, cold gas out).
+    <br><br>This simulation was built with Claude (Anthropic).
+  </footer>
+
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   Palette (hex mirrors of the CSS vars, for JS-drawn particles)
+============================================================ */
+const C = {
+  cold:'#2A6F8E', hot:'#BC4A2B', warm:'#DE9127',
+  coldSoft:'#DBEAF0', ink:'#14212A', inkSoft:'#55636C', line:'#D6DEE3',
+  tube:'#9BB6C0'
+};
+
+/* ============================================================
+   Component content
+============================================================ */
+const STAGES = {
+  'evaporator':{
+    label:'Evaporator', zone:'Indoor unit', zoom:true,
+    title:'Evaporator — where the room is cooled',
+    phase:{ from:'cold liquid + vapour', to:'cold vapour', c1:C.cold, c2:C.cold },
+    desc:'Cold, low-pressure refrigerant flows through the indoor coil. It is colder than the room air blown across it, so heat leaves the air and boils the refrigerant into a gas. This is the only place in the whole machine where the room actually loses heat.',
+    callouts:[
+      {kind:'system', tag:'Open system', k:'A control volume with flow',
+       t:'Treat the coil as an open system at steady state: refrigerant streams in one end and out the other, and heat crosses the boundary. Nothing accumulates inside — what flows in must flow out.'},
+      {kind:'law', tag:'2nd law', k:'Heat flows the natural way here',
+       t:'Room air is warmer than the refrigerant, so heat moves warm → cold on its own. This step is "downhill" and costs no work — the machine only had to make the refrigerant cold first.'}
+    ],
+    air:{
+      in:{h:'Air in — room air', v:'<b>High specific humidity</b>, average relative humidity'},
+      out:{h:'Air out — supply air', v:'<b>Low specific humidity</b>, relative humidity near 100%'},
+      note:'The coil cools the air below its dew point, so water vapour condenses onto the metal and drips away as condensate. The air leaves holding much less moisture (lower specific humidity), yet because it is now so cold it is nearly saturated, so its relative humidity climbs toward 100%. The condensate is caught in a tray under the coil and carried outside through a drain pipe, so it never wets the room.'
+    }
+  },
+  'compressor':{
+    label:'Compressor', zone:'Outdoor unit', zoom:true,
+    title:'Compressor — paying for the heat move',
+    phase:{ from:'cold vapour', to:'hot vapour', c1:C.cold, c2:C.hot },
+    desc:'The compressor squeezes the low-pressure gas into a high-pressure gas. Compressing a gas takes work, and that work energy stays in the refrigerant as heat — so the gas leaves much hotter than it arrived. This is the electrical energy your power bill pays for.',
+    callouts:[
+      {kind:'system', tag:'Open system', k:'Work crosses the boundary',
+       t:'Another open system at steady flow, but here work also crosses the boundary. Gas enters, gas leaves, and the mechanical and electrical work driving the motor is added along the way.'},
+      {kind:'law', tag:'1st law', k:'Work in becomes energy in the gas',
+       t:'Energy is conserved: the work put in doesn\u2019t vanish, it shows up as a higher-energy, hotter gas leaving the compressor. Energy in = energy out, just in a different form.'}
+    ]
+  },
+  'condenser':{
+    label:'Condenser', zone:'Outdoor unit', zoom:true,
+    title:'Condenser — dumping heat outdoors',
+    phase:{ from:'hot vapour', to:'warm liquid', c1:C.hot, c2:C.warm },
+    desc:'The hot, high-pressure gas runs through the outdoor coil. It is now hotter than the outside air, so heat pours out of it into the surroundings and the refrigerant condenses back to a liquid, ready to go round again.',
+    callouts:[
+      {kind:'system', tag:'Open system', k:'Heat leaves the control volume',
+       t:'Refrigerant flows through and heat crosses the boundary outward. Steady state again: as much refrigerant leaves as enters, carrying less energy than it arrived with.'},
+      {kind:'law', tag:'1st law', k:'The outdoor unit dumps more than the room lost',
+       t:'Over the whole cycle: heat rejected outside = heat taken from the room + compressor work (Q\u2095 = Q\u2097 + W). The outside always receives more heat than the room gave up — that extra is the work you paid for.'},
+      {kind:'law', tag:'2nd law', k:'Downhill again — but only because of the compressor',
+       t:'Heat now flows hot → cold, from the hot refrigerant to cooler outdoor air. This is only possible because the compressor first made the refrigerant hotter than the air outside.'}
+    ],
+    air:{
+      in:{h:'Air in — outdoor air', v:'Cool, <b>unchanged specific humidity</b>'},
+      out:{h:'Air out', v:'Warm, <b>lower relative humidity</b>'},
+      note:'Outdoor air simply picks up heat and blows away warmer. No water condenses here — the air is being heated, not cooled, so its moisture content (specific humidity) is unchanged while its relative humidity drops.'
+    }
+  },
+  'valve':{
+    label:'Expansion valve', zone:'Indoor unit', zoom:true,
+    title:'Expansion valve — resetting the refrigerant cold',
+    phase:{ from:'warm liquid', to:'cold liquid + vapour', c1:C.warm, c2:C.cold },
+    desc:'The warm liquid is forced through a narrow restriction. As it is forced through this restriction, its pressure suddenly drops and so does its temperature — no motor needed, just physics. It is now cold enough to absorb heat again, and the cycle repeats.',
+    callouts:[
+      {kind:'system', tag:'Open system', k:'A throttle, no work and no heat',
+       t:'Fluid flows through a restriction. It consumes no mechanical or electrical work, and essentially no heat crosses its boundary. It is the simplest open system in the loop — nothing is added or removed, the flow is only redistributed.'},
+      {kind:'law', tag:'1st law', k:'Energy is unchanged; pressure and temperature drop',
+       t:'No work is done and no heat is added or removed, so the total energy the refrigerant carries stays the same as it passes through. Even so, its pressure and temperature both fall sharply — the energy simply rearranges within the refrigerant.'}
+    ]
+  }
+};
+const ORDER = ['evaporator','compressor','condenser','valve'];
+
+/* ============================================================
+   State
+============================================================ */
+let active = null;         // current component key
+let view = 'loop';         // 'loop' | 'detail'
+const visited = new Set();
+let rafId = null;
+
+/* ============================================================
+   Elements
+============================================================ */
+const host        = document.getElementById('diagram-host');
+const stageName   = document.getElementById('stage-name');
+const backBtn     = document.getElementById('back-btn');
+const overviewH   = document.getElementById('overview-hints');
+const detailH     = document.getElementById('detail-hints');
+const detailHTxt  = document.getElementById('detail-hint-text');
+const progressEl  = document.getElementById('progress');
+const progCap     = document.getElementById('progress-caption');
+const emptyEl     = document.getElementById('empty');
+const contentEl   = document.getElementById('content');
+const cTitle      = document.getElementById('c-title');
+const cPhase      = document.getElementById('c-phase');
+const cDesc       = document.getElementById('c-desc');
+const cCallouts   = document.getElementById('c-callouts');
+
+/* ============================================================
+   Overview SVG — realistic split system
+   One continuous refrigerant tube threads through both coils.
+   State colours: COLD (blue) -> HOT (red) -> WARM (amber) -> back.
+============================================================ */
+// Flow: valve -> evaporator coil -> cold-gas line -> compressor -> condenser coil -> warm-liquid line -> valve
+const COLD_D = 'M262,108 L112,108 Q100,118 112,128 L262,128 Q274,138 262,148 L112,148 Q100,158 112,168 L262,168 L332,168 L332,438 L372,432 L398,432';
+const HOT_D  = 'M398,432 L398,406 L398,392 L420,390 L525,390 Q537,376 525,362 L395,362';
+const WARM_D = 'M395,362 Q383,348 395,335 L525,335 Q537,323 525,312 L395,312 L345,312 L345,130 L285,130 L262,108';
+const GUIDE_D = COLD_D + ' ' + HOT_D.replace(/^M/,'L') + ' ' + WARM_D.replace(/^M/,'L');
+
+function buildOverview(){
+  host.innerHTML = `
+  <svg viewBox="0 0 640 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Split air-conditioner: indoor and outdoor units joined by refrigerant tubing">
+    <defs>
+      <linearGradient id="grad-cool" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="var(--cold)" stop-opacity="0.5"/>
+        <stop offset="1" stop-color="var(--cold)" stop-opacity="0.03"/>
+      </linearGradient>
+      <linearGradient id="grad-warm" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="var(--warm)" stop-opacity="0.5"/>
+        <stop offset="1" stop-color="var(--warm)" stop-opacity="0.03"/>
+      </linearGradient>
+      <linearGradient id="grad-warm-v" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="var(--warm)" stop-opacity="0.5"/>
+        <stop offset="1" stop-color="var(--warm)" stop-opacity="0.04"/>
+      </linearGradient>
+      <marker id="ov-power" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink)"/></marker>
+    </defs>
+
+    <!-- zones -->
+    <rect class="zone-bg indoor"  x="14"  y="54" width="286" height="474" rx="10"/>
+    <rect class="zone-bg outdoor" x="318" y="54" width="308" height="474" rx="10"/>
+    <rect class="wall" x="300" y="54" width="18" height="474"/>
+    <circle class="wall-gap" cx="309" cy="130" r="10"/>
+    <circle class="wall-gap" cx="309" cy="168" r="10"/>
+    <text class="zone-label" x="26"  y="44">Inside the room</text>
+    <text class="zone-label" x="620" y="44" text-anchor="end">Outdoors</text>
+
+    <!-- sun (context) -->
+    <g opacity="0.5">
+      <circle cx="586" cy="100" r="17" fill="var(--warm)" opacity="0.3"/>
+      <circle cx="586" cy="100" r="10.5" fill="var(--warm)"/>
+      <g stroke="var(--warm)" stroke-width="1.8" stroke-linecap="round">
+        <line x1="586" y1="74"  x2="586" y2="82"/>
+        <line x1="586" y1="118" x2="586" y2="126"/>
+        <line x1="560" y1="100" x2="568" y2="100"/>
+        <line x1="604" y1="100" x2="612" y2="100"/>
+        <line x1="568" y1="82"  x2="573" y2="87"/>
+        <line x1="599" y1="113" x2="604" y2="118"/>
+        <line x1="604" y1="82"  x2="599" y2="87"/>
+        <line x1="573" y1="113" x2="568" y2="118"/>
+      </g>
+    </g>
+
+    <!-- furniture (context) -->
+    <g opacity="0.7">
+      <!-- bed (side view) -->
+      <rect x="46" y="452" width="12" height="62" rx="2" fill="#C9B79B" stroke="#A38F72" stroke-width="1"/>            <!-- headboard -->
+      <rect x="46" y="486" width="150" height="24" rx="5" fill="#E7EDF0" stroke="#B9C4CB" stroke-width="1"/>          <!-- mattress -->
+      <rect x="58" y="478" width="40" height="14" rx="4" fill="#fff" stroke="#B9C4CB" stroke-width="1"/>               <!-- pillow -->
+      <path d="M98,492 Q150,484 196,492 L196,500 Q150,492 98,500 Z" fill="#BFD3DE" stroke="#9DB8C6" stroke-width="1"/> <!-- blanket -->
+      <rect x="50" y="510" width="6" height="12" fill="#A38F72"/><rect x="186" y="510" width="6" height="12" fill="#A38F72"/>
+      <text class="ctx-label" x="121" y="470" text-anchor="middle">bed</text>
+    </g>
+
+    <!-- unit shells (drawn under the tubing) -->
+    <text class="unit-title" x="93"  y="88">Indoor unit</text>
+    <rect class="unit-box unit-indoor"  x="93"  y="96"  width="196" height="82"  rx="8"/>
+    <rect x="120" y="170" width="140" height="7" rx="3" fill="#fff" stroke="var(--ink-soft)" stroke-width="1"/>
+
+    <text class="unit-title" x="360" y="294">Outdoor unit</text>
+    <rect class="unit-box unit-outdoor" x="360" y="300" width="200" height="172" rx="8"/>
+
+    <!-- indoor air: warm room air pulled in, cool air blown out -->
+    <polygon points="136,184 164,184 164,214 178,214 150,246 122,214 136,214" fill="url(#grad-cool)"/>
+    <text class="air-tag cool" x="150" y="262" text-anchor="middle">cool air out</text>
+    <polygon points="226,246 254,246 254,216 268,216 240,184 212,216 226,216" fill="url(#grad-warm-v)"/>
+    <text class="air-tag warm" x="240" y="262" text-anchor="middle">warm room air in</text>
+
+    <!-- outdoor air: ambient air pulled in, warm air blown out -->
+    <polygon points="562,360 598,360 598,350 626,375 598,400 598,390 562,390" fill="url(#grad-warm)"/>
+    <text class="air-tag warm" x="588" y="345" text-anchor="middle">warm air out</text>
+    <polygon points="486,522 514,522 514,494 528,494 500,476 472,494 486,494" fill="url(#grad-cool)"/>
+    <text class="air-tag cool" x="500" y="538" text-anchor="middle">ambient air in</text>
+
+    <!-- electricity fed into the compressor from below -->
+    <path d="M398,498 L398,462" stroke="var(--ink)" stroke-width="2" fill="none" marker-end="url(#ov-power)"/>
+    <path class="bolt" d="M381,486 L374,500 L381,500 L376,512 L389,496 L382,496 Z"/>
+    <text class="comp-sub" x="398" y="524" text-anchor="middle">electricity in</text>
+
+    <!-- refrigerant-line label (kept clear of the compressor) -->
+    <line class="leader" x1="424" y1="210" x2="348" y2="210"/>
+    <text class="stream-label" x="430" y="214">refrigerant line</text>
+
+    <!-- continuous refrigerant tube (threads through both coils) -->
+    <path class="pipe cold" d="${COLD_D}"/>
+    <path class="pipe hot"  d="${HOT_D}"/>
+    <path class="pipe warm" d="${WARM_D}"/>
+    <path class="pipe-core" d="${GUIDE_D}"/>
+
+    <!-- component bodies (drawn under the particles so refrigerant shows inside) -->
+    <path class="valve-sym" d="M268,110 L280,120 L268,130 Z M280,110 L268,120 L280,130 Z"/>
+    <circle class="comp-body" cx="398" cy="432" r="26"/>
+    <path d="M398,421 A11,11 0 1 1 387,432" fill="none" stroke="var(--hot)" stroke-width="1.6" opacity="0.4"/>
+
+    <!-- particle guide (invisible) + particle layer -->
+    <path id="loop-guide" d="${GUIDE_D}" fill="none" stroke="none"/>
+    <g id="loop-particles"></g>
+
+    <!-- component name chips -->
+    <g pointer-events="none">
+      <!-- Evaporator: labelled from the left, clear of the unit box -->
+      <line class="leader" x1="86" y1="136" x2="112" y2="124"/>
+      <rect class="label-chip-in" x="8" y="126" width="78" height="19" rx="4"/>
+      <text class="comp-name" x="14" y="140">Evaporator</text>
+      <text class="zoom-tag" x="14" y="158">tap to zoom &#8594;</text>
+
+      <!-- Expansion valve: labelled from above, clear of the unit box -->
+      <line class="leader" x1="285" y1="76" x2="276" y2="111"/>
+      <rect class="label-chip-in" x="190" y="57" width="100" height="19" rx="4"/>
+      <text class="comp-name" x="196" y="71">Expansion valve</text>
+      <text class="zoom-tag" x="196" y="89">tap to zoom &#8594;</text>
+
+      <!-- Condenser: labelled above the unit, leader down to the coil (off the pipe) -->
+      <line class="leader" x1="522" y1="269" x2="505" y2="332"/>
+      <rect class="label-chip-out" x="446" y="250" width="84" height="19" rx="4"/>
+      <text class="comp-name" x="452" y="264">Condenser</text>
+      <text class="zoom-tag" x="452" y="284">tap to zoom &#8594;</text>
+
+      <!-- Compressor: labelled to the right, clear space below the coil -->
+      <line class="leader" x1="424" y1="432" x2="438" y2="432"/>
+      <rect class="label-chip-out" x="440" y="421" width="82" height="19" rx="4"/>
+      <text class="comp-name" x="446" y="435">Compressor</text>
+      <text class="zoom-tag" x="446" y="453">tap to zoom &#8594;</text>
+    </g>
+
+    <!-- interactive hit areas -->
+    <g class="node zoomable" data-key="evaporator">
+      <rect class="hl"  x="104" y="100" width="150" height="74" rx="8"/>
+      <rect class="hit" x="104" y="100" width="150" height="74" rx="8"/>
+    </g>
+    <g class="node zoomable" data-key="valve">
+      <rect class="hl"  x="255" y="102" width="40" height="52" rx="8"/>
+      <rect class="hit" x="255" y="102" width="40" height="52" rx="8"/>
+    </g>
+    <g class="node zoomable" data-key="condenser">
+      <rect class="hl"  x="384" y="304" width="162" height="94" rx="8"/>
+      <rect class="hit" x="384" y="304" width="162" height="94" rx="8"/>
+    </g>
+    <g class="node zoomable" data-key="compressor">
+      <rect class="hl"  x="368" y="402" width="60" height="60" rx="16"/>
+      <rect class="hit" x="368" y="402" width="60" height="60" rx="16"/>
+    </g>
+  </svg>`;
+
+  host.querySelectorAll('.node').forEach(n=>{
+    n.addEventListener('click', ()=> onNodeClick(n.dataset.key));
+  });
+  syncActiveNode();
+  startOverviewAnim();
+}
+
+function overviewStateColor(f, b1, b2){
+  return f < b1 ? C.cold : (f < b2 ? C.hot : C.warm);
+}
+
+function startOverviewAnim(){
+  stopAnim();
+  const svg = host.querySelector('svg');
+  if (!svg) return;
+  const guide = svg.querySelector('#loop-guide');
+  const L = guide.getTotalLength();
+  const NS = 'http://www.w3.org/2000/svg';
+
+  // segment fractions, so particle colour matches refrigerant state
+  function segLen(d){ const p=document.createElementNS(NS,'path'); p.setAttribute('d',d); svg.appendChild(p); const l=p.getTotalLength(); svg.removeChild(p); return l; }
+  const lc=segLen(COLD_D), lh=segLen(HOT_D), lw=segLen(WARM_D), tot=lc+lh+lw;
+  const b1=lc/tot, b2=(lc+lh)/tot;
+
+  const layer = svg.querySelector('#loop-particles');
+  const n=18, parts=[];
+  for (let i=0;i<n;i++){
+    const c=document.createElementNS(NS,'circle');
+    c.setAttribute('r','5');
+    layer.appendChild(c);
+    parts.push({ c, off:i/n });
+  }
+  const place = p => {
+    const pt = guide.getPointAtLength(p.off*L);
+    p.c.setAttribute('cx', pt.x.toFixed(1));
+    p.c.setAttribute('cy', pt.y.toFixed(1));
+    p.c.setAttribute('fill', overviewStateColor(p.off, b1, b2));
+  };
+
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    parts.forEach(place); return;
+  }
+  let last=performance.now();
+  function frame(now){
+    const dt=Math.min(50, now-last); last=now;
+    const sp=0.00004*dt;
+    parts.forEach(p=>{ p.off=(p.off+sp)%1; place(p); });
+    rafId=requestAnimationFrame(frame);
+  }
+  rafId=requestAnimationFrame(frame);
+}
+
+/* ============================================================
+   Detail SVG + animation (evaporator / condenser)
+============================================================ */
+const COIL_D = 'M180,90 L180,330 Q210,372 240,330 L240,90 Q270,48 300,90 '
+             + 'L300,330 Q330,372 360,330 L360,90 Q390,48 420,90 '
+             + 'L420,330 Q450,372 480,330 L480,90';
+
+function lerpHex(a,b,t){
+  const pa=[parseInt(a.slice(1,3),16),parseInt(a.slice(3,5),16),parseInt(a.slice(5,7),16)];
+  const pb=[parseInt(b.slice(1,3),16),parseInt(b.slice(3,5),16),parseInt(b.slice(5,7),16)];
+  const r=Math.round(pa[0]+(pb[0]-pa[0])*t), g=Math.round(pa[1]+(pb[1]-pa[1])*t), bl=Math.round(pa[2]+(pb[2]-pa[2])*t);
+  return `rgb(${r},${g},${bl})`;
+}
+const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+
+function buildCoilDetail(key){
+  const isEvap = key==='evaporator';
+  const inLabel  = isEvap ? 'refrigerant in' : 'refrigerant in';
+  const inState  = isEvap ? 'cold liquid + vapour' : 'hot gas';
+  const outState = isEvap ? 'cold gas' : 'warm liquid';
+  const airInLbl  = isEvap ? 'Room air in' : 'Outdoor air in';
+  const airInSub  = isEvap ? 'warm, humid' : 'cool';
+  const airOutLbl = isEvap ? 'Cool, drier air out' : 'Warm air out';
+
+  // heat-transfer inset order differs by device
+  const htLeft   = isEvap ? 'room air' : 'refrigerant';
+  const htRight  = isEvap ? 'refrigerant' : 'outdoor air';
+  const htLeftC  = isEvap ? C.warm : C.hot;
+  const htRightC = isEvap ? C.cold : C.warm;
+  const conv1 = isEvap ? 'convection' : 'convection';
+  const conv2 = isEvap ? 'convection (boiling)' : 'convection (condensing)';
+
+  host.innerHTML = `
+  <svg viewBox="0 0 640 ${isEvap?432:372}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${isEvap?'Evaporator':'Condenser'} coil detail">
+    <defs>
+      <marker id="d-air" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${C.inkSoft}"/></marker>
+      <marker id="d-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${C.ink}"/></marker>
+    </defs>
+
+    <!-- air-flow direction (left -> right across the coil) -->
+    <path d="M40,150 L120,150" stroke="${C.inkSoft}" stroke-width="1.6" stroke-dasharray="5 4" fill="none" marker-end="url(#d-air)"/>
+    <path d="M40,270 L120,270" stroke="${C.inkSoft}" stroke-width="1.6" stroke-dasharray="5 4" fill="none" marker-end="url(#d-air)"/>
+    <path d="M520,150 L600,150" stroke="${C.inkSoft}" stroke-width="1.6" stroke-dasharray="5 4" fill="none" marker-end="url(#d-air)"/>
+    <path d="M520,270 L600,270" stroke="${C.inkSoft}" stroke-width="1.6" stroke-dasharray="5 4" fill="none" marker-end="url(#d-air)"/>
+
+    <!-- air labels, centred between the two flow arrows -->
+    <text x="44" y="204" style="font:600 13px 'Space Grotesk',sans-serif" fill="${C.ink}">${airInLbl}</text>
+    <text x="44" y="221" style="font:italic 11.5px 'Inter',sans-serif" fill="${C.inkSoft}">${airInSub}</text>
+    <text x="596" y="213" text-anchor="end" style="font:600 13px 'Space Grotesk',sans-serif" fill="${C.ink}">${airOutLbl}</text>
+
+    <!-- the coil (tube) -->
+    <path id="coil-guide" d="${COIL_D}" fill="none" stroke="${C.tube}" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${COIL_D}" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+
+    <!-- refrigerant in / out, marked at the actual coil ends (top) -->
+    <text x="180" y="70" text-anchor="middle" style="font:600 11.5px 'Inter',sans-serif" fill="${isEvap?C.cold:C.hot}">refrigerant in</text>
+    <text x="180" y="83" text-anchor="middle" style="font:italic 10px 'Inter',sans-serif" fill="${C.inkSoft}">${inState}</text>
+    <circle cx="180" cy="90" r="5" fill="${isEvap?C.cold:C.hot}"/>
+    <text x="480" y="70" text-anchor="middle" style="font:600 11.5px 'Inter',sans-serif" fill="${isEvap?C.cold:C.warm}">refrigerant out</text>
+    <text x="480" y="83" text-anchor="middle" style="font:italic 10px 'Inter',sans-serif" fill="${C.inkSoft}">${outState}</text>
+    <circle cx="480" cy="90" r="5" fill="${isEvap?C.cold:C.warm}"/>
+
+    <!-- animated layers -->
+    <g id="air-layer"></g>
+    <g id="refrig-layer"></g>
+    <g id="cond-layer"></g>
+
+    ${isEvap ? `
+      <rect x="150" y="368" width="340" height="9" rx="4" fill="${C.coldSoft}"/>
+      <text x="490" y="363" text-anchor="end" style="font:italic 10.5px 'Inter',sans-serif" fill="${C.cold}">condensate drains outdoors</text>
+      <g transform="translate(150,404)" style="font-family:'Inter',sans-serif;font-size:11px">
+        <circle cx="0" cy="2" r="4.6" fill="${C.cold}"/>
+        <text x="11" y="6" fill="${C.ink}">refrigerant (in the coil)</text>
+        <g transform="translate(180,0)">
+          <path transform="translate(0,-1)" d="M0,-6 C-3.6,-2 -5.4,1.4 -5.4,4.4 C-5.4,7.8 -2.6,10.5 0,10.5 C2.6,10.5 5.4,7.8 5.4,4.4 C5.4,1.4 3.6,-2 0,-6 Z" fill="#A6DBF0" stroke="#5AA6C6" stroke-width="1"/>
+          <ellipse cx="-1.6" cy="2" rx="1.4" ry="2.2" fill="#fff" opacity="0.85"/>
+          <text x="11" y="6" fill="${C.ink}">condensate (water from air)</text>
+        </g>
+      </g>
+    ` : ''}
+
+  </svg>`;
+
+  startCoilAnim(key);
+}
+
+/* Detail dispatcher: coils get the coil view; compressor & valve get their own. */
+function buildDetail(key){
+  if (key==='evaporator' || key==='condenser') buildCoilDetail(key);
+  else if (key==='compressor') buildCompressorDetail();
+  else if (key==='valve') buildValveDetail();
+}
+
+function startCoilAnim(key){
+  stopAnim();
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    // draw a single static frame so phase is still visible
+    drawStaticFrame(key);
+    return;
+  }
+  const isEvap = key==='evaporator';
+  const svg = host.querySelector('svg');
+  const guide = svg.querySelector('#coil-guide');
+  const L = guide.getTotalLength();
+  const NS = 'http://www.w3.org/2000/svg';
+
+  // --- refrigerant particles (droplet <-> gas morph) ---
+  const refrigLayer = svg.querySelector('#refrig-layer');
+  const nR = 16;
+  const refrig = [];
+  const liqColor = isEvap ? C.cold : C.warm;
+  const gasColor = isEvap ? C.cold : C.hot;
+  for (let i=0;i<nR;i++){
+    const g = document.createElementNS(NS,'g');
+    // refrigerant LIQUID = solid round dot
+    const drop = document.createElementNS(NS,'circle');
+    drop.setAttribute('r','4.8'); drop.setAttribute('fill', liqColor);
+    // refrigerant GAS = hollow ring
+    const gas = document.createElementNS(NS,'circle');
+    gas.setAttribute('r','4.4'); gas.setAttribute('fill','none');
+    gas.setAttribute('stroke', gasColor); gas.setAttribute('stroke-width','1.7'); gas.setAttribute('opacity','0.7');
+    g.appendChild(gas); g.appendChild(drop);
+    refrigLayer.appendChild(g);
+    refrig.push({ g, drop, gas, off:i/nR });
+  }
+
+  // --- air particles (colour shifts as they cross the coil) ---
+  const airLayer = svg.querySelector('#air-layer');
+  const nA = 22;
+  const air = [];
+  const airIn  = isEvap ? C.warm : C.cold;   // room air warm / outdoor air cool
+  const airOut = isEvap ? C.cold : C.warm;
+  const rows = [130,175,220,255,300];
+  for (let i=0;i<nA;i++){
+    const c = document.createElementNS(NS,'circle');
+    c.setAttribute('r','3'); c.setAttribute('opacity','0.5');
+    airLayer.appendChild(c);
+    air.push({ c, x:40 + Math.random()*560, y:rows[i%rows.length] + (Math.random()*10-5), sp:0.9+Math.random()*0.5 });
+  }
+
+  // --- condensate (evaporator only) ---
+  const condLayer = svg.querySelector('#cond-layer');
+  const cond = [];
+  if (isEvap){
+    const nC = 7;
+    for (let i=0;i<nC;i++){
+      const g = document.createElementNS(NS,'g');
+      const d = document.createElementNS(NS,'path');
+      d.setAttribute('d','M0,-6 C-3.6,-2 -5.4,1.4 -5.4,4.4 C-5.4,7.8 -2.6,10.5 0,10.5 C2.6,10.5 5.4,7.8 5.4,4.4 C5.4,1.4 3.6,-2 0,-6 Z');
+      d.setAttribute('fill','#A6DBF0'); d.setAttribute('stroke','#5AA6C6'); d.setAttribute('stroke-width','1');
+      const hl = document.createElementNS(NS,'ellipse');
+      hl.setAttribute('cx','-1.6'); hl.setAttribute('cy','3'); hl.setAttribute('rx','1.4'); hl.setAttribute('ry','2.3'); hl.setAttribute('fill','#fff'); hl.setAttribute('opacity','0.85');
+      g.appendChild(d); g.appendChild(hl);
+      condLayer.appendChild(g);
+      cond.push({ g, x:170+Math.random()*320, y:90+Math.random()*230, v:0.8+Math.random()*0.9 });
+    }
+  }
+
+  let last = performance.now();
+  function frame(now){
+    const dt = Math.min(50, now-last); last = now;
+
+    // refrigerant
+    const speed = 0.00006 * dt; // fraction of path per ms-ish
+    refrig.forEach(p=>{
+      p.off = (p.off + speed) % 1;
+      const pt = guide.getPointAtLength(p.off * L);
+      p.g.setAttribute('transform', `translate(${pt.x.toFixed(1)},${pt.y.toFixed(1)})`);
+      // phase blend along the path
+      let liqOp;
+      if (isEvap) liqOp = clamp((0.62 - p.off)/0.34, 0, 1);      // liquid -> gas
+      else        liqOp = clamp((p.off - 0.38)/0.34, 0, 1);      // gas -> liquid
+      p.drop.setAttribute('opacity', liqOp.toFixed(2));
+      p.gas.setAttribute('opacity', ((1-liqOp)*0.7).toFixed(2));
+    });
+
+    // air
+    air.forEach(a=>{
+      a.x += a.sp * dt * 0.06;
+      if (a.x > 604){ a.x = 36; a.y = rows[(Math.random()*rows.length)|0] + (Math.random()*10-5); }
+      const t = clamp((a.x-150)/(500-150), 0, 1); // shift colour while crossing coil
+      a.c.setAttribute('cx', a.x.toFixed(1));
+      a.c.setAttribute('cy', a.y.toFixed(1));
+      a.c.setAttribute('fill', lerpHex(airIn, airOut, t));
+    });
+
+    // condensate falling + draining
+    cond.forEach(k=>{
+      k.y += k.v * dt * 0.06;
+      if (k.y > 368){ k.y = 90 + Math.random()*230; k.x = 170+Math.random()*320; }
+      k.g.setAttribute('transform', `translate(${k.x.toFixed(1)},${k.y.toFixed(1)})`);
+    });
+
+    rafId = requestAnimationFrame(frame);
+  }
+  rafId = requestAnimationFrame(frame);
+}
+
+function drawStaticFrame(key){
+  // minimal non-animated depiction for reduced-motion users
+  const isEvap = key==='evaporator';
+  const svg = host.querySelector('svg');
+  const guide = svg.querySelector('#coil-guide');
+  const L = guide.getTotalLength();
+  const NS='http://www.w3.org/2000/svg';
+  const layer = svg.querySelector('#refrig-layer');
+  const liqColor = isEvap ? C.cold : C.warm, gasColor = isEvap ? C.cold : C.hot;
+  for (let i=0;i<12;i++){
+    const off=i/12, pt=guide.getPointAtLength(off*L);
+    let liq = isEvap ? clamp((0.62-off)/0.34,0,1) : clamp((off-0.38)/0.34,0,1);
+    const el = document.createElementNS(NS,'circle');
+    el.setAttribute('cx',pt.x); el.setAttribute('cy',pt.y);
+    if(liq>0.5){ el.setAttribute('r','4.8'); el.setAttribute('fill',liqColor); }
+    else { el.setAttribute('r','4.4'); el.setAttribute('fill','none'); el.setAttribute('stroke',gasColor); el.setAttribute('stroke-width','1.7'); el.setAttribute('opacity','0.7'); }
+    layer.appendChild(el);
+  }
+}
+
+function stopAnim(){ if (rafId){ cancelAnimationFrame(rafId); rafId=null; } }
+
+/* ============================================================
+   Compressor detail — reciprocating piston
+============================================================ */
+function buildCompressorDetail(){
+  host.innerHTML = `
+  <svg viewBox="0 0 640 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Compressor piston detail">
+    <defs>
+      <marker id="cw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${C.ink}"/></marker>
+    </defs>
+
+    <!-- cylinder interior + walls (open on the left for the rod) -->
+    <rect x="300" y="162" width="248" height="96" rx="6" fill="#fff"/>
+    <path d="M300,162 L548,162 L548,258 L300,258" fill="none" stroke="${C.inkSoft}" stroke-width="3" stroke-linejoin="round"/>
+
+    <!-- suction port (cold gas in) -->
+    <rect x="330" y="128" width="22" height="36" fill="#fff" stroke="${C.inkSoft}" stroke-width="2"/>
+    <text x="341" y="118" text-anchor="middle" style="font:600 11.5px 'Inter',sans-serif" fill="${C.cold}">cold gas in</text>
+    <text x="341" y="106" text-anchor="middle" style="font:italic 9.5px 'Inter',sans-serif" fill="${C.inkSoft}">low pressure</text>
+    <g id="suck-layer"></g>
+
+    <!-- discharge port (hot gas out) -->
+    <rect x="500" y="128" width="22" height="36" fill="#fff" stroke="${C.inkSoft}" stroke-width="2"/>
+    <text x="511" y="118" text-anchor="middle" style="font:600 11.5px 'Inter',sans-serif" fill="${C.hot}">hot gas out</text>
+    <text x="511" y="106" text-anchor="middle" style="font:italic 9.5px 'Inter',sans-serif" fill="${C.inkSoft}">high pressure</text>
+    <g id="disch-layer"></g>
+
+    <!-- gas trapped in the cylinder -->
+    <g id="gas-layer"></g>
+
+    <!-- piston + rod -->
+    <rect id="piston" x="360" y="164" width="18" height="92" rx="2" fill="#C7CDD2" stroke="${C.inkSoft}" stroke-width="1.5"/>
+    <line id="rod" x1="360" y1="208" x2="196" y2="208" stroke="${C.inkSoft}" stroke-width="4"/>
+
+    <!-- crank -->
+    <circle cx="150" cy="208" r="46" fill="none" stroke="${C.inkSoft}" stroke-width="3"/>
+    <circle cx="150" cy="208" r="4" fill="${C.inkSoft}"/>
+    <circle id="crankpin" cx="196" cy="208" r="6" fill="${C.hot}"/>
+
+    <!-- work in -->
+    <path d="M58,208 L100,208" stroke="${C.ink}" stroke-width="2.5" fill="none" marker-end="url(#cw)"/>
+    <text x="58" y="195" style="font:600 12px 'Space Grotesk',sans-serif" fill="${C.ink}">work in</text>
+    <text x="58" y="232" style="font:italic 10px 'Inter',sans-serif" fill="${C.inkSoft}">electricity turns</text>
+    <text x="58" y="244" style="font:italic 10px 'Inter',sans-serif" fill="${C.inkSoft}">the crank</text>
+
+    <text x="424" y="300" text-anchor="middle" style="font:italic 12px 'Inter',sans-serif" fill="${C.inkSoft}">The gas is squeezed into a smaller space — its pressure and temperature rise.</text>
+  </svg>`;
+  startCompressorAnim();
+}
+
+function startCompressorAnim(){
+  stopAnim();
+  const svg=host.querySelector('svg'), NS='http://www.w3.org/2000/svg';
+  const piston=svg.querySelector('#piston'), rod=svg.querySelector('#rod'), pin=svg.querySelector('#crankpin');
+  const gasLayer=svg.querySelector('#gas-layer'), suck=svg.querySelector('#suck-layer'), disch=svg.querySelector('#disch-layer');
+  const CX=150, CY=208, R=46, RL=210, minW=118, maxW=210;
+
+  const nG=9, gas=[];
+  for(let i=0;i<nG;i++){ const c=document.createElementNS(NS,'circle'); c.setAttribute('r','4'); gasLayer.appendChild(c); gas.push({c, fx:Math.random(), fy:Math.random(), jx:0, jy:0}); }
+  const suckDots=[]; for(let i=0;i<3;i++){ const c=document.createElementNS(NS,'circle'); c.setAttribute('r','3.6'); c.setAttribute('fill','none'); c.setAttribute('stroke',C.cold); c.setAttribute('stroke-width','1.6'); suck.appendChild(c); suckDots.push({c,p:i/3}); }
+  const dischDots=[]; for(let i=0;i<3;i++){ const c=document.createElementNS(NS,'circle'); c.setAttribute('r','4'); c.setAttribute('fill',C.hot); disch.appendChild(c); dischDots.push({c,p:i/3}); }
+
+  function draw(theta){
+    const pistonLeft = CX + R*Math.cos(theta) + Math.sqrt(Math.max(0, RL*RL - (R*Math.sin(theta))**2));
+    const px=CX+R*Math.cos(theta), py=CY+R*Math.sin(theta);
+    piston.setAttribute('x', pistonLeft.toFixed(1));
+    rod.setAttribute('x1', pistonLeft.toFixed(1));
+    rod.setAttribute('x2', px.toFixed(1)); rod.setAttribute('y2', py.toFixed(1));
+    pin.setAttribute('cx', px.toFixed(1)); pin.setAttribute('cy', py.toFixed(1));
+    const gasLeft=pistonLeft+21, gasRight=544, w=gasRight-gasLeft;
+    const comp=clamp(1-(w-minW)/(maxW-minW),0,1);
+    const col=lerpHex(C.cold, C.hot, comp);
+    gas.forEach(g=>{
+      const x=gasLeft + g.fx*w + g.jx, y=172 + g.fy*76 + g.jy;
+      g.c.setAttribute('cx', x.toFixed(1)); g.c.setAttribute('cy', y.toFixed(1));
+      g.c.setAttribute('fill', col); g.c.setAttribute('r', (3.4+comp*1.5).toFixed(1));
+    });
+  }
+
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){ draw(0.7); return; }
+  let theta=0, last=performance.now();
+  function frame(now){ const dt=Math.min(50, now-last); last=now;
+    theta=(theta + 0.0022*dt) % (Math.PI*2);
+    gas.forEach(g=>{ g.jx=clamp(g.jx+(Math.random()-0.5)*1.2,-4,4); g.jy=clamp(g.jy+(Math.random()-0.5)*1.2,-4,4); });
+    draw(theta);
+    suckDots.forEach(d=>{ d.p=(d.p+0.006*dt)%1; d.c.setAttribute('cx',341); d.c.setAttribute('cy',(102+d.p*66).toFixed(1)); });
+    dischDots.forEach(d=>{ d.p=(d.p+0.006*dt)%1; d.c.setAttribute('cx',511); d.c.setAttribute('cy',(166-d.p*64).toFixed(1)); });
+    rafId=requestAnimationFrame(frame);
+  }
+  rafId=requestAnimationFrame(frame);
+}
+
+/* ============================================================
+   Expansion valve detail — throttling through a restriction
+============================================================ */
+function buildValveDetail(){
+  host.innerHTML = `
+  <svg viewBox="0 0 640 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Expansion valve restriction detail">
+    <!-- chamber pressure tints -->
+    <rect x="110" y="150" width="200" height="100" fill="${C.warm}" opacity="0.10"/>
+    <rect x="330" y="150" width="200" height="100" fill="${C.cold}" opacity="0.12"/>
+
+    <!-- valve bodies pinching to a narrow throat -->
+    <path d="M96,116 L544,116 L544,150 L340,150 L325,192 L315,192 L300,150 L96,150 Z" fill="#D6DEE3" stroke="${C.inkSoft}" stroke-width="1.5"/>
+    <path d="M96,284 L544,284 L544,250 L340,250 L325,208 L315,208 L300,250 L96,250 Z" fill="#D6DEE3" stroke="${C.inkSoft}" stroke-width="1.5"/>
+
+    <!-- flowing refrigerant -->
+    <g id="valve-layer"></g>
+
+    <!-- labels -->
+    <text x="112" y="90"  style="font:600 12.5px 'Space Grotesk',sans-serif" fill="${C.warm}">Warm liquid in</text>
+    <text x="112" y="105" style="font:italic 10.5px 'Inter',sans-serif" fill="${C.inkSoft}">high pressure</text>
+    <text x="528" y="90"  text-anchor="end" style="font:600 12.5px 'Space Grotesk',sans-serif" fill="${C.cold}">Cold liquid + vapour out</text>
+    <text x="528" y="105" text-anchor="end" style="font:italic 10.5px 'Inter',sans-serif" fill="${C.inkSoft}">low pressure</text>
+
+    <line class="leader" x1="392" y1="150" x2="330" y2="196" stroke="${C.inkSoft}" stroke-width="1" opacity="0.5"/>
+    <text x="396" y="148" style="font:italic 10.5px 'Inter',sans-serif" fill="${C.inkSoft}">narrow restriction</text>
+
+    <text x="320" y="316" text-anchor="middle" style="font:italic 12px 'Inter',sans-serif" fill="${C.inkSoft}">No work, no heat added — forcing the refrigerant through the narrow gap drops its pressure and temperature.</text>
+  </svg>`;
+  startValveAnim();
+}
+
+function startValveAnim(){
+  stopAnim();
+  const svg=host.querySelector('svg'), NS='http://www.w3.org/2000/svg';
+  const layer=svg.querySelector('#valve-layer');
+  const n=16, parts=[];
+  for(let i=0;i<n;i++){
+    const c=document.createElementNS(NS,'circle');
+    layer.appendChild(c);
+    parts.push({ c, p:i/n, lane:165+Math.random()*70, vapor:Math.random()<0.42 });
+  }
+  const place = pt => {
+    const x=118+pt.p*410, d=Math.abs(x-320), conv=clamp((d-14)/60,0,1);
+    const y=200+(pt.lane-200)*conv;
+    const t=clamp((x-320)/44,0,1), col=lerpHex(C.warm, C.cold, t);
+    if (pt.vapor && x>326){ pt.c.setAttribute('fill','none'); pt.c.setAttribute('stroke',col); pt.c.setAttribute('stroke-width','1.7'); pt.c.setAttribute('r','4.6'); pt.c.setAttribute('opacity','0.8'); }
+    else { pt.c.setAttribute('fill',col); pt.c.setAttribute('stroke','none'); pt.c.setAttribute('r','4.2'); pt.c.setAttribute('opacity','1'); }
+    pt.c.setAttribute('cx',x.toFixed(1)); pt.c.setAttribute('cy',y.toFixed(1));
+  };
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){ parts.forEach(place); return; }
+  let last=performance.now();
+  function frame(now){ const dt=Math.min(50, now-last); last=now;
+    parts.forEach(pt=>{
+      const x0=118+pt.p*410, d0=Math.abs(x0-320), conv0=clamp((d0-14)/60,0,1);
+      pt.p += (0.00007 + 0.00017*(1-conv0))*dt;
+      if (pt.p>1){ pt.p=0; pt.lane=165+Math.random()*70; pt.vapor=Math.random()<0.42; }
+      place(pt);
+    });
+    rafId=requestAnimationFrame(frame);
+  }
+  rafId=requestAnimationFrame(frame);
+}
+
+/* ============================================================
+   Interaction
+============================================================ */
+function onNodeClick(key){
+  active = key;
+  visited.add(key);
+  if (STAGES[key].zoom){ enterDetail(key); }
+  else { enterLoop(); }
+  renderInfo();
+  renderProgress();
+}
+
+const DETAIL_META = {
+  evaporator:{ name:'Evaporator — coil detail',
+    hint:'Refrigerant enters as a cold liquid/vapour mix and <b>boils to gas</b> as it moves along the coil, soaking up heat from the room air blown across it. Watch the moisture condense on the coil and drain away — it is piped outside, not into the room.' },
+  condenser:{ name:'Condenser — coil detail',
+    hint:'Refrigerant enters as hot gas and <b>condenses to liquid</b> along the coil, giving its heat to the cooler outdoor air blown across it.' },
+  compressor:{ name:'Compressor — piston detail',
+    hint:'The piston squeezes low-pressure gas into a smaller space. The <b>work</b> driving it turns into heat, so the gas leaves <b>hotter and at higher pressure</b> than it entered.' },
+  valve:{ name:'Expansion valve — restriction detail',
+    hint:'Warm liquid is forced through a <b>narrow gap</b>. On the far side the pressure has dropped, so its <b>temperature falls sharply</b> and it leaves cold.' }
+};
+
+function enterDetail(key){
+  view='detail';
+  buildDetail(key);
+  const meta = DETAIL_META[key];
+  stageName.textContent = meta.name;
+  backBtn.hidden = false;
+  overviewH.hidden = true;
+  detailH.hidden = false;
+  detailHTxt.innerHTML = meta.hint;
+}
+
+function enterLoop(){
+  view='loop';
+  stopAnim();
+  buildOverview();
+  stageName.textContent = 'Full loop';
+  backBtn.hidden = true;
+  overviewH.hidden = false;
+  detailH.hidden = true;
+}
+
+function syncActiveNode(){
+  host.querySelectorAll('.node').forEach(n=>{
+    n.classList.toggle('active', n.dataset.key===active);
+  });
+}
+
+function renderProgress(){
+  progressEl.innerHTML='';
+  ORDER.forEach(key=>{
+    const b=document.createElement('button');
+    b.className='chip'+(visited.has(key)?' visited':'')+(key===active?' active':'');
+    b.innerHTML=`<span class="dot"></span>${STAGES[key].label}`;
+    b.addEventListener('click', ()=> onNodeClick(key));
+    progressEl.appendChild(b);
+  });
+  progCap.textContent = `${visited.size} of 4 explored`;
+  if (view==='loop') syncActiveNode();
+}
+
+function calloutHTML(co){
+  return `<div class="callout ${co.kind}">
+    <div class="k"><span class="tag">${co.tag}</span>${co.k}</div>
+    <div>${co.t}</div>
+  </div>`;
+}
+
+function airHTML(air){
+  return `<div class="callout air">
+    <div class="k">On the air side</div>
+    <div class="hum-row">
+      <div class="hum-cell"><div class="h">${air.in.h}</div><div class="v">${air.in.v}</div></div>
+      <div class="hum-cell"><div class="h">${air.out.h}</div><div class="v">${air.out.v}</div></div>
+    </div>
+    <div>${air.note}</div>
+  </div>`;
+}
+
+function renderInfo(){
+  if (!active){ emptyEl.hidden=false; contentEl.hidden=true; return; }
+  emptyEl.hidden=true; contentEl.hidden=false;
+  const s=STAGES[active];
+  cTitle.textContent=s.title;
+  cPhase.innerHTML=`<span class="sw" style="background:${s.phase.c1}"></span>${s.phase.from}
+     <span class="to">&#8594;</span>
+     <span class="sw" style="background:${s.phase.c2}"></span>${s.phase.to}`;
+  cDesc.textContent=s.desc;
+
+  let html = s.callouts.map(calloutHTML).join('');
+  if (s.air) html += airHTML(s.air);
+  cCallouts.innerHTML = html;
+}
+
+/* buttons */
+backBtn.addEventListener('click', ()=>{ enterLoop(); renderProgress(); });
+document.getElementById('reset-btn').addEventListener('click', ()=>{
+  active=null; visited.clear(); enterLoop(); renderInfo(); renderProgress();
+});
+
+/* init */
+buildOverview();
+renderProgress();
+renderInfo();
+
+/* ============================================================
+   Self-check quiz
+============================================================ */
+const QUIZ = [
+  {
+    q:'Inside the evaporator, the refrigerant boils — turning from a cold liquid into a gas. As this happens, the room air passing over the coil…',
+    options:[
+      'loses heat to the refrigerant',
+      'gains heat from the refrigerant',
+      'is turned colder by the refrigerant leaking into it',
+      'is left completely unchanged by the boiling'
+    ],
+    correct:0,
+    why:'Boiling (evaporating) soaks up heat. That heat comes out of the room air and into the colder refrigerant — which is exactly how the air, and the room, gets cooled.'
+  },
+  {
+    q:'When the air conditioner is switched on, it also removes moisture from the room air; that water is collected and piped outdoors, not into the room. Why does the moisture come out of the air in the first place?',
+    options:[
+      'The refrigerant leaks a little water into the air stream',
+      'Cooling the air makes some of its moisture condense',
+      'The compressor gives off water as it uses power',
+      'Heating the air squeezes the moisture out of it'
+    ],
+    correct:1,
+    why:'Cold air can hold less moisture than warm air. As the room air is cooled past its dew point on the coil, some of its water vapour condenses into liquid — which is then caught and drained outside.'
+  },
+  {
+    q:'Heat naturally flows from warm to cold on its own. An air conditioner instead moves heat from the cool room out to the warm outdoors. What makes this possible?',
+    options:[
+      'The temperature difference at the coils',
+      'Making the refrigerant cold enough',
+      'Good insulation in the walls',
+      'Work done by the compressor'
+    ],
+    correct:3,
+    why:'Moving heat the "wrong" way — from cooler to warmer — cannot happen on its own. The work done by the compressor is what forces it. (Even making the refrigerant cold in the first place takes that work.)'
+  },
+  {
+    q:'Over one full cycle, compared with the heat taken out of the room, the heat the outdoor unit releases outside is…',
+    options:[
+      'equal to the heat taken from the room',
+      'less, since some heat leaks from the pipes',
+      'more, because the compressor\u2019s work becomes heat too',
+      'more, because the outdoor air is warmer than the room'
+    ],
+    correct:2,
+    why:'Energy is conserved: heat released outside = heat taken from the room + the compressor\u2019s work. Both "more" options sound plausible, but the reason is the work turning into heat — not the outdoor temperature.'
+  },
+  {
+    q:'Which statement correctly describes the systems inside the machine?',
+    options:[
+      'The refrigerant loop is open; each component is closed.',
+      'The refrigerant loop is closed; each component is open.',
+      'Both the loop and each component are closed.',
+      'Both the loop and each component are open.'
+    ],
+    correct:1,
+    why:'The sealed loop carries a fixed mass of refrigerant round and round, so it is a closed system. Each component, though, has refrigerant flowing in one side and out the other, so each is an open system.'
+  },
+  {
+    q:'Imagine the whole air conditioner — both the indoor and outdoor units — running inside a single sealed room that cannot exchange heat with anywhere else. Over time the room would…',
+    options:[
+      'slowly warm up',
+      'cool down, as it normally does',
+      'stay at exactly the same temperature',
+      'cool near one unit but even out overall'
+    ],
+    correct:0,
+    why:'The heat pulled out of the air is dumped straight back into the same room, and the compressor\u2019s electrical work also ends up as heat in the room. So the sealed room gains energy overall and warms up.'
+  }
+];
+
+const qProgress = document.getElementById('quiz-progress');
+const qDots     = document.getElementById('quiz-dots');
+const qBody     = document.getElementById('quiz-body');
+const qQ        = document.getElementById('quiz-q');
+const qOpts     = document.getElementById('quiz-opts');
+const qFeed     = document.getElementById('quiz-feedback');
+const qRetry    = document.getElementById('quiz-retry');
+const qNext     = document.getElementById('quiz-next');
+const qSummary  = document.getElementById('quiz-summary');
+const qScore    = document.getElementById('quiz-score');
+const MARKS = ['A','B','C','D'];
+
+let qi = 0;
+const qState = QUIZ.map(()=>({ picks:[], resolved:false, correct:false, retrying:false }));
+
+function renderQuizDots(){
+  qDots.innerHTML = '';
+  QUIZ.forEach((_, i)=>{
+    const d = document.createElement('div');
+    d.className = 'quiz-dot' + (i===qi ? ' current' : (qState[i].resolved ? ' done' : ''));
+    qDots.appendChild(d);
+  });
+}
+
+function pickOption(i){
+  const item = QUIZ[qi], st = qState[qi];
+  if (st.resolved) return;
+  st.picks.push(i);
+  st.retrying = false;
+  if (i===item.correct){ st.resolved = true; st.correct = true; }
+  else if (st.picks.length >= 2){ st.resolved = true; st.correct = false; }
+  renderQuiz();
+}
+
+function renderQuiz(){
+  qBody.hidden = false;
+  qSummary.hidden = true;
+  qProgress.textContent = `Question ${qi+1} of ${QUIZ.length}`;
+  renderQuizDots();
+
+  const item = QUIZ[qi], st = qState[qi];
+  qQ.textContent = item.q;
+  qOpts.innerHTML = '';
+
+  const attempt1 = !st.resolved && st.picks.length===0;
+  const attempt2 = !st.resolved && st.picks.length===1 && st.retrying;
+  const active   = attempt1 || attempt2;
+
+  item.options.forEach((opt, i)=>{
+    const b = document.createElement('button');
+    const tried = st.picks.includes(i);
+    const clickable = active && !tried;
+    let cls = 'quiz-opt' + (clickable ? '' : ' locked');
+    if (st.resolved){
+      if (i===item.correct) cls += ' correct';
+      else if (tried) cls += ' wrong';
+    } else if (tried){
+      cls += ' wrong';
+    }
+    b.className = cls;
+    b.innerHTML = `<span class="mark">${MARKS[i]}</span><span>${opt}</span>`;
+    if (clickable) b.addEventListener('click', ()=> pickOption(i));
+    qOpts.appendChild(b);
+  });
+
+  if (st.resolved){
+    qFeed.hidden = false;
+    qFeed.className = 'quiz-feedback ' + (st.correct ? 'good' : 'bad');
+    qFeed.innerHTML = `<strong>${st.correct ? 'Correct' : 'Not quite'}</strong>${item.why}`;
+    qRetry.hidden = true;
+    qNext.hidden = false;
+    qNext.textContent = qi < QUIZ.length-1 ? 'Next question \u2192' : 'See results \u2192';
+  } else if (st.picks.length===1 && !st.retrying){
+    // first wrong attempt: prompt a retry, no answer revealed yet
+    qFeed.hidden = false;
+    qFeed.className = 'quiz-feedback bad';
+    qFeed.innerHTML = `<strong>Not quite</strong>That\u2019s not it — you have one more try.`;
+    qRetry.hidden = false;
+    qNext.hidden = true;
+  } else {
+    // an attempt is in progress
+    qFeed.hidden = true;
+    qRetry.hidden = true;
+    qNext.hidden = true;
+  }
+}
+
+function showQuizSummary(){
+  qBody.hidden = true;
+  qSummary.hidden = false;
+  qProgress.textContent = 'Done';
+  renderQuizDots();
+  const n = qState.reduce((s,st)=> s + (st.correct ? 1 : 0), 0);
+  qScore.innerHTML = `You answered <b>${n} of ${QUIZ.length}</b> correctly.`;
+}
+
+qRetry.addEventListener('click', ()=>{ qState[qi].retrying = true; renderQuiz(); });
+qNext.addEventListener('click', ()=>{
+  if (qi < QUIZ.length-1){ qi++; renderQuiz(); }
+  else showQuizSummary();
+});
+document.getElementById('quiz-reset-all').addEventListener('click', ()=>{
+  qi = 0;
+  qState.forEach(st=>{ st.picks=[]; st.resolved=false; st.correct=false; st.retrying=false; });
+  renderQuiz();
+});
+
+renderQuiz();
+</script>
+</body>
+</html>
