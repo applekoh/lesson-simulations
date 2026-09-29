@@ -2,1016 +2,541 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Inside a Buffer</title>
+<title>Approaching Equilibrium</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
   :root{
-    --bench: #F2F4F3;
+    --bg: #EEF3F6;
     --panel: #FFFFFF;
-    --panel-sunk: #F6F8F7;
-    --line: #DCE3E1;
-    --line-strong: #C4CFCC;
-    --ink: #1A2621;
-    --ink-soft: #55635E;
-    --ink-faint: #84948E;
-    --ha: #C8792B;
-    --ha-soft: #EBC79A;
-    --abase: #2E7D8A;
-    --abase-soft: #A6D0D6;
-    --acid: #C0453B;
-    --base: #7B5EA7;
+    --line: #D7E1E6;
+    --text: #1B2733;
+    --muted: #5B7480;
+    --reactant-color: #065A82;
+    --product-color: #C9822A;
+    --q-color: #1C7293;
+    --neq-tint: rgba(184,74,44,0.08);
+    --eq-tint: rgba(63,125,79,0.10);
     --good: #3F7D4F;
-    --warn: #C98A2B;
-    --bad: #C0453B;
-    --focus: #2E7D8A;
+    --bad: #B84C3C;
+    --focus: #1C7293;
+    --navy: #21295C;
   }
   *{box-sizing:border-box;}
-  html,body{margin:0; padding:0;}
+  html,body{margin:0;padding:0;}
   body{
-    background: var(--bench);
-    color: var(--ink);
+    background: var(--bg);
+    color: var(--text);
     font-family:'Inter',sans-serif;
     min-height:100vh;
-    padding: 40px 22px 64px;
-    line-height:1.5;
+    padding: 32px 20px 60px;
   }
-  .wrap{max-width: 1120px; margin:0 auto;}
+  .wrap{max-width: 960px; margin: 0 auto;}
 
-  header.top{margin-bottom:26px;}
-  .eyebrow{font-size:12.5px; color:var(--ink-soft); font-weight:500; margin:0 0 8px;}
+  header.top{ margin-bottom: 22px; }
   header.top h1{
-    font-family:'Fraunces',serif; font-weight:600; font-size:38px; line-height:1.05;
-    margin:0 0 14px; letter-spacing:-0.01em;
+    font-family:'Source Serif 4', serif; font-weight:700; font-size: 26px;
+    margin: 0 0 12px; color: var(--navy);
   }
-  header.top p.sub{margin:0; color:var(--ink-soft); font-size:15px; max-width:64ch;}
-  header.top p.pka-note{margin:14px 0 0; color:var(--ink-soft); font-size:13px; max-width:64ch; line-height:1.6; background:var(--panel-sunk); border:1px solid var(--line); border-left:3px solid var(--focus); border-radius:6px; padding:11px 14px;}
-  header.top .eq{
-    font-family:'IBM Plex Mono',monospace; font-size:16px; margin-top:16px;
-    padding:10px 16px; background:var(--panel); border:1px solid var(--line); border-radius:8px;
-    display:inline-block;
+  header.top p.sub{margin:10px 2px 0; color:var(--muted); font-size:13.5px; line-height:1.55; max-width:66ch;}
+  header.top p.note{margin:8px 2px 0; color:var(--muted); font-size:12px; line-height:1.55; max-width:66ch; font-style:italic;}
+
+  .equation-banner{
+    display:flex; align-items:center; justify-content:center;
+    background: var(--panel); border:1px solid var(--line); border-radius:8px;
+    padding: 14px 20px; box-shadow: 0 1px 3px rgba(33,41,92,0.06);
   }
-  header.top .eq .ha{color:var(--ha); font-weight:600;}
-  header.top .eq .abase{color:var(--abase); font-weight:600;}
-  header.top .eq .water{color:var(--ink-faint);}
+  .equation-banner .eq{ font-family:'Source Serif 4', serif; font-size: 22px; font-weight:700; }
+  .equation-banner .eq .r-c{color:var(--reactant-color);}
+  .equation-banner .eq .p-c{color:var(--product-color);}
 
-  .lab{display:grid; grid-template-columns: 1.35fr 1fr; gap:22px; align-items:stretch;}
-  @media (max-width: 780px){ .lab{grid-template-columns:1fr;} }
+  section.graph-section{
+    background: var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding: 20px 20px 16px; margin-top: 18px; box-shadow: 0 1px 3px rgba(33,41,92,0.06);
+  }
 
-  .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:22px;}
-  .card h2{font-family:'Inter',sans-serif; font-weight:600; font-size:13px; color:var(--ink-soft); margin:0 0 16px;}
+  .legend-row{display:flex; gap:22px; flex-wrap:wrap; margin-bottom:10px; font-size:13px;}
+  .legend-item{display:flex; align-items:center; gap:6px;}
+  .swatch{width:14px; height:4px; border-radius:2px; display:inline-block;}
+  .band-legend{display:flex; gap:16px; margin-left:auto; font-size:12px; color:var(--muted);}
+  .band-legend .chip{display:flex; align-items:center; gap:6px;}
+  .band-legend .chipcolor{width:12px; height:12px; border-radius:3px; display:inline-block;}
 
-  .beaker-wrap{display:flex; flex-direction:column; align-items:center;}
-  svg#beaker{width:100%; max-width:560px; height:auto; display:block;}
-  #beaker .molecule circle{ transform-box: fill-box; transform-origin: center; }
+  svg#chart{width:100%; height:auto; display:block;}
+  svg#chartQ{width:100%; height:auto; display:block;}
+  .charts-row{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .chart-block{min-width:0;}
+  .chart-title{font-size:12px; color:var(--muted); margin-bottom:6px; text-align:center;}
+  @media (max-width: 720px){ .charts-row{grid-template-columns:1fr;} }
+  .gridline{stroke:#E3E9EC; stroke-width:1;}
+  .axis-label{fill:var(--muted); font-size:11px; font-family:'IBM Plex Mono',monospace;}
+  .axis-title{fill:var(--muted); font-size:12px; font-family:'Inter',sans-serif;}
+  .curve{fill:none; stroke-width:2.5;}
+  .marker-line{stroke:var(--navy); stroke-width:1; stroke-dasharray:4 4; opacity:0.4;}
+  .tip{stroke:#FFFFFF; stroke-width:2;}
+  .band-label{font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:600;}
 
-  .station{display:grid; grid-template-columns:96px 1fr 96px; gap:10px; align-items:center; margin-top:8px;}
-  .beaker-wrap{display:flex; flex-direction:column; align-items:center; min-width:0;}
-  .dose-col{display:flex; flex-direction:column; gap:9px; justify-content:center; width:96px;}
-  .dose-col-head{font-size:11.5px; font-weight:600; text-align:center; letter-spacing:.01em; margin-bottom:2px;}
-  .dose-col.acid .dose-col-head{color:var(--acid);}
-  .dose-col.base .dose-col-head{color:var(--base);}
-  .dose-btn{
+  .slider-row{margin-top:14px;}
+  .slider-row .srow-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
+  .slider-row label{font-size:13px; color:var(--text); font-weight:600;}
+  .slider-row .tval{font-family:'IBM Plex Mono',monospace; color:var(--focus); font-size:14px;}
+  input[type=range]{width:100%; accent-color: var(--focus);}
+
+  .btnrow{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;}
+  button.action{
     cursor:pointer; font-family:'Inter',sans-serif; font-weight:600; font-size:13px;
-    padding:11px 10px; border-radius:10px; border:1.5px solid; background:var(--panel);
-    display:flex; flex-direction:column; align-items:center; gap:2px; transition: background .14s ease, transform .05s ease;
+    padding:8px 14px; border-radius:6px; border:1px solid var(--line);
+    background: #F5F8FA; color: var(--text);
+    transition: border-color .15s ease, background .15s ease;
   }
-  .dose-btn .sub{font-weight:400; font-size:10.5px; opacity:.8;}
-  .dose-btn:active{transform:translateY(1px);}
-  .dose-col.acid .dose-btn{border-color:var(--acid); color:var(--acid);}
-  .dose-col.acid .dose-btn:hover{background:rgba(192,69,59,0.07);}
-  .dose-col.base .dose-btn{border-color:var(--base); color:var(--base);}
-  .dose-col.base .dose-btn:hover{background:rgba(123,94,167,0.07);}
-  .dose-btn:disabled{opacity:.35; cursor:not-allowed;}
-  .beaker-foot{display:flex; flex-direction:column; align-items:center; margin-top:6px;}
-  .reset-btn{
-    margin-top:8px; cursor:pointer; font-family:'Inter',sans-serif; font-weight:500; font-size:12.5px;
-    padding:8px 16px; border-radius:8px; border:1px solid var(--line-strong); background:var(--panel); color:var(--ink-soft);
+  button.action:hover{border-color: var(--focus);}
+  button.action.primary{background: var(--focus); border-color: var(--focus); color:#FFFFFF;}
+  button.action:disabled{opacity:.4; cursor:not-allowed;}
+
+  .kpi-row{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;}
+  .kpi{
+    background: #F5F8FA; border:1px solid var(--line); border-radius:6px;
+    padding:9px 16px; text-align:center; flex:1 1 140px;
   }
-  .reset-btn:hover{border-color:var(--ink-soft);}
-  @media (max-width: 900px){
-    .station{grid-template-columns:1fr; justify-items:center;}
-    .dose-col{flex-direction:row; width:auto;}
-    .dose-col-head{width:100%;}
-    .dose-col{flex-wrap:wrap; justify-content:center;}
+  .kpi .lbl{font-size:11px; letter-spacing:.02em;}
+  .kpi .val{font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:600; margin-top:2px;}
+
+  .status{
+    margin-top:14px; padding:11px 14px; border-radius:6px; font-size:13.5px;
+    background:#F5F8FA; border:1px solid var(--line); color:var(--text); line-height:1.5;
   }
+  .status.ready{border-color: var(--good); background: rgba(63,125,79,0.08);}
 
-  .legend{display:flex; gap:18px; margin-top:16px; font-size:15.5px; flex-wrap:wrap; justify-content:center; align-items:center;}
-  .legend-item{display:flex; align-items:center; gap:7px;}
-  .legend-dot{width:13px; height:13px; border-radius:50%;}
-  .legend-note{font-size:13.5px; color:var(--ink-soft); text-align:left; max-width:60ch; margin:12px auto 0; line-height:1.6;}
-  .legend-note + .legend-note{margin-top:10px;}
+  footer.credit{ text-align:center; color:var(--muted); font-size:11.5px; margin-top:26px; line-height:1.6;}
 
-  .readout-col{display:flex; flex-direction:column; gap:22px;}
-
-  .ph-display{display:flex; align-items:center; gap:20px;}
-  .ph-number{font-family:'Fraunces',serif; font-weight:600; font-size:66px; line-height:0.9; letter-spacing:-0.02em; transition:color .4s ease;}
-  .ph-meta{flex:1;}
-  .ph-scale{height:12px; border-radius:6px; width:100%;
-    background:linear-gradient(90deg,#C0392B,#E8622E,#E8A33D,#E3D250,#7FAE6B,#3FA7A0,#3F7DC0,#7B5EA7);}
-  .ph-scale-wrap{position:relative; margin-top:8px;}
-  .ph-needle{position:absolute; top:-3px; width:3px; height:18px; background:var(--ink); border-radius:2px; transform:translateX(-50%); transition:left .5s cubic-bezier(.4,0,.2,1);}
-  .ph-scale-ends{display:flex; justify-content:space-between; font-size:10.5px; color:var(--ink-faint); margin-top:5px; font-family:'IBM Plex Mono',monospace;}
-  .ph-verdict{font-size:13px; font-weight:500; margin-top:6px;}
-  .ph-compare{display:none; gap:18px; margin-top:14px; padding-top:12px; border-top:1px solid var(--line); font-size:13px; color:var(--ink-soft);}
-  .ph-compare.show{display:flex; flex-wrap:wrap;}
-  .ph-compare .pc-item{display:flex; align-items:center; gap:6px;}
-  .ph-compare b{font-family:'IBM Plex Mono',monospace; color:var(--ink); font-weight:600;}
-  .pc-dot{width:11px; height:11px; border-radius:50%; display:inline-block;}
-  .pc-dot.pc-buffer{background:#E8823D;}
-  .pc-dot.pc-water{background:#fff; border:2px solid #5F7076;}
-
-  .conc-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
-  .conc-box{border-radius:10px; padding:13px 15px; border:1px solid var(--line);}
-  .conc-box.ha{background:rgba(200,121,43,0.06); border-color:var(--ha-soft);}
-  .conc-box.abase{background:rgba(46,125,138,0.06); border-color:var(--abase-soft);}
-  .conc-box .name{font-size:15px; font-weight:600; display:flex; align-items:center; gap:6px;}
-  .conc-box.ha .name{color:var(--ha);}
-  .conc-box.abase .name{color:var(--abase);}
-  .conc-box .amount{font-family:'IBM Plex Mono',monospace; font-size:23px; font-weight:500; margin-top:5px; color:var(--ink);}
-  .conc-box .amount .unit{font-size:12px; color:var(--ink-faint); font-weight:400;}
-  .conc-box .role{font-size:11px; color:var(--ink-soft); margin-top:3px;}
-
-  .equation-live{background:var(--panel-sunk); border:1px solid var(--line); border-radius:10px; padding:16px 18px; font-family:'IBM Plex Mono',monospace;}
-  .eq-symbolic{font-size:14px; color:var(--ink-soft); margin-bottom:12px;}
-  .eq-numeric{font-size:15px; line-height:2; color:var(--ink);}
-  .eq-numeric .ha{color:var(--ha); font-weight:600;}
-  .eq-numeric .abase{color:var(--abase); font-weight:600;}
-  .eq-numeric .result{color:var(--ink); font-weight:600;}
-  .eq-numeric.dead{opacity:.45;}
-  .eq-broken-note{font-family:'Inter',sans-serif; font-size:12.5px; color:var(--bad); margin-top:6px; display:none;}
-  .eq-broken-note.show{display:block;}
-  .eq-plain{font-family:'Inter',sans-serif; font-size:12px; color:var(--ink-soft); margin-top:12px; line-height:1.5; border-top:1px solid var(--line); padding-top:11px;}
-
-  .capacity-card{margin-top:22px;}
-  .cap-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; flex-wrap:wrap; gap:6px;}
-  .cap-head h2{margin:0;}
-  .cap-head .cap-hint{font-size:12px; color:var(--ink-soft);}
-  .gauge{margin-bottom:16px;}
-  .gauge:last-of-type{margin-bottom:0;}
-  .gauge-label{display:flex; justify-content:space-between; font-size:14.5px; margin-bottom:6px;}
-  .gauge-label .gl-name{font-weight:500;}
-  .gauge-label .gl-val{font-family:'IBM Plex Mono',monospace; color:var(--ink-soft);}
-  .gauge-track{height:20px; border-radius:6px; background:var(--panel-sunk); border:1px solid var(--line); overflow:hidden;}
-  .gauge-fill{height:100%; border-radius:5px 0 0 5px; transition:width .45s cubic-bezier(.4,0,.2,1), background .3s ease;}
-  .gauge.acid-cap .gl-name{color:var(--abase);}
-  .gauge.base-cap .gl-name{color:var(--ha);}
-
-  .status{margin-top:20px; padding:14px 16px; border-radius:10px; font-size:14px; line-height:1.55; border:1px solid var(--line); background:var(--panel-sunk);}
-  .status.ok{border-color:var(--good); background:rgba(63,125,79,0.07);}
-  .status.warn{border-color:var(--warn); background:rgba(201,138,43,0.09);}
-  .status.over{border-color:var(--bad); background:rgba(192,69,59,0.08);}
-  .status b{font-weight:600;}
-
-  footer.credit{text-align:center; color:var(--ink-faint); font-size:11.5px; margin-top:32px; line-height:1.6;}
-  sup.charge{font-size:0.72em; font-weight:700; vertical-align:baseline; position:relative; top:-0.6em; line-height:0;}
-
-  /* pH vs amount curve */
-  svg#phCurve{width:100%; height:auto; display:block;}
-  .curve-cap{font-size:12px; color:var(--ink-soft); margin:10px 0 0; line-height:1.5;}
-  .curve-toggle-row{display:flex; justify-content:flex-end; margin:-6px 0 8px;}
-  .curve-toggle{font-family:'Inter',sans-serif; font-size:12px; font-weight:500; cursor:pointer; padding:6px 12px; border-radius:7px; border:1px solid var(--line-strong); background:var(--panel); color:var(--ink-soft); transition:border-color .12s ease, background .12s ease;}
-  .curve-toggle:hover{border-color:var(--ink-soft);}
-  .curve-toggle[aria-pressed="true"]{border-color:var(--ink-soft); background:var(--panel-sunk); color:var(--ink); font-weight:600;}
-
-  /* self-check quiz */
-  .quiz-card{margin-top:22px;}
-  .quiz-intro{font-size:13.5px; color:var(--ink-soft); margin:0 0 6px; max-width:72ch; line-height:1.6;}
-  .quiz-q{border-top:1px solid var(--line); padding-top:20px; margin-top:20px;}
-  .quiz-q:first-of-type{border-top:none; padding-top:6px; margin-top:0;}
-  .q-num{font-size:11.5px; font-weight:600; color:var(--ink-faint); letter-spacing:.04em; margin-bottom:7px;}
-  .q-prompt{font-size:15.5px; font-weight:600; color:var(--ink); margin-bottom:14px; line-height:1.5;}
-  .q-opts{display:flex; flex-direction:column; gap:9px;}
-  .q-opt{
-    text-align:left; font-family:'Inter',sans-serif; font-size:14px; color:var(--ink);
-    background:var(--panel-sunk); border:1px solid var(--line); border-radius:9px;
-    padding:11px 14px; cursor:pointer; line-height:1.45; display:flex; gap:10px; align-items:flex-start;
-    transition:border-color .12s ease, background .12s ease;
+  /* ---- quiz section ---- */
+  section.quiz-section{
+    background: var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding: 20px; margin-top: 18px; box-shadow: 0 1px 3px rgba(33,41,92,0.06);
   }
-  .q-opt:hover:not(:disabled){border-color:var(--line-strong);}
-  .q-opt:disabled{cursor:default;}
-  .q-opt .mark{flex:0 0 auto; font-weight:700; width:1em; text-align:center; opacity:0;}
-  .q-opt.correct{border-color:var(--good); background:rgba(63,125,79,0.10); color:#2C5A38;}
-  .q-opt.correct .mark{opacity:1; color:var(--good);}
-  .q-opt.wrong{border-color:var(--bad); background:rgba(192,69,59,0.09); color:#8E2F27;}
-  .q-opt.wrong .mark{opacity:1; color:var(--bad);}
-  .q-exp{display:none; margin-top:12px; padding:12px 14px; border-radius:9px; font-size:13.5px; line-height:1.6; border:1px solid var(--line); background:var(--panel-sunk); color:var(--ink-soft);}
-  .q-exp.show{display:block;}
-  .q-exp .verdict{font-weight:700; margin-right:5px; color:var(--ink);}
-  .q-exp.right{border-color:var(--good); background:rgba(63,125,79,0.07);}
-  .q-exp.right .verdict{color:var(--good);}
-  .q-exp.miss{border-color:var(--warn); background:rgba(201,138,43,0.08);}
-  .q-exp.miss .verdict{color:var(--warn);}
+  section.quiz-section h2{
+    font-family:'Source Serif 4', serif; font-size:18px; margin:0 0 4px; font-weight:600; color: var(--navy);
+  }
+  section.quiz-section > p.qsub{margin:0 0 16px; color:var(--muted); font-size:13.5px; line-height:1.5;}
+  .qprogress{font-size:11.5px; color:var(--muted); letter-spacing:.03em; margin-bottom:10px; font-family:'IBM Plex Mono',monospace;}
+  .qprompt{font-size:14.5px; font-weight:600; margin-bottom:14px; line-height:1.5;}
+  .qoptions{display:flex; flex-direction:column; gap:9px; margin-bottom:16px;}
+  .qopt{
+    display:flex; align-items:flex-start; gap:10px; padding:11px 13px; border-radius:6px;
+    border:1px solid var(--line); cursor:pointer; font-size:13.5px; background:#F5F8FA; line-height:1.45;
+  }
+  .qopt input{accent-color: var(--focus); margin-top:2px;}
+  .qopt.chosen{border-color: var(--focus); box-shadow: inset 0 0 0 1px var(--focus);}
+  .qopt.disabled{cursor:default;}
+  .qopt.correct-opt{border-color: var(--good); background: rgba(63,125,79,0.08);}
+  .qopt.incorrect-opt{border-color: var(--bad); background: rgba(184,76,60,0.08);}
+
+  .qfeedback{
+    border-radius:6px; padding:12px 14px; font-size:13.5px; line-height:1.55;
+    border:1px solid var(--line); margin-bottom:14px; display:none;
+  }
+  .qfeedback.show{display:block;}
+  .qfeedback.correct{border-color: var(--good); background: rgba(63,125,79,0.07);}
+  .qfeedback.incorrect{border-color: var(--bad); background: rgba(184,76,60,0.07);}
+  .qfeedback b.tag{display:block; margin-bottom:4px; font-size:12px;}
+  .qfeedback.correct b.tag{color:var(--good);}
+  .qfeedback.incorrect b.tag{color:var(--bad);}
+
+  .qcomplete{font-size:14px; line-height:1.6;}
+  .qcomplete .score{font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:600; color:var(--focus); margin:6px 0 10px;}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <header class="top">
-    <p class="eyebrow">Sustainability &middot; Science and Systems Thinking</p>
-    <h1>Inside a Buffer</h1>
-    <p class="sub">A buffer is a mixture of a weak acid and its conjugate base sitting together in water. Add a little strong acid or strong base and the mixture absorbs it, so the pH barely moves &mdash; until the mixture runs out. Add a dose and watch what happens to the molecules, the amounts, and the pH.</p>
-    <div class="eq"><span class="ha">HA</span> <span class="water">+ H&#8322;O</span> &#8652; <span class="abase">A<sup class="charge">&minus;</sup></span> <span class="water">+ H&#8323;O<sup class="charge">+</sup></span></div>
-    <p class="pka-note">This particular weak acid has a <b>pK<sub>a</sub> of 4.74</b>. The buffer starts with equal amounts of HA and A<sup class="charge">&minus;</sup>, so the [HA]/[A<sup class="charge">&minus;</sup>] ratio is 1, and log&#8321;&#8320;(1) = 0 &mdash; which is why the fresh buffer sits at pH = pK<sub>a</sub> = 4.74 before anything is added.</p>
+    <h1>Approaching Equilibrium</h1>
+    <div class="equation-banner">
+      <div class="eq"><span class="r-c">Reactant</span> &#8652; <span class="p-c">Product</span></div>
+    </div>
+    <p class="sub">These graphs show how the concentrations of Reactant and Product change over time, and how the reaction quotient Q changes alongside them. Try changing K to see how the equilibrium point shifts &mdash; then drag the time slider forward to watch the system get there.</p>
+    <p class="note">Reactant, Product, and the K values below (0.5, 1, 3, 6) are a generic, illustrative setup for teaching purposes &mdash; not a real measured reaction, and the curve shown is a simplified model, not derived from a measured rate law.</p>
   </header>
 
-  <div class="lab">
-    <div class="card beaker-card">
-      <h2>The solution</h2>
-      <div class="station">
-        <div class="dose-col acid">
-          <div class="dose-col-head">Strong acid</div>
-          <button class="dose-btn" id="acidDropBtn">Add a drop<span class="sub">+0.01 M</span></button>
-          <button class="dose-btn" id="acidPourBtn">Add a pour<span class="sub">+0.12 M</span></button>
-        </div>
-        <div class="beaker-wrap">
-          <svg id="beaker" viewBox="0 0 380 360" xmlns="http://www.w3.org/2000/svg"></svg>
-        </div>
-        <div class="dose-col base">
-          <div class="dose-col-head">Strong base</div>
-          <button class="dose-btn" id="baseDropBtn">Add a drop<span class="sub">+0.01 M</span></button>
-          <button class="dose-btn" id="basePourBtn">Add a pour<span class="sub">+0.12 M</span></button>
-        </div>
-      </div>
-      <div class="beaker-foot">
-        <button class="reset-btn" id="resetBtn">Reset to fresh buffer</button>
-        <div class="legend">
-          <span class="legend-item">
-            <svg width="34" height="24" viewBox="0 0 34 24" aria-hidden="true">
-              <circle cx="14" cy="12" r="9" fill="#2E7D8A"/>
-              <circle cx="21" cy="6" r="4.5" fill="#C0453B"/>
-            </svg>
-            HA &mdash; weak acid
-          </span>
-          <span class="legend-item">
-            <svg width="26" height="24" viewBox="0 0 26 24" aria-hidden="true">
-              <circle cx="13" cy="12" r="9" fill="#2E7D8A"/>
-            </svg>
-            A<sup class="charge">&minus;</sup> &mdash; conjugate base
-          </span>
-          <span class="legend-item">
-            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-              <circle cx="8" cy="8" r="5" fill="#C0453B"/>
-            </svg>
-            H<sup class="charge">+</sup> &mdash; proton
-          </span>
-        </div>
-        <p class="legend-note">HA is A<sup class="charge">&minus;</sup> with a proton (H<sup class="charge">+</sup>) attached &mdash; so a conversion is simply a proton coming or going.</p>
-        <p class="legend-note">When we add a small amount of strong acid, it reacts with A<sup class="charge">&minus;</sup> from the buffer to form more HA: [A<sup class="charge">&minus;</sup>] goes down by that small amount and [HA] goes up by the same amount, so the [HA]/[A<sup class="charge">&minus;</sup>] ratio increases. The [H&#8323;O<sup class="charge">+</sup>] in the solution increases very slightly and the pH decreases very slightly.</p>
-        <p class="legend-note">When we add a small amount of strong base, the OH<sup class="charge">&minus;</sup> ions react with HA from the buffer to form more A<sup class="charge">&minus;</sup>: this time the [HA]/[A<sup class="charge">&minus;</sup>] ratio decreases, which decreases [H&#8323;O<sup class="charge">+</sup>] very slightly and the pH increases very slightly.</p>
+  <section class="graph-section">
+    <div class="legend-row">
+      <span class="legend-item"><span class="swatch" style="background:var(--reactant-color);"></span>Reactant</span>
+      <span class="legend-item"><span class="swatch" style="background:var(--product-color);"></span>Product</span>
+      <span class="legend-item"><span class="swatch" style="background:var(--q-color);"></span>Q</span>
+      <div class="band-legend">
+        <span class="chip"><span class="chipcolor" style="background:rgba(217,123,102,0.5);"></span>Q &ne; K</span>
+        <span class="chip"><span class="chipcolor" style="background:rgba(127,174,107,0.5);"></span>Q = K</span>
       </div>
     </div>
 
-    <div class="readout-col">
-      <div class="card">
-        <h2>pH meter</h2>
-        <div class="ph-display">
-          <div class="ph-number" id="phNumber">4.74</div>
-          <div class="ph-meta">
-            <div class="ph-scale-wrap">
-              <div class="ph-scale"></div>
-              <div class="ph-needle" id="phNeedle"></div>
-            </div>
-            <div class="ph-scale-ends"><span>0</span><span>7</span><span>14</span></div>
-            <div class="ph-verdict" id="phVerdict"></div>
-          </div>
-        </div>
-        <div class="ph-compare" id="phCompare">
-          <span class="pc-item"><span class="pc-dot pc-buffer"></span>buffer&nbsp;<b id="phBufVal">4.74</b></span>
-          <span class="pc-item"><span class="pc-dot pc-water"></span>pure water&nbsp;<b id="phWaterVal">7.00</b></span>
-        </div>
+    <div class="charts-row">
+      <div class="chart-block">
+        <div class="chart-title">Concentration vs. Time</div>
+        <svg id="chart" viewBox="0 0 480 300" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
-
-      <div class="card">
-        <h2>pH vs. amount added</h2>
-        <div class="curve-toggle-row"><button class="curve-toggle" id="waterToggle" type="button" aria-pressed="false">Compare with pure water</button></div>
-        <svg id="phCurve" viewBox="0 0 360 210" xmlns="http://www.w3.org/2000/svg"></svg>
-        <p class="curve-cap">The dot shows where your solution sits now. Add acid or base and watch it travel along the curve &mdash; nearly flat through the buffer region, then falling (or rising) sharply once a partner runs out.</p>
-      </div>
-
-      <div class="card">
-        <h2>What&rsquo;s in the beaker</h2>
-        <div class="conc-grid">
-          <div class="conc-box ha">
-            <div class="name"><span class="legend-dot" style="width:9px;height:9px;background:var(--ha);"></span>HA</div>
-            <div class="amount" id="haAmount">1.000<span class="unit"> M</span></div>
-          </div>
-          <div class="conc-box abase">
-            <div class="name"><span class="legend-dot" style="width:9px;height:9px;background:var(--abase);"></span>A<sup class="charge">&minus;</sup></div>
-            <div class="amount" id="abaseAmount">1.000<span class="unit"> M</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>How the pH is worked out</h2>
-        <div class="equation-live">
-          <div class="eq-symbolic">pH = pK<sub>a</sub> &minus; log&#8321;&#8320;( [HA] &divide; [A<sup class="charge">&minus;</sup>] )</div>
-          <div class="eq-numeric" id="eqNumeric"></div>
-          <div class="eq-broken-note" id="eqBroken"></div>
-          <div class="eq-plain" id="eqPlain"></div>
-        </div>
+      <div class="chart-block">
+        <div class="chart-title">Reaction Quotient (Q) vs. Time</div>
+        <svg id="chartQ" viewBox="0 0 480 300" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
     </div>
-  </div>
 
-  <div class="card capacity-card">
-    <div class="cap-head">
-      <h2>Buffering capacity left</h2>
-      <span class="cap-hint">how much of each partner remains to absorb a dose</span>
+    <div class="slider-row">
+      <div class="srow-top">
+        <label>Equilibrium constant, K</label>
+      </div>
+      <div class="btnrow" id="kButtonRow" style="margin-top:2px;">
+        <button class="action k-btn" data-k="0.5">K = 0.5</button>
+        <button class="action k-btn" data-k="1">K = 1</button>
+        <button class="action k-btn primary" data-k="3">K = 3</button>
+        <button class="action k-btn" data-k="6">K = 6</button>
+      </div>
     </div>
-    <div class="gauge acid-cap">
-      <div class="gauge-label"><span class="gl-name">A<sup class="charge">&minus;</sup> left to absorb strong acid</span><span class="gl-val" id="acidCapVal">1.000 M</span></div>
-      <div class="gauge-track"><div class="gauge-fill" id="acidCapFill" style="background:var(--abase); width:100%;"></div></div>
-    </div>
-    <div class="gauge base-cap">
-      <div class="gauge-label"><span class="gl-name">HA left to absorb strong base</span><span class="gl-val" id="baseCapVal">1.000 M</span></div>
-      <div class="gauge-track"><div class="gauge-fill" id="baseCapFill" style="background:var(--ha); width:100%;"></div></div>
-    </div>
-    <div class="status ok" id="statusLine"></div>
-  </div>
 
-  <div class="card quiz-card">
-    <h2>Check your understanding</h2>
-    <p class="quiz-intro">Five questions on what you&rsquo;ve been exploring. Pick an answer to see whether it&rsquo;s right &mdash; and why.</p>
-    <div id="quizRoot"></div>
-  </div>
+    <div class="slider-row" style="margin-top:20px;">
+      <div class="srow-top">
+        <label for="timeSlider">Time</label>
+        <span class="tval"><span id="tReadout">0.0</span> (arbitrary units)</span>
+      </div>
+      <input type="range" id="timeSlider" min="0" max="17" step="0.05" value="0">
+    </div>
 
-  <footer class="credit">
-    HA / A<sup class="charge">&minus;</sup> is a generic weak-acid / conjugate-base pair (pK<sub>a</sub> = 4.74), chosen so the focus stays on buffering behavior rather than any one real molecule.<br>
-    Simplified teaching model: it follows the Henderson&ndash;Hasselbalch relationship while both partners are present, then switches to a plain strong-acid / strong-base calculation once one runs out. It does not model water&rsquo;s own self-ionization, activity, or dilution.<br>
-    Sustainability: Science and Systems Thinking &mdash; Buffer Lab. This simulation was built with Claude (Anthropic).
-  </footer>
+    <div class="btnrow">
+      <button class="action" id="jumpStartBtn">Jump to t = 0</button>
+      <button class="action" id="jumpEqBtn">Jump to equilibrium</button>
+    </div>
+
+    <div class="status" id="statusLine">Q &ne; K &mdash; concentrations are still changing.</div>
+  </section>
+
+  <section class="quiz-section" id="quizSection">
+    <h2>Check Your Understanding</h2>
+    <p class="qsub">Three questions based on what you just observed. Answer one at a time &mdash; the next question appears once you've submitted the current one.</p>
+    <div id="quizBody"></div>
+  </section>
+
+  <footer class="credit">Sustainability: Science and Systems Thinking &mdash; Approaching Equilibrium.<br>This simulation was built with Claude (Anthropic).</footer>
 </div>
 
 <script>
 (function(){
   "use strict";
 
-  const HA0 = 1.00, A0 = 1.00;
-  const PKA = 4.74;
-  const TOTAL = HA0 + A0;
-  const DROP = 0.01;   // textbook-scale addition: pH barely moves
-  const POUR = 0.12;   // large addition: walks to the capacity cliff in ~9 clicks, never lands exactly on exhaustion
-  const NET_LIMIT = A0 + 0.24;  // allow a few pours past exhaustion so the cliff is visible on both sides
-  const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // ---- reaction setup: Reactant <=> Product ----
+  let K = 3;                      // equilibrium ratio [Product]/[Reactant] -- now adjustable
+  const R0 = 1.0, P0 = 0.0;
+  const T_MAX = 17;
+  const CONV_THRESHOLD = 0.01;    // "close enough to equilibrium" tolerance, applied to Q itself
+  const TOL = 1 - CONV_THRESHOLD;
 
-  let net = 0; // net strong acid added (M); negative = net strong base
+  // TAU is the reaction's "speed" and is held fixed regardless of K (it was solved once so
+  // that, at the default K = 3, the equilibrium band lands at a readable t = 10.5). XI_EQ,
+  // F_REQUIRED and T_EQ all depend on K, so they're recomputed whenever K changes -- this is
+  // what keeps the "Q = K" band mathematically honest (Q actually within tolerance of K)
+  // for whatever K the student has chosen, not just for the default.
+  const TAU = 2.15601531695703;
+  let XI_EQ, F_REQUIRED, T_EQ;
+  function recomputeFromK(){
+    XI_EQ = K/(1+K);
+    F_REQUIRED = TOL / ((1-XI_EQ) + TOL*XI_EQ);
+    T_EQ = TAU * (-Math.log(1-F_REQUIRED));
+  }
+  recomputeFromK();
 
-  function clamp(v,lo,hi){ return Math.max(lo, Math.min(hi, v)); }
+  function concAt(t){
+    const xi = XI_EQ * (1 - Math.exp(-t/TAU));
+    const R = R0-xi, P = P0+xi;
+    return { R, P, Q: P/R };
+  }
 
-  const Ka = Math.pow(10, -PKA);   // acid dissociation constant for this weak acid
-  const Kb = 1e-14 / Ka;           // for the conjugate base
+  const svgNS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs){
+    const e = document.createElementNS(svgNS, tag);
+    for(const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
 
-  // pure function: pH for any net strong-acid addition (negative = net base). Single source of
-  // truth for both the live readout and the pH-vs-amount curve.
-  function phAtNet(nv){
-    const HA = clamp(HA0 + nv, 0, TOTAL);
-    const A  = clamp(A0  - nv, 0, TOTAL);
-    const eA = Math.max(0, nv - A0);
-    const eB = Math.max(0, -nv - HA0);
-    let pH;
-    if(A <= 0){
-      pH = -Math.log10(eA + Math.sqrt(Ka * TOTAL));            // all A- gone: excess acid + weak acid
-    } else if(HA <= 0){
-      pH = 14 + Math.log10(eB + Math.sqrt(Kb * TOTAL));        // all HA gone: excess base + conjugate base
+  const rootStyle = getComputedStyle(document.documentElement);
+  const reactantColor = rootStyle.getPropertyValue('--reactant-color').trim();
+  const productColor = rootStyle.getPropertyValue('--product-color').trim();
+  const qColor = rootStyle.getPropertyValue('--q-color').trim();
+
+  // ---- reusable chart builder: draws axes/gridlines once, returns helpers ----
+  function buildChart(svg, yMax, yStep, yTitleText){
+    const PAD = {l:40, r:14, t:16, b:36};
+    const VW = 480, VH = 300;
+    const plotW = VW - PAD.l - PAD.r, plotH = VH - PAD.t - PAD.b;
+
+    function X(t){ return PAD.l + (t/T_MAX)*plotW; }
+    function Y(v){ return PAD.t + plotH - (v/yMax)*plotH; }
+
+    for(let v=0; v<=yMax+1e-9; v+=yStep){
+      const y = Y(v);
+      svg.appendChild(el('line', {x1:PAD.l, y1:y, x2:VW-PAD.r, y2:y, class:'gridline'}));
+      const t = el('text', {x:PAD.l-8, y:y+4, class:'axis-label', 'text-anchor':'end'});
+      t.textContent = (yStep < 1 ? v.toFixed(1) : v.toFixed(0));
+      svg.appendChild(t);
+    }
+    for(let tt=0; tt<=T_MAX; tt+=5){
+      const x = X(tt);
+      svg.appendChild(el('line', {x1:x, y1:PAD.t, x2:x, y2:VH-PAD.b, class:'gridline'}));
+      const t = el('text', {x:x, y:VH-PAD.b+18, class:'axis-label', 'text-anchor':'middle'});
+      t.textContent = tt;
+      svg.appendChild(t);
+    }
+    const yTitle = el('text', {x:12, y:PAD.t+plotH/2, class:'axis-title', 'text-anchor':'middle', transform:'rotate(-90 12 '+(PAD.t+plotH/2)+')'});
+    yTitle.textContent = yTitleText;
+    svg.appendChild(yTitle);
+    const xTitle = el('text', {x:PAD.l+plotW/2, y:VH-6, class:'axis-title', 'text-anchor':'middle'});
+    xTitle.textContent = 'Time (arbitrary units)';
+    svg.appendChild(xTitle);
+
+    const bandNeq = el('rect', {y:PAD.t, height:plotH, fill:'var(--neq-tint)'});
+    const bandEq = el('rect', {y:PAD.t, height:plotH, fill:'var(--eq-tint)'});
+    const labelNeq = el('text', {class:'band-label', y:PAD.t+18, fill:'#A8442A', 'text-anchor':'middle'});
+    labelNeq.textContent = 'Q \u2260 K';
+    const labelEq = el('text', {class:'band-label', y:PAD.t+18, fill:'#2E6B3E', 'text-anchor':'middle'});
+    labelEq.textContent = 'Q = K';
+    const markerLine = el('line', {class:'marker-line', y1:PAD.t, y2:VH-PAD.b});
+
+    svg.appendChild(bandNeq);
+    svg.appendChild(bandEq);
+    svg.appendChild(labelNeq);
+    svg.appendChild(labelEq);
+    svg.appendChild(markerLine);
+
+    return {svg, X, Y, bandNeq, bandEq, labelNeq, labelEq, markerLine};
+  }
+
+  function addCurve(chart, color){
+    const path = el('path', {class:'curve', stroke:color});
+    const tip = el('circle', {r:5, class:'tip', fill:color});
+    chart.svg.appendChild(path);
+    chart.svg.appendChild(tip);
+    return {path, tip};
+  }
+
+  const chartConc = buildChart(document.getElementById('chart'), 1.1, 0.2, 'Concentration (M)');
+  const chartQ = buildChart(document.getElementById('chartQ'), 7, 1, 'Reaction Quotient, Q');
+
+  const curveR = addCurve(chartConc, reactantColor);
+  const curveP = addCurve(chartConc, productColor);
+  const curveQ = addCurve(chartQ, qColor);
+
+  const slider = document.getElementById('timeSlider');
+  const tReadout = document.getElementById('tReadout');
+  const statusLine = document.getElementById('statusLine');
+
+  const MIN_LABEL_WIDTH = 46; // px, hide band label if the revealed band is narrower than this
+
+  function updateBands(chart, t){
+    const neqEnd = Math.min(t, T_EQ);
+    const neqX0 = chart.X(0), neqX1 = chart.X(neqEnd);
+    chart.bandNeq.setAttribute('x', neqX0);
+    chart.bandNeq.setAttribute('width', Math.max(0, neqX1-neqX0));
+    const neqWidth = neqX1-neqX0;
+    chart.labelNeq.setAttribute('x', (neqX0+neqX1)/2);
+    chart.labelNeq.setAttribute('opacity', neqWidth >= MIN_LABEL_WIDTH ? 1 : 0);
+
+    if(t > T_EQ){
+      const eqX0 = chart.X(T_EQ), eqX1 = chart.X(t);
+      chart.bandEq.setAttribute('x', eqX0);
+      chart.bandEq.setAttribute('width', Math.max(0, eqX1-eqX0));
+      const eqWidth = eqX1-eqX0;
+      chart.labelEq.setAttribute('x', (eqX0+eqX1)/2);
+      chart.labelEq.setAttribute('opacity', eqWidth >= MIN_LABEL_WIDTH ? 1 : 0);
     } else {
-      const hh = PKA + Math.log10(A/HA);                        // Henderson-Hasselbalch, bounded by the
-      const acidFloor = -Math.log10(Math.sqrt(Ka * HA));        // weak-acid-only floor and
-      const baseCeil  = 14 + Math.log10(Math.sqrt(Kb * A));     // weak-base-only ceiling
-      pH = Math.min(Math.max(hh, acidFloor), baseCeil);
-    }
-    return clamp(pH, 0, 14);
-  }
-
-  // pH of pure water after the same net strong-acid (nv>0) or strong-base (nv<0) addition
-  function phWaterAt(nv){
-    const pH = nv>=0 ? -Math.log10(nv + 1e-7) : 14 + Math.log10(-nv + 1e-7);
-    return clamp(pH,0,14);
-  }
-
-  function state(){
-    const HA = clamp(HA0 + net, 0, TOTAL);
-    const A  = clamp(A0  - net, 0, TOTAL);
-    const excessAcid = Math.max(0, net - A0);
-    const excessBase = Math.max(0, -net - HA0);
-    const regime = A<=0 ? 'over-acid' : HA<=0 ? 'over-base' : 'buffer';
-    return { HA, A, excessAcid, excessBase, pH: phAtNet(net), regime };
-  }
-
-  const PH_STOPS = [
-    {p:0,c:'#C0392B'},{p:2,c:'#E8622E'},{p:4,c:'#E8A33D'},{p:6,c:'#E3D250'},
-    {p:7,c:'#7FAE6B'},{p:9,c:'#3FA7A0'},{p:11,c:'#3F7DC0'},{p:14,c:'#7B5EA7'}
-  ];
-  function hexToRgb(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
-  function mix(a,b,t){return a.map((v,i)=>Math.round(v+(b[i]-v)*t));}
-  function phColor(pH){
-    pH=clamp(pH,0,14);
-    for(let i=0;i<PH_STOPS.length-1;i++){
-      const s0=PH_STOPS[i],s1=PH_STOPS[i+1];
-      if(pH>=s0.p&&pH<=s1.p) return 'rgb('+mix(hexToRgb(s0.c),hexToRgb(s1.c),(pH-s0.p)/(s1.p-s0.p)).join(',')+')';
-    }
-    return PH_STOPS[PH_STOPS.length-1].c;
-  }
-
-  const NS='http://www.w3.org/2000/svg';
-  function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
-
-  const beaker = document.getElementById('beaker');
-  // viewBox is 380 x 360; a roomier glass, centered, with space for a pipette on each side
-  const GLASS = {x:120, y:92, w:150, h:214};
-  const LIP = 16;
-  const BASE_CURVE = 14;                    // radius of the rounded bottom corners
-  const liquidTop = GLASS.y + 44;
-  const glassInnerBottom = GLASS.y + GLASS.h; // liquid must reach here (the interior floor)
-
-  const defs = el('defs',{});
-  function grad(id,light,mid,dark){
-    const g=el('radialGradient',{id:id,cx:'35%',cy:'30%',r:'72%'});
-    g.appendChild(el('stop',{offset:'0%','stop-color':light}));
-    g.appendChild(el('stop',{offset:'58%','stop-color':mid}));
-    g.appendChild(el('stop',{offset:'100%','stop-color':dark}));
-    return g;
-  }
-  defs.appendChild(grad('gHA','#F0CE9C','#C8792B','#9A5C1E'));
-  defs.appendChild(grad('gA','#B4DBE0','#2E7D8A','#1F5A64'));
-  defs.appendChild(grad('gProton','#F2B3AB','#C0453B','#8E2F27'));
-  defs.appendChild(grad('gAcid','#E8A79F','#C0453B','#93332B'));
-  defs.appendChild(grad('gBase','#C6B4DE','#7B5EA7','#5C447F'));
-  const liq = el('linearGradient',{id:'gLiquid',x1:'0%',y1:'0%',x2:'0%',y2:'100%'});
-  liq.appendChild(el('stop',{offset:'0%','stop-color':'#EAF3F4'}));
-  liq.appendChild(el('stop',{offset:'100%','stop-color':'#D6E7E9'}));
-  defs.appendChild(liq);
-
-  // clip path matches the glass interior INCLUDING the rounded base, so liquid sits on the floor
-  const liquidPathD =
-    'M '+(GLASS.x+2)+' '+liquidTop+' '+
-    'L '+(GLASS.x+2)+' '+(glassInnerBottom-BASE_CURVE)+' '+
-    'Q '+(GLASS.x+2)+' '+glassInnerBottom+' '+(GLASS.x+2+BASE_CURVE)+' '+glassInnerBottom+' '+
-    'L '+(GLASS.x+GLASS.w-2-BASE_CURVE)+' '+glassInnerBottom+' '+
-    'Q '+(GLASS.x+GLASS.w-2)+' '+glassInnerBottom+' '+(GLASS.x+GLASS.w-2)+' '+(glassInnerBottom-BASE_CURVE)+' '+
-    'L '+(GLASS.x+GLASS.w-2)+' '+liquidTop+' Z';
-  const clip = el('clipPath',{id:'liquidClip'});
-  clip.appendChild(el('path',{d:liquidPathD}));
-  defs.appendChild(clip);
-  beaker.appendChild(defs);
-
-  const liquidGroup = el('g',{'clip-path':'url(#liquidClip)'});
-  liquidGroup.appendChild(el('path',{d:liquidPathD, fill:'url(#gLiquid)'}));
-  liquidGroup.appendChild(el('ellipse',{cx:GLASS.x+GLASS.w/2,cy:liquidTop+3,rx:(GLASS.w-6)/2,ry:5,fill:'#ffffff',opacity:0.5}));
-  const moleculeLayer = el('g',{});
-  liquidGroup.appendChild(moleculeLayer);
-  beaker.appendChild(liquidGroup);
-
-  // glass walls with rounded base, drawn over the liquid
-  beaker.appendChild(el('path',{
-    d:'M '+(GLASS.x-LIP)+' '+GLASS.y+' L '+GLASS.x+' '+(GLASS.y+12)+' '+
-      'L '+GLASS.x+' '+(glassInnerBottom-BASE_CURVE)+' '+
-      'Q '+GLASS.x+' '+glassInnerBottom+' '+(GLASS.x+BASE_CURVE)+' '+glassInnerBottom+' '+
-      'L '+(GLASS.x+GLASS.w-BASE_CURVE)+' '+glassInnerBottom+' '+
-      'Q '+(GLASS.x+GLASS.w)+' '+glassInnerBottom+' '+(GLASS.x+GLASS.w)+' '+(glassInnerBottom-BASE_CURVE)+' '+
-      'L '+(GLASS.x+GLASS.w)+' '+(GLASS.y+12)+' L '+(GLASS.x+GLASS.w+LIP)+' '+GLASS.y,
-    fill:'none', stroke:'#B8C7C4', 'stroke-width':3, 'stroke-linejoin':'round', 'stroke-linecap':'round'
-  }));
-  // subtle water-line at the liquid surface
-  beaker.appendChild(el('line',{x1:GLASS.x+2,y1:liquidTop,x2:GLASS.x+GLASS.w-2,y2:liquidTop,stroke:'#B4CDD1','stroke-width':1,opacity:0.7}));
-  // glass shine
-  beaker.appendChild(el('rect',{x:GLASS.x+8,y:liquidTop+6,width:7,height:GLASS.h-70,rx:3,fill:'#ffffff',opacity:0.4}));
-
-  // ---- pipettes: one per side, drawn as a single seamless shape, angled toward the liquid ----
-  function buildDropper(side, colorVar, tint){
-    const dir = side==='acid' ? 1 : -1;               // 1 = points down-right into liquid, -1 = mirror
-    const tipX = side==='acid' ? GLASS.x + 24 : GLASS.x + GLASS.w - 24; // where a droplet releases
-    const tipY = liquidTop - 8;
-    // build the pipette in a local frame then rotate it so the tip aims at (tipX,tipY)
-    // local frame: bulb at top, tip at bottom, vertical; we translate+rotate the whole group
-    const g = el('g',{});
-    // geometry in local coords (0,0 at tip, pipette extends upward)
-    const L = 92;                 // overall length tip->top of bulb
-    const barrelW = 7;            // half-width of the glass barrel
-    const bulbW = 15;             // half-width of the rubber bulb
-    // one continuous outline: tip -> up right side of barrel -> flare into bulb -> over top -> down left -> back to tip
-    const d =
-      'M 0 0 '+
-      'L '+barrelW*0.5+' -10 '+
-      'L '+barrelW+' -34 '+                       // right side of barrel
-      'C '+barrelW+' -50 '+bulbW+' -'+(L-40)+' '+bulbW+' -'+(L-24)+' '+  // flare out to bulb
-      'C '+bulbW+' -'+(L-4)+' -'+bulbW+' -'+(L-4)+' -'+bulbW+' -'+(L-24)+' '+ // bulb top cap
-      'C -'+bulbW+' -'+(L-40)+' -'+barrelW+' -50 -'+barrelW+' -34 '+   // flare back to barrel
-      'L -'+barrelW*0.5+' -10 '+
-      'Z';
-    // glass barrel + bulb body
-    const body = el('path',{d:d, fill:'#EAF1F2', stroke:'#B8C7C4', 'stroke-width':2, 'stroke-linejoin':'round'});
-    g.appendChild(body);
-    // colored reagent filling the bulb, so each pipette reads as holding acid / base
-    const bulb = el('ellipse',{cx:0, cy:-(L-22), rx:bulbW-3, ry:16, fill:colorVar, opacity:0.9});
-    g.appendChild(bulb);
-    // liquid in the barrel (thin colored column)
-    g.appendChild(el('rect',{x:-2.5, y:-(L-44), width:5, height:30, fill:colorVar, opacity:0.55, rx:2}));
-    // highlight
-    g.appendChild(el('ellipse',{cx:-5, cy:-(L-26), rx:3.5, ry:6, fill:'#ffffff', opacity:0.4}));
-
-    // orient: rotate about the tip so the pipette leans inward toward the liquid
-    const angle = dir * 22; // degrees; leans toward center
-    g.setAttribute('transform', 'translate('+tipX+' '+tipY+') rotate('+angle+')');
-    beaker.appendChild(g);
-    return {tipX, tipY, bulb, group:g};
-  }
-  const acidDropper = buildDropper('acid','#C0453B');
-  const baseDropper = buildDropper('base','#7B5EA7');
-  // airborne droplets travel here (unclipped), above everything, so they show from tip to surface
-  const airLayer = el('g',{});
-  beaker.appendChild(airLayer);
-
-  const N = 10;
-  const BODY_R = 12;      // shared body circle (same for HA and A-)
-  const PROTON_R = 5.5;   // small proton, only present on HA
-  const molPos = [];
-  (function scatter(){
-    // loose staggered scatter across the liquid, with generous spacing since molecules are bigger now
-    const cols=3, rows=4, slots=[];
-    const fieldTop = liquidTop + 26, fieldBottom = glassInnerBottom - 24;
-    const cellW=(GLASS.w-40)/cols, cellH=(fieldBottom-fieldTop)/rows;
-    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-      // last row has fewer to total 10; skip two slots in a balanced way
-      slots.push({r,c});
-    }
-    // choose 10 of the 12 slots, dropping two to avoid a rigid grid
-    const drop = new Set([4, 7]);
-    let idx=0;
-    slots.forEach((s,si)=>{
-      if(drop.has(si)) return;
-      molPos.push({
-        x: GLASS.x+22 + s.c*cellW + cellW*0.5 + (Math.random()-0.5)*cellW*0.4,
-        y: fieldTop + s.r*cellH + cellH*0.5 + (Math.random()-0.5)*cellH*0.4
-      });
-      idx++;
-    });
-  })();
-
-  // each molecule is a group: a teal body (always) + a red proton (only when HA)
-  const mols=[], protons=[], drift=[];
-  for(let i=0;i<N;i++){
-    const g=el('g',{class:'molecule'});
-    const body=el('circle',{cx:0,cy:0,r:BODY_R,fill:'url(#gA)',stroke:'rgba(0,0,0,0.18)','stroke-width':0.8});
-    // proton sits touching the upper-right of the body
-    const pOff = BODY_R*0.82;
-    const proton=el('circle',{cx:pOff,cy:-pOff,r:PROTON_R,fill:'url(#gProton)',stroke:'rgba(0,0,0,0.2)','stroke-width':0.7});
-    g.appendChild(body);
-    g.appendChild(proton);
-    g.setAttribute('transform','translate('+molPos[i].x+' '+molPos[i].y+')');
-    moleculeLayer.appendChild(g);
-    mols.push(g);
-    protons.push(proton);
-    drift.push({ax:2.5+Math.random()*3,ay:2.5+Math.random()*3,fx:0.28+Math.random()*0.3,fy:0.28+Math.random()*0.3,px:Math.random()*6.28,py:Math.random()*6.28,rot:(Math.random()-0.5)*8});
-  }
-
-  if(!REDUCE_MOTION){
-    const t0=performance.now();
-    (function tick(now){
-      const t=(now-t0)/1000;
-      for(let i=0;i<N;i++){
-        const d=drift[i];
-        const x=molPos[i].x+Math.sin(t*d.fx+d.px)*d.ax;
-        const y=molPos[i].y+Math.cos(t*d.fy+d.py)*d.ay;
-        const rot=Math.sin(t*d.fx*0.5+d.px)*d.rot;
-        mols[i].setAttribute('transform','translate('+x.toFixed(2)+' '+y.toFixed(2)+') rotate('+rot.toFixed(2)+')');
-      }
-      requestAnimationFrame(tick);
-    })(performance.now());
-  }
-
-  const phNumber=document.getElementById('phNumber');
-  const phNeedle=document.getElementById('phNeedle');
-  const phVerdict=document.getElementById('phVerdict');
-  const phCompare=document.getElementById('phCompare');
-  const phBufVal=document.getElementById('phBufVal');
-  const phWaterVal=document.getElementById('phWaterVal');
-  const haAmount=document.getElementById('haAmount');
-  const abaseAmount=document.getElementById('abaseAmount');
-  const eqNumeric=document.getElementById('eqNumeric');
-  const eqBroken=document.getElementById('eqBroken');
-  const eqPlain=document.getElementById('eqPlain');
-  const acidCapFill=document.getElementById('acidCapFill');
-  const baseCapFill=document.getElementById('baseCapFill');
-  const acidCapVal=document.getElementById('acidCapVal');
-  const baseCapVal=document.getElementById('baseCapVal');
-  const statusLine=document.getElementById('statusLine');
-  const acidDropBtn=document.getElementById('acidDropBtn');
-  const acidPourBtn=document.getElementById('acidPourBtn');
-  const baseDropBtn=document.getElementById('baseDropBtn');
-  const basePourBtn=document.getElementById('basePourBtn');
-  const resetBtn=document.getElementById('resetBtn');
-
-  // ---- pH vs. amount-added curve: fixed curves for the buffer and pure water, with dots that slide ----
-  const phCurveSvg=document.getElementById('phCurve');
-  const waterToggle=document.getElementById('waterToggle');
-  const curveDot=(function buildCurve(){
-    const W=360,H=210,padL=34,padR=16,padT=14,padB=38;
-    const plotW=W-padL-padR, plotH=H-padT-padB;
-    const Xnet=(nv)=> padL + ((NET_LIMIT-nv)/(2*NET_LIMIT))*plotW;  // acid (positive) on the left, base (negative) on the right
-    const Ypx=(pH)=> padT + plotH - (clamp(pH,0,14)/14)*plotH;
-    const phWater = phWaterAt; // pure-water pH (defined in outer scope)
-    // region shading signifies buffer vs out-of-range, using neutral colours (NOT the HA/A-/acid/base
-    // actor colours): soft green = buffer works here, grey = capacity exceeded on either edge
-    const bandL=Math.min(Xnet(-HA0),Xnet(A0)), bandR=Math.max(Xnet(-HA0),Xnet(A0));
-    const BUFFER_FILL='rgba(126,168,107,0.18)', EXCEEDED_FILL='rgba(120,124,130,0.14)';
-    phCurveSvg.appendChild(el('rect',{x:bandL,y:padT,width:bandR-bandL,height:plotH,fill:BUFFER_FILL}));
-    phCurveSvg.appendChild(el('rect',{x:padL,y:padT,width:Math.max(0,bandL-padL),height:plotH,fill:EXCEEDED_FILL}));
-    phCurveSvg.appendChild(el('rect',{x:bandR,y:padT,width:Math.max(0,(W-padR)-bandR),height:plotH,fill:EXCEEDED_FILL}));
-    // y gridlines + labels
-    [0,7,14].forEach(v=>{
-      const y=Ypx(v);
-      phCurveSvg.appendChild(el('line',{x1:padL,y1:y,x2:W-padR,y2:y,stroke:'#E3E9E7','stroke-width':1}));
-      const t=el('text',{x:padL-6,y:y+3,'text-anchor':'end','font-size':9,fill:'#84948E','font-family':'IBM Plex Mono, monospace'}); t.textContent=v; phCurveSvg.appendChild(t);
-    });
-    // dashed pKa reference + start line at net=0
-    const yk=Ypx(PKA);
-    phCurveSvg.appendChild(el('line',{x1:padL,y1:yk,x2:W-padR,y2:yk,stroke:'#A6D0D6','stroke-width':1,'stroke-dasharray':'3 3'}));
-    phCurveSvg.appendChild(el('line',{x1:Xnet(0),y1:padT,x2:Xnet(0),y2:padT+plotH,stroke:'#C4CFCC','stroke-width':1,'stroke-dasharray':'2 3'}));
-    // pure-water curve (drawn behind the buffer curve; hidden until "compare" is on)
-    const waterCurveG=el('g',{}); waterCurveG.style.display='none';
-    let wd=''; const SW=480;
-    for(let i=0;i<=SW;i++){ const nv=-NET_LIMIT+(i/SW)*(2*NET_LIMIT); wd += (i===0?'M':'L')+Xnet(nv).toFixed(1)+' '+Ypx(phWater(nv)).toFixed(1)+' '; }
-    waterCurveG.appendChild(el('path',{d:wd.trim(),fill:'none',stroke:'#8A9BA0','stroke-width':2,'stroke-dasharray':'5 4','stroke-linejoin':'round','stroke-linecap':'round'}));
-    phCurveSvg.appendChild(waterCurveG);
-    // the fixed buffer curve
-    let d=''; const S=240;
-    for(let i=0;i<=S;i++){ const nv=-NET_LIMIT+(i/S)*(2*NET_LIMIT); d += (i===0?'M':'L')+Xnet(nv).toFixed(1)+' '+Ypx(phAtNet(nv)).toFixed(1)+' '; }
-    phCurveSvg.appendChild(el('path',{d:d.trim(),fill:'none',stroke:'#2E7D8A','stroke-width':2.5,'stroke-linejoin':'round','stroke-linecap':'round'}));
-    // axis labels
-    const xl=el('text',{x:padL+plotW/2,y:H-6,'text-anchor':'middle','font-size':10,fill:'#84948E','font-family':'Inter, sans-serif'});
-    xl.textContent='← strong acid      added      strong base →'; phCurveSvg.appendChild(xl);
-    const st0=el('text',{x:Xnet(0),y:padT+plotH+13,'text-anchor':'middle','font-size':9,fill:'#84948E','font-family':'Inter, sans-serif'}); st0.textContent='start'; phCurveSvg.appendChild(st0);
-    const yl=el('text',{x:11,y:padT+plotH/2,'text-anchor':'middle','font-size':10,fill:'#84948E','font-family':'Inter, sans-serif',transform:'rotate(-90 11 '+(padT+plotH/2)+')'}); yl.textContent='pH'; phCurveSvg.appendChild(yl);
-    // vertical "current amount" guide (neutral)
-    const guide=el('line',{x1:Xnet(0),y1:padT,x2:Xnet(0),y2:padT+plotH,stroke:'#9AA6A2','stroke-width':1,opacity:0.55});
-    phCurveSvg.appendChild(guide);
-    // water dot + legend (front, hidden until compare on)
-    const waterFrontG=el('g',{}); waterFrontG.style.display='none';
-    const waterDot=el('circle',{r:5.5,fill:'#ffffff',stroke:'#5F7076','stroke-width':2});
-    waterFrontG.appendChild(waterDot);
-    // legend, top-left (empty region: acid side is low pH there)
-    [['#2E7D8A',false,'buffer','#E8823D',null],['#8A9BA0',true,'pure water','#ffffff','#5F7076']].forEach((it,i)=>{
-      const ly=padT+11+i*15;
-      waterFrontG.appendChild(el('line',{x1:padL+8,y1:ly,x2:padL+30,y2:ly,stroke:it[0],'stroke-width':2.5,'stroke-dasharray':it[1]?'5 4':'0'}));
-      const dot=el('circle',{cx:padL+19,cy:ly,r:4,fill:it[3]}); if(it[4]){ dot.setAttribute('stroke',it[4]); dot.setAttribute('stroke-width',1.6); } waterFrontG.appendChild(dot);
-      const tt=el('text',{x:padL+37,y:ly+3.5,'font-size':10,fill:'#55635E','font-family':'Inter, sans-serif'}); tt.textContent=it[2]; waterFrontG.appendChild(tt);
-    });
-    phCurveSvg.appendChild(waterFrontG);
-    // buffer dot (topmost)
-    const dotG=el('g',{}); const dotC=el('circle',{r:6,fill:'#E8823D',stroke:'#fff','stroke-width':2}); dotG.appendChild(dotC);
-    phCurveSvg.appendChild(dotG);
-
-    function place(nv){
-      const x=Xnet(nv), y=Ypx(phAtNet(nv));
-      dotG.setAttribute('transform','translate('+x+' '+y+')');
-      guide.setAttribute('x1',x); guide.setAttribute('x2',x);
-      waterDot.setAttribute('cx',x); waterDot.setAttribute('cy',Ypx(phWater(nv)));
-    }
-    place(0);
-    let shownNet=0, animId=null;
-    function set(targetNet){
-      if(REDUCE_MOTION){ shownNet=targetNet; place(targetNet); return; }
-      const startNet=shownNet, t0=performance.now(), dur=420;
-      if(animId) cancelAnimationFrame(animId);
-      (function step(now){
-        const p=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-p,2);
-        shownNet=startNet+(targetNet-startNet)*e; place(shownNet);
-        if(p<1){ animId=requestAnimationFrame(step); } else { shownNet=targetNet; place(targetNet); }
-      })(performance.now());
-    }
-    function setCompare(on){
-      waterCurveG.style.display = on ? '' : 'none';
-      waterFrontG.style.display = on ? '' : 'none';
-    }
-    return { set, setCompare };
-  })();
-
-  // "compare with pure water" toggle
-  let compareOn=false;
-  waterToggle.addEventListener('click', ()=>{
-    compareOn=!compareOn;
-    waterToggle.setAttribute('aria-pressed', compareOn?'true':'false');
-    waterToggle.textContent = compareOn ? 'Hide pure water' : 'Compare with pure water';
-    curveDot.setCompare(compareOn);
-    renderNonMolecular(state());  // refresh the meter's dual readout immediately
-  });
-
-  // per-position identity, scattered (not clustered by index): true = HA (has proton), false = A-
-  const isHA = new Array(N).fill(false);
-  (function seedIdentities(){
-    // start at the equal-parts split: exactly half HA, chosen at random positions
-    const startHA = Math.round(N * (HA0/TOTAL));
-    const order = [...Array(N).keys()].sort(()=>Math.random()-0.5);
-    for(let k=0;k<startHA;k++) isHA[order[k]] = true;
-  })();
-
-  // gentle pop for a proton appearing/leaving
-  function pulseProton(proton, appearing){
-    if(REDUCE_MOTION){ proton.setAttribute('opacity', appearing?1:0); return; }
-    if(appearing){
-      proton.setAttribute('opacity',1);
-      proton.animate(
-        [{transform:'scale(0.2)',opacity:0},{transform:'scale(1.25)',opacity:1},{transform:'scale(1)',opacity:1}],
-        {duration:520, easing:'cubic-bezier(.34,1.3,.64,1)'}
-      );
-    } else {
-      const a=proton.animate(
-        [{transform:'scale(1)',opacity:1},{transform:'scale(0.2)',opacity:0}],
-        {duration:420, easing:'ease-in'}
-      );
-      a.onfinish=()=>proton.setAttribute('opacity',0);
-    }
-  }
-  function paintProton(i, animate){
-    if(animate){ pulseProton(protons[i], isHA[i]); }
-    else { protons[i].setAttribute('opacity', isHA[i]?1:0); }
-  }
-
-  // snap all protons to the current isHA[] (used on load/reset), except an optionally deferred index
-  function paintAll(deferIdx){
-    for(let i=0;i<N;i++){ if(i!==deferIdx) paintProton(i, false); }
-  }
-
-  // reconcile the scattered identities to a target HA count by flipping random molecules of the
-  // wrong type. Returns the list of indices that flipped, in flip order.
-  function reconcileTo(targetHA){
-    const flipped=[];
-    let current = isHA.reduce((a,b)=>a+(b?1:0),0);
-    while(current < targetHA){                       // need more HA: pick a random A- to gain a proton
-      const pool=[]; for(let i=0;i<N;i++) if(!isHA[i]) pool.push(i);
-      if(!pool.length) break;
-      const idx=pool[Math.floor(Math.random()*pool.length)];
-      isHA[idx]=true; flipped.push(idx); current++;
-    }
-    while(current > targetHA){                        // need fewer HA: pick a random HA to lose a proton
-      const pool=[]; for(let i=0;i<N;i++) if(isHA[i]) pool.push(i);
-      if(!pool.length) break;
-      const idx=pool[Math.floor(Math.random()*pool.length)];
-      isHA[idx]=false; flipped.push(idx); current--;
-    }
-    return flipped;
-  }
-
-  // full snap of the molecule field to the current state (load/reset)
-  function renderMolecules(st){
-    const haCount = clamp(Math.round(N * st.HA/TOTAL), 0, N);
-    reconcileTo(haCount);
-    paintAll(-1);
-    return haCount;
-  }
-
-  // squeeze a dropper bulb briefly
-  function squeeze(dropper){
-    if(REDUCE_MOTION) return;
-    dropper.bulb.animate(
-      [{transform:'scale(1,1)'},{transform:'scale(1.12,0.82)'},{transform:'scale(1,1)'}],
-      {duration:340, easing:'ease-out'}
-    );
-  }
-
-  // droplet emerges from the correct dropper tip, travels to a specific molecule, then fires onArrive
-  function dropToMolecule(kind, targetIdx, onArrive){
-    if(REDUCE_MOTION){ if(onArrive) onArrive(); return; }
-    const dropper = kind==='acid' ? acidDropper : baseDropper;
-    squeeze(dropper);
-    const fill = kind==='acid' ? 'url(#gAcid)' : 'url(#gBase)';
-    const sx = dropper.tipX, sy = dropper.tipY;
-    const tx = molPos[targetIdx].x, ty = molPos[targetIdx].y;
-    const drop = el('circle',{cx:sx, cy:sy, r:5.5, fill:fill, opacity:0.95});
-    airLayer.appendChild(drop);
-    const start = performance.now(), dur = 480;
-    (function step(now){
-      const p = Math.min(1, (now-start)/dur);
-      const e = 1-Math.pow(1-p,2);
-      drop.setAttribute('cx', (sx+(tx-sx)*e).toFixed(2));
-      drop.setAttribute('cy', (sy+(ty-sy)*e).toFixed(2));
-      if(p<1){ requestAnimationFrame(step); }
-      else { drop.remove(); if(onArrive) onArrive(); }
-    })(start);
-  }
-
-  // add strong acid or base. acid: a proton lands on a random A- (A- -> HA).
-  // base: the base droplet lands on a random HA and pulls its proton off (HA -> A-).
-  function applyDose(kind, amount){
-    net = clamp(net + (kind==='acid' ? amount : -amount), -NET_LIMIT, NET_LIMIT);
-    const after = state();
-    renderNonMolecular(after);
-    const targetHA = clamp(Math.round(N * after.HA/TOTAL), 0, N);
-    const currentHA = isHA.reduce((a,b)=>a+(b?1:0),0);
-
-    // molecules that need to change identity to reach the target
-    const willFlip = [];
-    if(targetHA > currentHA){
-      const pool=[]; for(let i=0;i<N;i++) if(!isHA[i]) pool.push(i);
-      shuffle(pool);
-      for(let k=0;k<targetHA-currentHA && k<pool.length;k++) willFlip.push(pool[k]);
-    } else if(targetHA < currentHA){
-      const pool=[]; for(let i=0;i<N;i++) if(isHA[i]) pool.push(i);
-      shuffle(pool);
-      for(let k=0;k<currentHA-targetHA && k<pool.length;k++) willFlip.push(pool[k]);
+      chart.bandEq.setAttribute('width', 0);
+      chart.labelEq.setAttribute('opacity', 0);
     }
 
-    if(willFlip.length===0){
-      // addition too small to flip a whole molecule: still show a droplet land among the right species
-      const pool=[]; for(let i=0;i<N;i++) if(kind==='acid' ? !isHA[i] : isHA[i]) pool.push(i);
-      const idx = pool.length ? pool[Math.floor(Math.random()*pool.length)] : Math.floor(Math.random()*N);
-      dropToMolecule(kind, idx, null);
-      return;
-    }
-
-    // land the droplet on the first molecule to change; set identity now (keeps rapid clicks
-    // consistent), but defer the proton's visual appear/leave until the droplet arrives.
-    const landIdx = willFlip[0];
-    willFlip.forEach(i=> isHA[i] = (kind==='acid')); // commit identities immediately
-    dropToMolecule(kind, landIdx, ()=>{
-      paintProton(landIdx, true);
-      for(let k=1;k<willFlip.length;k++){
-        const j=willFlip[k];
-        setTimeout(()=>paintProton(j, true), 70*k);
-      }
-    });
+    const x = chart.X(t);
+    chart.markerLine.setAttribute('x1', x); chart.markerLine.setAttribute('x2', x);
   }
 
-  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
-
-  // everything on screen except the molecule field (pH, concentrations, equation, gauges, status, buttons)
-  function renderNonMolecular(st){
-    phNumber.textContent = st.pH.toFixed(2);
-    phNumber.style.color = phColor(st.pH);
-    phNeedle.style.left = (st.pH/14*100)+'%';
-    const verdict = st.pH < 6.95 ? 'acidic' : st.pH > 7.05 ? 'basic' : 'neutral';
-    phVerdict.textContent = verdict+' · pH '+st.pH.toFixed(2);
-    phVerdict.style.color = phColor(st.pH);
-
-    haAmount.innerHTML = st.HA.toFixed(3)+'<span class="unit"> M</span>';
-    abaseAmount.innerHTML = st.A.toFixed(3)+'<span class="unit"> M</span>';
-
-    if(st.regime==='buffer' && st.HA>0 && st.A>0){
-      const ratio = st.HA/st.A;
-      eqNumeric.className='eq-numeric';
-      eqNumeric.innerHTML =
-        'pH = '+PKA.toFixed(2)+' &minus; log&#8321;&#8320;( <span class="ha">'+st.HA.toFixed(3)+'</span> &divide; <span class="abase">'+st.A.toFixed(3)+'</span> )<br>'+
-        'pH = '+PKA.toFixed(2)+' &minus; log&#8321;&#8320;( '+ratio.toFixed(3)+' ) = <span class="result">'+st.pH.toFixed(2)+'</span>';
-      eqBroken.className='eq-broken-note';
-      eqPlain.textContent = 'The pH depends only on the ratio of the two partners, not on how much solution there is. Equal amounts give pH = pKa exactly.';
-    } else {
-      eqNumeric.className='eq-numeric dead';
-      eqNumeric.innerHTML =
-        'pH = '+PKA.toFixed(2)+' &minus; log&#8321;&#8320;( <span class="ha">'+st.HA.toFixed(3)+'</span> &divide; <span class="abase">'+st.A.toFixed(3)+'</span> )';
-      eqBroken.className='eq-broken-note show';
-      eqBroken.innerHTML = 'This equation no longer applies &mdash; '+(st.regime==='over-acid'?'A<sup class="charge">&minus;</sup>':'HA')+' has run out, so the ratio breaks down.';
-      eqPlain.textContent = st.regime==='over-acid'
-        ? 'The leftover strong acid now sets the pH directly, the way it would in plain water.'
-        : 'The leftover strong base now sets the pH directly, the way it would in plain water.';
+  function updateCurve(chart, curve, t, key){
+    const N = Math.max(2, Math.round((t/T_MAX)*150));
+    let d = '';
+    for(let i=0;i<=N;i++){
+      const tt = (i/N)*t;
+      const v = concAt(tt)[key];
+      const x = chart.X(tt);
+      d += (i===0?'M':'L') + x.toFixed(2) + ' ' + chart.Y(v).toFixed(2) + ' ';
     }
-
-    acidCapFill.style.width = (st.A/A0*100)+'%';
-    baseCapFill.style.width = (st.HA/HA0*100)+'%';
-    acidCapVal.textContent = st.A.toFixed(3)+' M';
-    baseCapVal.textContent = st.HA.toFixed(3)+' M';
-    acidCapFill.style.background = (st.A/A0 < 0.2) ? 'var(--bad)' : 'var(--abase)';
-    baseCapFill.style.background = (st.HA/HA0 < 0.2) ? 'var(--bad)' : 'var(--ha)';
-
-    const minFrac = Math.min(st.A/A0, st.HA/HA0);
-    if(st.regime!=='buffer'){
-      statusLine.className='status over';
-      statusLine.innerHTML = '<b>Capacity exceeded.</b> One partner is used up, so the buffer cannot absorb any more &mdash; the pH now swings freely with each dose.';
-    } else if(minFrac <= 0.25){
-      statusLine.className='status warn';
-      statusLine.innerHTML = '<b>Running low.</b> One partner is nearly gone. Another pour or two will push the buffer past its limit, and the pH will start to move sharply.';
-    } else {
-      statusLine.className='status ok';
-      statusLine.innerHTML = '<b>Buffering.</b> The addition was absorbed by converting one partner into the other. Notice how little the pH moved.';
-    }
-
-    // disable a button when its next click would push net beyond the allowed limit
-    acidDropBtn.disabled = (net + DROP) > (NET_LIMIT + 1e-9);
-    acidPourBtn.disabled = (net + POUR) > (NET_LIMIT + 1e-9);
-    baseDropBtn.disabled = (-(net - DROP)) > (NET_LIMIT + 1e-9);
-    basePourBtn.disabled = (-(net - POUR)) > (NET_LIMIT + 1e-9);
-
-    curveDot.set(net);  // slide the dot to the current position on the pH curve
-
-    if(compareOn){
-      phCompare.classList.add('show');
-      phBufVal.textContent = st.pH.toFixed(2);
-      phWaterVal.textContent = phWaterAt(net).toFixed(2);
-    } else {
-      phCompare.classList.remove('show');
-    }
+    curve.path.setAttribute('d', d.trim());
+    const x = chart.X(t);
+    const vNow = concAt(t)[key];
+    curve.tip.setAttribute('cx', x);
+    curve.tip.setAttribute('cy', chart.Y(vNow));
   }
 
-  // full render (used on load and reset): update everything and snap molecules to the ratio
   function render(){
-    const st = state();
-    renderNonMolecular(st);
-    renderMolecules(st);
+    const t = parseFloat(slider.value);
+
+    tReadout.textContent = t.toFixed(1);
+
+    updateBands(chartConc, t);
+    updateBands(chartQ, t);
+
+    updateCurve(chartConc, curveR, t, 'R');
+    updateCurve(chartConc, curveP, t, 'P');
+    updateCurve(chartQ, curveQ, t, 'Q');
+
+    const atEq = t > T_EQ;
+    statusLine.className = 'status' + (atEq ? ' ready' : '');
+    statusLine.innerHTML = atEq
+      ? 'Q = K &mdash; the system has reached <b>equilibrium</b>. Concentrations have stopped changing.'
+      : 'Q &ne; K &mdash; concentrations are still <b>changing</b> as the reaction proceeds.';
   }
 
-  acidDropBtn.addEventListener('click', ()=>applyDose('acid', DROP));
-  acidPourBtn.addEventListener('click', ()=>applyDose('acid', POUR));
-  baseDropBtn.addEventListener('click', ()=>applyDose('base', DROP));
-  basePourBtn.addEventListener('click', ()=>applyDose('base', POUR));
-  resetBtn.addEventListener('click', ()=>{ net = 0; render(); });
+  slider.addEventListener('input', render);
+  document.getElementById('jumpStartBtn').addEventListener('click', ()=>{ slider.value = 0; render(); });
+  document.getElementById('jumpEqBtn').addEventListener('click', ()=>{ slider.value = T_MAX; render(); });
+
+  document.querySelectorAll('.k-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      K = parseFloat(btn.getAttribute('data-k'));
+      recomputeFromK();
+      document.querySelectorAll('.k-btn').forEach(b=>b.classList.remove('primary'));
+      btn.classList.add('primary');
+      render();
+    });
+  });
 
   render();
 })();
 </script>
-
 <script>
 (function(){
   "use strict";
-  const CHARGE_MINUS='<sup class="charge">&minus;</sup>';
-  const A='A'+CHARGE_MINUS;
-  const H3O='H&#8323;O<sup class="charge">+</sup>';
 
-  const QUIZ=[
+  const QUESTIONS = [
     {
-      q:`You add the same few drops of strong acid to two beakers: one contains the buffer, the other contains pure water. What do you expect?`,
-      opts:[
-        {t:`Both drop by about the same amount.`},
-        {t:`The pure water&rsquo;s pH drops far more than the buffer&rsquo;s.`, c:true},
-        {t:`The buffer&rsquo;s pH drops more, since it already contains acid.`},
-        {t:`Neither changes, because the amount added is small.`}
-      ],
-      e:`Pure water has nothing to absorb the added ${H3O}, so its pH plunges. The buffer turns most of the added acid into HA, so its pH barely moves &mdash; that&rsquo;s what buffering means.`
+      type: 'tf',
+      prompt: 'True or False: Once a system reaches equilibrium, [Reactant] and [Product] must always be equal to each other.',
+      options: [ {label:'True', value:'true'}, {label:'False', value:'false'} ],
+      correct: 'false',
+      explanation: 'The correct answer is False. Equilibrium means the concentrations have stopped changing \u2014 it does not mean Reactant and Product have become equal. Whether they end up equal, or one ends up with a greater concentration than the other, depends on the value of K. In fact, there is exactly one case where they ARE equal at equilibrium: when K = 1. Try clicking the K = 1 button above and see for yourself.'
     },
     {
-      q:`Beaker X holds 0.10 M HA + 0.10 M ${A}. Beaker Y holds 1.0 M HA + 1.0 M ${A}. Same weak acid. Which is true?`,
-      opts:[
-        {t:`Y has a lower pH, because it contains more acid.`},
-        {t:`X has a higher pH, because it is more dilute.`},
-        {t:`They have the same pH, but Y can absorb more added acid or base.`, c:true},
-        {t:`Y has a higher pH, because it contains more conjugate base.`}
-      ],
-      e:`pH is set by the ratio [HA]/[${A}], which is 1 in both beakers &mdash; so both sit at the same pH. Capacity depends on the actual amounts, so the more concentrated buffer (Y) can soak up more before running out.`
+      type: 'tf',
+      prompt: 'True or False: Once the system reaches equilibrium, the reaction stops.',
+      options: [ {label:'True', value:'true'}, {label:'False', value:'false'} ],
+      correct: 'false',
+      explanation: 'The correct answer is False. The graph goes flat, but the reaction has not actually stopped: Reactant molecules are still continuously converting into Product, and Product molecules are still continuously converting back into Reactant. These two conversions are simply happening at the same speed now, so there is no more net change in the concentrations. A flat line means the forward and reverse conversions are balanced, not that the reaction has stopped.'
     },
     {
-      q:`Why does adding a small amount of strong base to a buffer raise the pH rather than lowering it?`,
-      opts:[
-        {t:`Because adding any substance to a buffer nudges its pH upward.`},
-        {t:`Because strong base is itself high-pH, so mixing it in averages the pH upward.`},
-        {t:`Because the base removes protons from HA, so the [HA]/[${A}] ratio falls.`, c:true},
-        {t:`Because the added base dilutes the solution, and dilution raises pH.`}
+      type: 'mc',
+      prompt: 'Suppose a reaction has K = 3, so at equilibrium Product ends up with a greater concentration than Reactant. Now imagine repeating the experiment with twice as much initial Reactant, but at the same temperature (so K is still 3). At the new equilibrium, would Product still end up with a greater concentration than Reactant, by the same ratio as before?',
+      options: [
+        {label:'Yes \u2014 K depends only on temperature, so the same K governs the balance regardless of the starting amounts.', value:'a'},
+        {label:'No \u2014 starting with more Reactant would make K increase.', value:'b'},
+        {label:'No \u2014 starting with more Reactant means the system would never reach equilibrium.', value:'c'},
+        {label:'There\u2019s not enough information to know.', value:'d'}
       ],
-      e:`OH${CHARGE_MINUS} reacts with HA, accepting a proton to form water and converting that HA into ${A}. This lowers [HA] and raises [${A}], so the [HA]/[${A}] ratio falls &mdash; and a smaller ratio means a higher pH. It isn&rsquo;t averaging or dilution.`
-    },
-    {
-      q:`A student keeps adding strong acid to a buffer with [HA] = [${A}] = 1.0 M, dose after dose, and watches the pH. Which pattern will they see?`,
-      opts:[
-        {t:`It holds perfectly flat until all the ${A} is gone, then instantly jumps to pH 1.`},
-        {t:`It drops a little with each dose, then falls steeply once ${A} is nearly used up.`, c:true},
-        {t:`It falls steadily and evenly with each addition.`},
-        {t:`It rises, because adding acid produces more ${A}.`}
-      ],
-      e:`While both partners are present, each dose shifts the ratio only a little, so the pH drifts down slowly. Once ${A} is nearly gone there&rsquo;s almost nothing left to absorb the acid, so the pH falls off a cliff.`
-    },
-    {
-      q:`A buffer keeps its pH steady at first, but after only a small amount of strong acid its pH drops drastically &mdash; it runs out of capacity too early. What would let it absorb more acid before that happens, while keeping the same starting pH?`,
-      opts:[
-        {t:`Dilute it with more water.`},
-        {t:`Prepare it with more concentrated HA and ${A}.`, c:true},
-        {t:`Use a larger beaker.`},
-        {t:`Add the acid more slowly.`}
-      ],
-      e:`Capacity comes from how much HA and ${A} you actually have. Raising both concentrations equally keeps the ratio (and the pH) the same but gives more to consume, so it lasts longer. Diluting, a bigger beaker, or adding acid more slowly don&rsquo;t change the amount available.`
+      correct: 'a',
+      explanation: 'The correct answer is A: K depends only on temperature, so the same K governs the balance regardless of the starting amounts. The actual concentrations at the new equilibrium would be different \u2014 there would be more of both Reactant and Product overall \u2014 but the same K still governs the relationship between them, so Product would still end up with a greater concentration than Reactant, in the same proportion as before. K only changes if the temperature changes \u2014 you\u2019ll see this idea again in class.'
     }
   ];
 
-  function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+  let qIndex = 0;
+  let numCorrect = 0;
+  const quizBody = document.getElementById('quizBody');
 
-  const root=document.getElementById('quizRoot');
-  QUIZ.forEach((item,qi)=>{
-    const qEl=document.createElement('div'); qEl.className='quiz-q';
-    const num=document.createElement('div'); num.className='q-num'; num.textContent='QUESTION '+(qi+1); qEl.appendChild(num);
-    const prompt=document.createElement('div'); prompt.className='q-prompt'; prompt.innerHTML=item.q; qEl.appendChild(prompt);
-    const optsEl=document.createElement('div'); optsEl.className='q-opts'; qEl.appendChild(optsEl);
-    const exp=document.createElement('div'); exp.className='q-exp'; qEl.appendChild(exp);
+  function renderQuestion(){
+    const q = QUESTIONS[qIndex];
+    quizBody.innerHTML = '';
 
-    let answered=false;
-    shuffle(item.opts).forEach(o=>{
-      const b=document.createElement('button'); b.type='button'; b.className='q-opt';
-      b.innerHTML='<span class="mark"></span><span class="opt-text">'+o.t+'</span>';
-      b.addEventListener('click',()=>{
-        if(answered) return; answered=true;
-        const chosenCorrect=!!o.c;
-        Array.from(optsEl.children).forEach(btn=>{
-          btn.disabled=true;
-          const isCorrect=btn===b ? chosenCorrect : btn.dataset.correct==='1';
-          if(btn.dataset.correct==='1'){ btn.classList.add('correct'); btn.querySelector('.mark').textContent='✓'; }
-          if(btn===b && !chosenCorrect){ btn.classList.add('wrong'); btn.querySelector('.mark').textContent='✗'; }
-        });
-        exp.className='q-exp show '+(chosenCorrect?'right':'miss');
-        exp.innerHTML='<span class="verdict">'+(chosenCorrect?'Correct.':'Not quite.')+'</span>'+item.e;
-      });
-      b.dataset.correct=o.c?'1':'0';
-      optsEl.appendChild(b);
+    const progress = document.createElement('div');
+    progress.className = 'qprogress';
+    progress.textContent = 'QUESTION ' + (qIndex+1) + ' OF ' + QUESTIONS.length;
+    quizBody.appendChild(progress);
+
+    const prompt = document.createElement('div');
+    prompt.className = 'qprompt';
+    prompt.textContent = q.prompt;
+    quizBody.appendChild(prompt);
+
+    const optWrap = document.createElement('div');
+    optWrap.className = 'qoptions';
+    q.options.forEach((opt, i)=>{
+      const label = document.createElement('label');
+      label.className = 'qopt';
+      label.innerHTML = '<input type="radio" name="qopt" value="'+opt.value+'"> <span>'+opt.label+'</span>';
+      optWrap.appendChild(label);
     });
-    root.appendChild(qEl);
-  });
+    quizBody.appendChild(optWrap);
+
+    const submitBtn = document.createElement('button');
+    submitBtn.className = 'action';
+    submitBtn.textContent = 'Submit answer';
+    quizBody.appendChild(submitBtn);
+
+    const feedback = document.createElement('div');
+    feedback.className = 'qfeedback';
+    quizBody.appendChild(feedback);
+
+    optWrap.querySelectorAll('input[name=qopt]').forEach(radio=>{
+      radio.addEventListener('change', ()=>{
+        optWrap.querySelectorAll('.qopt').forEach(el=>el.classList.remove('chosen'));
+        radio.closest('.qopt').classList.add('chosen');
+      });
+    });
+
+    submitBtn.addEventListener('click', ()=>{
+      const chosen = optWrap.querySelector('input[name=qopt]:checked');
+      if(!chosen) return;
+      const isCorrect = chosen.value === q.correct;
+      if(isCorrect) numCorrect++;
+
+      optWrap.querySelectorAll('input[name=qopt]').forEach(r=>r.disabled=true);
+      optWrap.querySelectorAll('.qopt').forEach(el=>el.classList.add('disabled'));
+      const chosenLabel = chosen.closest('.qopt');
+      chosenLabel.classList.add(isCorrect ? 'correct-opt' : 'incorrect-opt');
+      if(!isCorrect){
+        const correctLabel = optWrap.querySelector('input[value="'+q.correct+'"]').closest('.qopt');
+        correctLabel.classList.add('correct-opt');
+      }
+
+      feedback.className = 'qfeedback show ' + (isCorrect ? 'correct' : 'incorrect');
+      feedback.innerHTML = '<b class="tag">'+(isCorrect?'CORRECT':'INCORRECT')+'</b>' + q.explanation;
+
+      submitBtn.disabled = true;
+      submitBtn.style.display = 'none';
+
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'action primary';
+      nextBtn.textContent = (qIndex < QUESTIONS.length-1) ? 'Next question' : 'Finish';
+      nextBtn.addEventListener('click', ()=>{
+        qIndex++;
+        if(qIndex < QUESTIONS.length){ renderQuestion(); }
+        else { renderComplete(); }
+      });
+      quizBody.appendChild(nextBtn);
+    });
+  }
+
+  function renderComplete(){
+    quizBody.innerHTML = '';
+    const done = document.createElement('div');
+    done.className = 'qcomplete';
+    done.innerHTML = 'You\u2019ve completed all '+QUESTIONS.length+' questions.<div class="score">'+numCorrect+' / '+QUESTIONS.length+' correct</div>' +
+      'If any of these surprised you, it\u2019s worth re-reading the equilibrium definition on the pre-class slides before class \u2014 these are the two ideas most students need to unlearn first.';
+    quizBody.appendChild(done);
+
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'action';
+    resetBtn.style.marginTop = '14px';
+    resetBtn.textContent = 'Try the questions again';
+    resetBtn.addEventListener('click', ()=>{
+      qIndex = 0;
+      numCorrect = 0;
+      renderQuestion();
+    });
+    quizBody.appendChild(resetBtn);
+  }
+
+  renderQuestion();
 })();
 </script>
 </body>
