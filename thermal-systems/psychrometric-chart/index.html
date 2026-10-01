@@ -476,9 +476,14 @@ function Guide(cfg){
     else if(step.preview){ const x=step.preview(S); o.traces=x.traces||[]; o.curves=x.curves||[]; o.texts=x.texts||[]; }
     if(S.attempt) o.points=o.points.concat([{T:S.attempt.T,w:S.attempt.w,hollow:true,color:'#BC4A2B'}]);
     chart.setOverlay(o); chart.focus(step.focus||null); }
+  function detail(i){ const st=S.st[i], task=cfg.steps[i].task;
+    if(task.kind==='plot'){ if(st.revealed||!st.click) return 'page showed the point'+(st.tries?' after '+st.tries+' misses':''); return 'clicked T = '+fmt(st.click.T,1)+' °C, φ = '+fmt(Math.min(PSY.rhFrom(st.click.T,st.click.w),1.2)*100,0)+' %'+(st.tries?' (after '+st.tries+' misses)':''); }
+    if(task.kind==='num') return task.fields.map(f=>f.label+' = '+(st.vals[f.id]!=null?st.vals[f.id]:'?')+' '+f.unit).join('; ')+(st.revealed?' (values shown by the page)':'');
+    if(task.kind==='mcq') return 'picked '+st.mcq.picks.join(' then ');
+    return ''; }
   function finishStep(i){ const st=S.st[i], step=cfg.steps[i]; st.done=true; st.status=st.status||statusOf(st);
     (step.know||[]).forEach(k=>S.known.add(k));
-    cfg.onStep&&cfg.onStep(i,st.status,S); }
+    cfg.onStep&&cfg.onStep(i,st.status,S,detail(i)); }
 
   function render(){ const i=S.cur, step=cfg.steps[i], st=S.st[i]; S.attempt=null;
     const box=document.createElement('div');
@@ -505,7 +510,7 @@ function Guide(cfg){
     box.innerHTML='<div class="plot-prompt"><span>👆</span><span>'+task.prompt+'</span></div><div id="plot-fb"></div><div id="plot-show"></div>';
     chart.setPlotMode(true,c=>{ if(st.done) return;
       const dT=c.T-t.T, dw=c.w-t.w;
-      if(Math.abs(dT)<=task.tolT&&Math.abs(dw)<=task.tolW){ S.pts[task.point]={T:t.T,w:t.w}; S.attempt=null; st.hadWrong=st.tries>0; finishStep(S.cur); chart.setPlotMode(false); renderTask(); overlay(); return; }
+      if(Math.abs(dT)<=task.tolT&&Math.abs(dw)<=task.tolW){ S.pts[task.point]={T:t.T,w:t.w}; st.click={T:c.T,w:c.w}; S.attempt=null; st.hadWrong=st.tries>0; finishStep(S.cur); chart.setPlotMode(false); renderTask(); overlay(); return; }
       st.tries++; st.hadWrong=true; S.attempt={T:c.T,w:c.w};
       const rh=PSY.rhFrom(c.T,c.w), parts=[]; if(dT>task.tolT) parts.push('too far right'); if(dT<-task.tolT) parts.push('too far left'); if(dw>task.tolW) parts.push('too high'); if(dw<-task.tolW) parts.push('too low');
       const wrongNote=rh>1.0?'That point is above the 100 % curve (not possible for real air). ':'';
@@ -735,7 +740,7 @@ function startYours(){ if(guide3) return; RES.once('yt-start',Date.now());
     find:'the rate of moisture removal ṁ<sub>w</sub> and the rate of heat removal Q̇.',
     ref:{'1':Y1,'2':Y2},known0:['1.T','1.rhp','2.T','2.rhp'],
     table:{cols:['1','2'],rows:[{k:'T',label:'T (°C)',d:0},{k:'rhp',label:'φ (%)',d:0},{k:'w',label:'ω (kg/kg)',d:4},{k:'h',label:'h (kJ/kg)',d:1},{k:'v',label:'v (m³/kg)',d:3}],extra:[{k:'ma',label:'ṁ_a, dry air (kg/min)',d:2,val:()=>Yma},{k:'mw',label:'ṁ_w, condensate (kg/min)',d:3,val:()=>Ymw}]},
-    onStep:(i,status)=>RES.set('Your turn|'+(i+1),status),
+    onStep:(i,status,S,detail)=>RES.set('Your turn|'+(i+1),status+(detail?' · '+detail:'')),
     onDone:()=>{ RES.set('yt-end',Date.now()); finishStage(3); go(4); },
     steps:[
      {title:'Plot state 1',focus:'rh',body:()=>'<p>You know T₁ and φ₁. Plot the air entering the window unit.</p>',
