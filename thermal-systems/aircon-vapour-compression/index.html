@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aircon Cycle Simulator</title>
+<title>Aircon Simulator Part 1</title>
 <script>
-/* Results for the instructor: paste your Microsoft Forms pre-filled link between the quotes. Leave empty to turn it off. */
-window.FORM_URL = "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=drd2NJDpck-5UGJImDFiPQQF_x3qFEtKo0uI3pPMN4VURFE3SURONUsySkZaTUJXMzVTQTkwNjJMSC4u&r0de0baf3d2a5481c9c674daaf96b212c=TEST&rd585932f8d9642bf9c994bae594a3a01=%22First%20try%22&rac448687145549978ece49702db4ef67=%22After%20a%20try%22&rd8018c323ea14de2a519ed64ebba066a=%22Revealed%20the%20answer%22&r47c6bef3792b4be7afa52e571c611bb0=%22First%20try%22&rac104dc9608a465681d27977ecd375cd=%22After%20a%20try%22&re6b42cf20b604b1aabf00f8d66eeace9=%22Revealed%20the%20answer%22&rbbe7ce29178148609d3bc7b476e9945d=%22First%20try%22&r1a186d5c872f437eabc1e94f88dfec0d=%22After%20a%20try%22&r95193a0261474a1c8ab81870628fd6e2=%22Revealed%20the%20answer%22&r2099bee6b873437d9b874a539139ca8f=5";
+/* Results for the instructor: paste your Microsoft Forms pre-filled link between the quotes.
+   Leave it empty to hide the "Send to instructor" step. */
+window.FORM_URL = "";
 </script>
 <style>
-  [hidden]{ display:none !important; }
-
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
 
   :root{
@@ -434,26 +433,51 @@ window.FORM_URL = "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=drd2
   #send-btn{ text-decoration:none; display:inline-block; }
   .res-chip{ display:inline-block; background:var(--bg); border-radius:6px; padding:2px 7px; margin:2px 0; font-variant-numeric:tabular-nums; }
 
+  /* ---------- v2: Part 1 / Part 2 ---------- */
+  .stages.s3{ grid-template-columns:repeat(3,1fr); }
+  @media (max-width:760px){ .stages.s3{ grid-template-columns:1fr; } }
+  .stage-pane > .board{ margin:0; }
+  .quiz-lock{ margin:16px 0 4px; padding:14px 16px; border-radius:10px; background:var(--warm-soft); font-size:14px; max-width:72ch; }
+  .quiz-lock .ql-n{ display:block; margin-top:6px; font-family:'Space Grotesk',sans-serif; font-weight:600; }
+  .given-box{ border:1px solid var(--line); border-radius:9px; overflow:hidden; margin-bottom:14px; }
+  dl.given{ display:grid; grid-template-columns:auto 1fr; gap:4px 12px; margin:0; padding:8px 12px 10px; font-size:13px; font-variant-numeric:tabular-nums; }
+  dl.given dt{ color:var(--ink-soft); }
+  dl.given dd{ margin:0; font-weight:500; }
+  .tasks{ margin:4px 0 18px; padding:14px 16px; border:1px dashed var(--mix); border-radius:12px; font-size:14px; }
+  .tasks .p-k{ color:var(--cold); }
+  .tasks ol{ margin:0; padding-left:22px; display:flex; flex-direction:column; gap:6px; max-width:80ch; }
+  .t-q{ margin-top:12px; padding:10px 12px; border-radius:9px; background:var(--lo-tint); max-width:80ch; }
+  details.reveal{ margin-top:10px; }
+  details.reveal summary{ cursor:pointer; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13.5px; color:var(--ok); }
+  details.reveal[open]{ background:var(--ok-soft); border-radius:9px; padding:10px 14px; }
+  details.reveal ol{ margin:10px 0; }
+  details.reveal p{ margin:6px 0 0; max-width:80ch; }
+  .howto-list{ margin:0; padding-left:22px; display:flex; flex-direction:column; gap:6px; font-size:14.5px; max-width:80ch; }
+  .toc{ display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+  .toc a{ font-size:13px; font-weight:500; color:var(--ink); text-decoration:none; border:1px solid var(--line); border-radius:8px; padding:6px 11px; background:var(--panel); }
+  .toc a:hover{ border-color:var(--ink-soft); }
+  footer.note a{ color:var(--cold); }
+
+  [hidden]{ display:none !important; }
 </style>
 </head>
 <body>
-
-
-
 <div class="wrap">
-
   <header class="page">
-    <div class="eyebrow">Thermal Systems · Air-conditioning simulation</div>
+    <div class="eyebrow">Thermal Systems</div>
     <h1>How air-conditioning cools a room</h1>
     <p>An air conditioner doesn't create cold — it moves heat out of the room and releases it outside. Think of it like a water pump: a pump can push water uphill, against the direction it would naturally flow, and in the same way an air conditioner "pumps" heat from the cooler room to the warmer outdoors — the opposite of the direction heat moves on its own. Forcing heat the "wrong" way takes energy, which is why the unit has to be powered. Four components and one circulating refrigerant do the job. Click any of them to see how.</p>
+    <p><b>Three steps, in order:</b> (1) explore the four components and do the self-check, (2) follow a worked example for a bedroom at 25 °C, (3) do the same bedroom at 20 °C yourself, then send your results to your instructor.</p>
   </header>
 
-
-  <div class="modes" role="tablist" aria-label="Simulation mode">
-    <button class="mode-btn" role="tab" id="tab-explore" aria-selected="true" aria-controls="explore">Explore how it works</button>
-    <button class="mode-btn" role="tab" id="tab-analyse" aria-selected="false" aria-controls="analyse">Analyse the cycle<small>worked example, COP, cost</small></button>
+  <div class="stages s3" id="stages" role="tablist" aria-label="Steps">
+    <button type="button" class="stage" role="tab" data-s="1" data-sub="Four components + self-check"><span class="num">1</span><span class="st-txt"><b>How it works</b><span class="lk"></span></span></button>
+    <button type="button" class="stage" role="tab" data-s="2" data-sub="Watch it done at 25 °C"><span class="num">2</span><span class="st-txt"><b>Worked example</b><span class="lk"></span></span></button>
+    <button type="button" class="stage" role="tab" data-s="3" data-sub="Calculate it at 20 °C"><span class="num">3</span><span class="st-txt"><b>Your turn</b><span class="lk"></span></span></button>
   </div>
-  <div id="explore">
+  <p class="skip" id="skip-row" hidden>Teacher view: <button type="button" class="linkbtn" id="unlock-all">Unlock all steps</button></p>
+<section class="an" id="part1">
+<div class="stage-pane" id="stage-1">
   <div class="board">
 
     <!-- ============ LEFT: DIAGRAM ============ -->
@@ -494,7 +518,6 @@ window.FORM_URL = "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=drd2
         <div id="c-callouts"></div>
       </div>
 
-      <button class="reset-link" id="reset-btn">Reset progress</button>
     </div>
 
   </div>
@@ -503,10 +526,12 @@ window.FORM_URL = "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=drd2
     <div class="quiz-head">
       <div>
         <h2>Check your understanding</h2>
-        <div class="sub">Six quick questions. Pick an answer to see whether it's right and why.</div>
+        <div class="sub">Six quick questions. You get two tries at each; your answers are saved for your instructor.</div>
       </div>
       <div class="quiz-progress" id="quiz-progress"></div>
     </div>
+    <div class="quiz-lock" id="quiz-lock"><b>Open all four components first.</b> Click each part of the air conditioner above (or use the buttons) and read about it. The self-check opens when you have explored all four. <span class="ql-n">Explored so far: <span id="quiz-lock-n">0</span> of 4.</span></div>
+    <div id="quiz-inner" hidden>
     <div class="quiz-dots" id="quiz-dots"></div>
 
     <div id="quiz-body">
@@ -524,22 +549,15 @@ window.FORM_URL = "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=drd2
       <div class="score" id="quiz-score"></div>
     </div>
 
+    <div class="row" style="margin-top:16px"><button type="button" class="btn" id="quiz-to-worked" hidden>Go to Step 2: worked example →</button></div>
     <button class="quiz-restart" id="quiz-reset-all">Restart quiz</button>
+    </div>
   </div>
 
-  </div>
-<section class="an" id="analyse" hidden>
-
-  <div class="stages" id="stages" role="tablist" aria-label="Steps">
-    <button type="button" class="stage" role="tab" data-s="1" data-sub="Watch it done at 25 °C"><span class="num">1</span><span class="st-txt"><b>Worked example</b><span class="lk"></span></span></button>
-    <button type="button" class="stage" role="tab" data-s="2" data-sub="Calculate it at 20 °C"><span class="num">2</span><span class="st-txt"><b>Your turn</b><span class="lk"></span></span></button>
-    <button type="button" class="stage" role="tab" data-s="3" data-sub="Change the conditions"><span class="num">3</span><span class="st-txt"><b>Explore</b><span class="lk"></span></span></button>
-    <button type="button" class="stage" role="tab" data-s="4" data-sub="Transient and practice"><span class="num">4</span><span class="st-txt"><b>Extensions</b><span class="lk"></span></span></button>
-  </div>
-  <p class="skip" id="skip-row">Already done this in class? <button type="button" class="linkbtn" id="unlock-all">Unlock all steps</button></p>
-<div class="stage-pane" id="stage-1">
+</div>
+<div class="stage-pane" id="stage-2" hidden>
   <div class="panel guide">
-    <div class="sec-head"><span class="eyebrow">Step 1 · worked example · R-134a</span><h2>How much does it cost to cool a bedroom to 25 °C?</h2></div>
+    <div class="sec-head"><span class="eyebrow">Step 2 · worked example · R-134a</span><h2>How much does it cost to cool a bedroom to 25 °C?</h2></div>
     <div class="guide-wrap" id="gw-scope">
       <div class="pair">
         <figure><figcaption>T-s diagram <span>as drawn in Çengel</span></figcaption><div class="chart-box" id="gw-ts"></div></figure>
@@ -547,14 +565,14 @@ window.FORM_URL = "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=drd2
       </div>
       <div class="guide-lower">
         <div class="guide-step" id="gw-step" aria-live="polite"></div>
-        <div class="guide-side"><div class="tbl-wrap"><table class="st" id="gw-tbl"></table></div><p class="note-s">Point at a state (in the table or on either diagram) to find it on both diagrams.</p></div>
+        <div class="guide-side"><div class="given-box" id="gw-given"></div><div class="tbl-wrap"><table class="st" id="gw-tbl"></table></div><p class="note-s">Point at a state (in the table or on either diagram) to find it on both diagrams.</p></div>
       </div>
     </div>
   </div>
 </div>
-<div class="stage-pane" id="stage-2" hidden>
+<div class="stage-pane" id="stage-3" hidden>
   <div class="panel guide">
-    <div class="sec-head"><span class="eyebrow">Step 2 · your turn · R-134a</span><h2>Now you: the same bedroom at 20 °C</h2></div>
+    <div class="sec-head"><span class="eyebrow">Step 3 · your turn · R-134a</span><h2>Now you: the same bedroom at 20 °C</h2></div>
     <div class="guide-wrap" id="gy-scope">
       <div class="pair">
         <figure><figcaption>T-s diagram <span>as drawn in Çengel</span></figcaption><div class="chart-box" id="gy-ts"></div></figure>
@@ -562,229 +580,103 @@ window.FORM_URL = "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=drd2
       </div>
       <div class="guide-lower">
         <div class="guide-step" id="gy-step" aria-live="polite"></div>
-        <div class="guide-side"><div class="tbl-wrap"><table class="st" id="gy-tbl"></table></div><p class="note-s">Point at a state (in the table or on either diagram) to find it on both diagrams.</p></div>
+        <div class="guide-side"><div class="given-box" id="gy-given"></div><div class="tbl-wrap"><table class="st" id="gy-tbl"></table></div><p class="note-s">Point at a state (in the table or on either diagram) to find it on both diagrams.</p></div>
       </div>
     </div>
   </div>
   <div class="panel" id="send-panel" hidden>
-    <div class="sec-head"><span class="eyebrow">Last step</span><h2>Send your results to your instructor</h2>
+    <div class="sec-head"><span class="eyebrow">Last step · before you leave</span><h2>Send your results to your instructor</h2>
       <p class="lede">This opens a Microsoft Form with your results already filled in. Check it, then press <b>Submit</b>. It records whether you got each question first try, after a retry, or revealed the answer, and how long Your turn took. It is not graded for correctness.</p></div>
     <div class="row"><input id="id-in" class="id-in" inputmode="text" autocomplete="off" placeholder="Student ID, e.g. 1001234" aria-label="Student ID"><a class="btn" id="send-btn" target="_blank" rel="noopener" aria-disabled="true">Send to instructor ↗</a></div>
     <p class="note-s" id="id-err" style="color:var(--hot)"></p>
     <div class="note-s" id="send-summary"></div>
   </div>
 </div>
-<div class="stage-pane" id="stage-3" hidden>
-  <!-- ============ shared conditions ============ -->
-  <div class="panel">
-    <div class="sec-head">
-      <span class="eyebrow">Room, weather and unit</span>
-      <h2>Set up the scenario</h2>
-      <p class="lede">These settings feed every section below. The defaults describe a typical HDB bedroom at night with two people and a 2.5 kW (9,000 BTU/h) wall-mounted unit.</p>
-    </div>
-    <div class="ctrl-grid">
-      <div class="ctrl"><label for="in-tout">Outdoor air temperature <output id="o-tout"></output></label>
-        <input type="range" id="in-tout" min="26" max="38" step="0.5" value="30">
-        <span class="help">Singapore: about 26–28 °C before dawn, 32–34 °C on a hot afternoon.</span></div>
-      <div class="ctrl"><label for="in-area">Room floor area <output id="o-area"></output></label>
-        <input type="range" id="in-area" min="8" max="40" step="1" value="14"></div>
-      <div class="ctrl"><label for="in-people">People in the room <output id="o-people"></output></label>
-        <input type="range" id="in-people" min="0" max="6" step="1" value="2"></div>
-      <div class="ctrl"><label for="in-equip">Lights and equipment <output id="o-equip"></output></label>
-        <input type="range" id="in-equip" min="0" max="600" step="20" value="100">
-        <span class="help">A laptop is about 50 W; a gaming PC can be 400 W.</span></div>
-      <div class="ctrl"><span class="lbl">Sun on the windows</span>
-        <div class="seg" id="seg-sun" role="group" aria-label="Sun on the windows">
-          <button type="button" data-v="0" aria-pressed="true">None</button>
-          <button type="button" data-v="250" aria-pressed="false">Some</button>
-          <button type="button" data-v="600" aria-pressed="false">West sun</button>
-        </div></div>
-      <div class="ctrl"><label for="in-cap">Unit cooling capacity <output id="o-cap"></output></label>
-        <input type="range" id="in-cap" min="1.5" max="6" step="0.1" value="2.5"></div>
-      <div class="ctrl"><span class="lbl">Refrigerant</span>
-        <div class="seg" id="seg-fl" role="group" aria-label="Refrigerant">
-          <button type="button" data-v="R32" aria-pressed="true">R-32</button>
-          <button type="button" data-v="R134a" aria-pressed="false">R-134a</button>
-        </div>
-        <span class="help">R-32 is in most new home units. R-134a matches the textbook tables.</span></div>
-      <div class="ctrl"><label for="in-tariff">Electricity tariff <output id="o-tariff"></output></label>
-        <input type="range" id="in-tariff" min="20" max="45" step="0.01" value="34.78">
-        <span class="help">SP Group household rate incl. GST, Jul–Sep 2026. Revised every quarter.</span></div>
-      <div class="ctrl"><label for="in-hours">Hours of use per day <output id="o-hours"></output></label>
-        <input type="range" id="in-hours" min="1" max="24" step="1" value="8"></div>
-    </div>
-
-    <details class="more">
-      <summary>Cycle details (advanced)</summary>
-      <div class="ctrl-grid">
-        <div class="ctrl"><label for="in-dte">Room air − evaporating temp, full speed <output id="o-dte"></output></label>
-          <input type="range" id="in-dte" min="10" max="22" step="0.5" value="16">
-          <span class="help">Refrigerant must be colder than the room for heat to flow into it.</span></div>
-        <div class="ctrl"><label for="in-dtc">Condensing temp − outdoor air, full speed <output id="o-dtc"></output></label>
-          <input type="range" id="in-dtc" min="5" max="20" step="0.5" value="13">
-          <span class="help">Refrigerant must be hotter than outdoor air to reject heat.</span></div>
-        <div class="ctrl"><label for="in-sh">Superheat at compressor inlet <output id="o-sh"></output></label>
-          <input type="range" id="in-sh" min="0" max="12" step="1" value="5"></div>
-        <div class="ctrl"><label for="in-sc">Subcooling at condenser exit <output id="o-sc"></output></label>
-          <input type="range" id="in-sc" min="0" max="12" step="1" value="5"></div>
-        <div class="ctrl"><label for="in-eta">Compressor isentropic efficiency <output id="o-eta"></output></label>
-          <input type="range" id="in-eta" min="0.5" max="1" step="0.01" value="0.65"></div>
-        <div class="ctrl"><label for="in-motor">Motor and drive efficiency <output id="o-motor"></output></label>
-          <input type="range" id="in-motor" min="0.7" max="1" step="0.01" value="0.85"></div>
-      </div>
-    </details>
-  </div>
-
-  <!-- ============ cycle ============ -->
-  <div class="panel">
-    <div class="sec-head">
-      <span class="eyebrow">Explore · the cycle</span>
-      <h2>The real cycle on a P-h diagram</h2>
-      <p class="lede">Now the cycle includes what the worked example left out: a real compressor (isentropic efficiency), motor losses, fans, superheat and subcooling, and R-32, the refrigerant in most new home units. The unit holds the room at the setpoint. Change the setpoint or the outdoor temperature and watch the cycle reshape: the evaporating pressure follows the room, the condensing pressure follows the outdoors.</p>
-    </div>
-    <div class="predict" data-gate="g-cycle" data-correct="1">
-      <div class="p-k">Predict first</div>
-      <div class="g-q">On a heatwave afternoon the outdoor air rises from 30 °C to 35 °C. The room stays at 25 °C. What happens to the COP?</div>
-      <div class="quiz-opts"><button type="button" class="quiz-opt" data-k="0"><span class="mark">A</span><span>It goes up</span></button><button type="button" class="quiz-opt" data-k="1"><span class="mark">B</span><span>It goes down</span></button><button type="button" class="quiz-opt" data-k="2"><span class="mark">C</span><span>It stays the same</span></button></div>
-      <div class="p-fb" hidden data-why="The condenser must now be hotter than 35 °C outdoor air, so the condensing pressure rises. The compressor has a bigger pressure lift and does more work for the same cooling. Check it: move the outdoor temperature slider in Set up the scenario to 35 °C and watch the top line of the cycle rise."></div>
-    </div>
-    <div id="g-cycle" class="gated" hidden>
-    <div class="ctrl-grid" style="margin-bottom:16px">
-      <div class="ctrl"><label for="in-tset">Room setpoint <output id="o-tset"></output></label>
-        <input type="range" id="in-tset" min="18" max="28" step="0.5" value="25"></div>
-      <div class="ctrl" style="justify-content:flex-end"><label style="justify-content:flex-start;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" id="in-ghost" checked> Overlay the cycle at <span id="ghost-t">20 °C</span></label>
-        <span class="help">The comparison setpoint is set in section 2.</span></div>
-    </div>
-    <div class="two" style="grid-template-columns:1fr" id="cyc-scope">
-      <div>
-        <div class="pair">
-          <figure><figcaption>T-s diagram <span>with the room and outdoor air temperatures</span></figcaption><div class="chart-box" id="ts-box"></div></figure>
-          <figure><figcaption>P-h diagram <span>pressure on a log scale</span></figcaption><div class="chart-box" id="ph-box"></div></figure>
-        </div>
-        <p class="note-s">The dashed line 1→2s is the ideal isentropic compression; 1→2 is the real one. The dashed 3→4 is the irreversible throttle. Hover a state on the P-h diagram for its properties; it lights up on both diagrams and in the table.</p>
-      </div>
-      <div>
-        <div class="kpis" id="kpis"></div>
-        <div class="tryit"><div class="p-k">Try this</div><ol>
-          <li>Move <b>Outdoor air temperature</b> from 30 to 35 °C. Which line on the diagram moves: top or bottom? What happens to the COP?</li>
-          <li>Move <b>Room setpoint</b> down to 20 °C. Which line moves now? Compare the electricity drawn.</li>
-          <li>Switch the refrigerant to <b>R-134a</b>. The shape changes but the COP barely does. Why might manufacturers still prefer R-32? (Hint: look at the refrigerant flow.)</li>
-          <li>Open <b>Cycle details</b> and set the isentropic efficiency to 100%. How close does the COP get to your worked example?</li>
-        </ol></div>
-      </div>
-      <div>
-        <div class="tbl-wrap"><table class="st" id="st-table"></table></div>
-        <div class="balance" id="balance"></div>
-        <div id="cap-warn"></div>
-        <p class="note-s" id="ref-note"></p>
-      </div>
-    </div>
-      </div>
-  </div>
-
-<!-- ============ setpoint comparison ============ -->
-  <div class="panel">
-    <div class="sec-head">
-      <span class="eyebrow">Explore · setpoint and your bill</span>
-      <h2>Why 25 °C and not 20 °C?</h2>
-      <p class="lede">Singapore's <b>Go 25</b> campaign (MSE and the Singapore Green Building Council, 2025) asks homes and offices to set air-conditioning at 25 °C or above. You calculated the ideal-cycle answer in Your turn. Here the full model includes real compressor losses and fans; compare any two setpoints and see where the extra electricity goes.</p>
-    </div>
-    <div class="predict" data-gate="g-set" data-correct="-1" data-dyn="1">
-      <div class="p-k">Predict first</div>
-      <div class="g-q">Raising the setpoint from 25 °C to 26 °C: how much electricity does it save?</div>
-      <div class="quiz-opts"><button type="button" class="quiz-opt" data-k="0"><span class="mark">A</span><span>Almost nothing (under 3%)</span></button><button type="button" class="quiz-opt" data-k="1"><span class="mark">B</span><span>Some (3% to 15%)</span></button><button type="button" class="quiz-opt" data-k="2"><span class="mark">C</span><span>A lot (over 15%)</span></button></div>
-      <div class="p-fb" hidden data-why=""></div>
-    </div>
-    <div id="g-set" class="gated" hidden>
-    <div class="ctrl-grid" style="margin-bottom:16px">
-      <div class="ctrl"><label for="in-sa">Setpoint A <output id="o-sa"></output></label>
-        <input type="range" id="in-sa" min="16" max="28" step="1" value="20"></div>
-      <div class="ctrl"><label for="in-sb">Setpoint B <output id="o-sb"></output></label>
-        <input type="range" id="in-sb" min="16" max="28" step="1" value="25"></div>
-    </div>
-    <div class="cmp" id="cmp"></div>
-    <div class="verdict" id="verdict"></div>
-    <div class="why-grid" id="why"></div>
-    <h3 style="font-size:15px;margin:24px 0 4px">Monthly cost at each setpoint</h3>
-    <p class="note-s" style="margin-top:0" id="bar-sub"></p>
-    <div class="chart-box" id="bar-box"></div>
-      </div>
-  </div>
-
-</div>
-<div class="stage-pane" id="stage-4" hidden>
-  <!-- ============ pull-down ============ -->
-  <div class="panel">
-    <div class="sec-head">
-      <span class="eyebrow">Extension · transient</span>
-      <h2>Coming home to a hot room</h2>
-      <p class="lede">The room starts warm and the unit switches on. The room is a lumped thermal mass: <i>C</i>·d<i>T</i>/d<i>t</i> = heat gains − cooling. An <b>inverter</b> unit slows its compressor once the room is cool; a <b>fixed-speed</b> unit runs flat out, then switches off and on around the setpoint.</p>
-    </div>
-    <div class="predict" data-gate="g-pull" data-correct="1">
-      <div class="p-k">Predict first</div>
-      <div class="g-q">Overnight, which unit uses less electricity to keep the room at 25 °C?</div>
-      <div class="quiz-opts"><button type="button" class="quiz-opt" data-k="0"><span class="mark">A</span><span>The fixed-speed (on/off) unit, because it is switched off part of the time</span></button><button type="button" class="quiz-opt" data-k="1"><span class="mark">B</span><span>The inverter unit, because it runs slowly for most of the night</span></button><button type="button" class="quiz-opt" data-k="2"><span class="mark">C</span><span>Both use the same, because they remove the same heat</span></button></div>
-      <div class="p-fb" hidden data-why="Both remove about the same heat, but the inverter does it at a higher COP. Running slowly means less heat crosses each coil, so the coils need smaller temperature differences and the compressor lift is smaller. See the power graph: the fixed-speed unit spikes to full power each time it restarts."></div>
-    </div>
-    <div id="g-pull" class="gated" hidden>
-    <div class="ctrl-grid" style="margin-bottom:12px">
-      <div class="ctrl"><label for="in-t0">Starting room temperature <output id="o-t0"></output></label>
-        <input type="range" id="in-t0" min="26" max="35" step="0.5" value="31"></div>
-      <div class="ctrl"><label for="in-tset2">Setpoint <output id="o-tset2"></output></label>
-        <input type="range" id="in-tset2" min="18" max="28" step="0.5" value="25"></div>
-      <div class="ctrl"><label for="in-simh">Simulated time <output id="o-simh"></output></label>
-        <input type="range" id="in-simh" min="1" max="10" step="1" value="8"></div>
-      <div class="ctrl" style="justify-content:flex-end"><div class="row"><button class="btn" id="btn-play" type="button">Replay</button></div></div>
-    </div>
-    <div class="legend"><span><i style="border-color:var(--inv)"></i>Inverter unit</span><span><i class="dash" style="border-color:var(--onoff)"></i>Fixed-speed (on/off) unit</span><span><i class="dash" style="border-color:var(--ink-soft);border-top-width:1.5px"></i>Setpoint</span></div>
-    <div class="chart-box" id="pd-temp"></div>
-    <div class="chart-box" id="pd-power" style="margin-top:6px"></div>
-    <div class="tbl-wrap"><table class="res" id="pd-res"></table></div>
-    <p class="note-s" id="pd-note"></p>
-      </div>
-  </div>
-
-<!-- ============ textbook problem ============ -->
-  <div class="panel">
-    <div class="sec-head">
-      <span class="eyebrow">Extension · practice</span>
-      <h2>More textbook problems</h2>
-      <p class="lede">A new R-134a problem each time, in the style of Çengel Chapter 11. Use the property tables (A-11 to A-13) and check your answers here. Answers within 2% are accepted, to allow for table interpolation.</p>
-    </div>
-    <div class="prob" id="prob"></div>
-    <div class="ans-grid" id="ans"></div>
-    <div class="row" style="margin-top:14px">
-      <button class="btn" id="btn-check" type="button">Check answers</button>
-      <button class="btn ghost" id="btn-sol" type="button">Show solution</button>
-      <button class="btn ghost" id="btn-new" type="button">New problem</button>
-    </div>
-    <div class="sol" id="sol" hidden></div>
-  </div>
-
-  <!-- ============ model notes ============ -->
-  <div class="panel model-notes">
-    <details class="more" style="margin:0;border:0;padding:0">
-      <summary>How this model works, and its limits</summary>
-      <p><b>Refrigerant properties</b> come from CoolProp 8 with the ASHRAE reference state (<code>h = 0</code>, <code>s = 0</code> for saturated liquid at −40 °C), the same reference as the R-134a tables in Çengel. Values are tabulated every 1 °C of saturation temperature and every 4 K of superheat, then interpolated. For the ideal cycle between 0.14 and 0.8 MPa (Çengel Example 11-1) the model gives h₁ = 239.18, h₂ = 275.39, h₃ = 95.51 kJ/kg and COP = 3.97.</p>
-      <p><b>Cycle.</b> State 1 is vapour at the evaporating pressure with the chosen superheat. State 2 comes from isentropic compression to the condensing pressure, corrected by the isentropic efficiency: h₂ = h₁ + (h₂ₛ − h₁)/η. State 3 is liquid with the chosen subcooling (h₃ ≈ h<sub>f</sub> at T₃). The valve is isenthalpic: h₄ = h₃. COP = (h₁ − h₄)/(h₂ − h₁). Electrical power = cooling ÷ COP ÷ motor efficiency, plus 25 W indoor fan and 35 W outdoor fan.</p>
-      <p><b>Room.</b> Sensible gains = <i>UA</i>(T<sub>out</sub> − T<sub>room</sub>) + 75 W per person + equipment + sun, with <i>UA</i> = 5 W/K per m² of floor (walls, window and air leakage lumped together). The coil also removes moisture: 55 W per person plus 80 W for humid air leaking in. Thermal mass is 40 kJ/K per m² of floor (air, furniture and the inner layer of the walls).</p>
-      <p><b>Part load.</b> When the unit delivers less than its full capacity, less heat crosses each coil, so the temperature differences across the coils shrink (linearly down to 10 K at the evaporator and 5 K at the condenser at zero load). This is the main reason an inverter unit is efficient at part load. The inverter cannot run below 30% capacity, so below that it cycles gently. The fixed-speed unit loses capacity for about 3 minutes after each start while pressures build up.</p>
-      <p><b>Not modelled:</b> pressure drops in pipes and coils, compressor speed effects on efficiency, humidity changes in the room, and how comfortable people feel. Treat the numbers as good estimates for comparison, not predictions of a particular unit.</p>
-    </details>
-  </div>
-
-</div>
 </section>
-
   <footer class="note">
     A teaching model, not to scale. The refrigerant is drawn as a single loop of tubing; real systems add a receiver, filter-drier and other parts. The expansion valve is shown indoors at the evaporator inlet, so both pipes crossing the wall stay single-phase (warm liquid in, cold gas out).
-    <br><br>The Analyse mode uses real refrigerant properties (CoolProp, ASHRAE reference state, matching Çengel's R-134a tables) and a simple room model; see "How this model works" under Extensions.<br><br>This simulation was built with Claude (Anthropic).
+    <br><br>This simulation was built with Claude (Anthropic).
   </footer>
 
 </div>
 
 <script>
 "use strict";
+/* ============================================================
+   Results for the instructor (Part 1 only, optional).
+   The page keeps each student's answers and, at the end of Your turn,
+   opens a Microsoft Form with them filled in. Active only when FORM_URL
+   at the top of the page holds the form's pre-filled link.
+   Nothing is sent until the student presses Submit on the form.
+============================================================ */
+const RESULTS=(function(){
+  const KEY='acsim-p1-results';
+  let r={}; try{ r=JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){}
+  const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(r)); }catch(e){} };
+  const form=String(window.FORM_URL||'').trim();
+  const on=/^https:\/\/forms\.(office\.com|microsoft\.com|cloud\.microsoft)\//.test(form);
+  const STEP={'correct first try':'First try','correct after retry':'After a retry','revealed answer':'Revealed the answer'};
+  const WRONG_LABEL={'Worked example|mcq2':'W evaporator question','Worked example|cop':'W COP',
+    'Your turn|env':'Y heat leaking in','Your turn|mcq3':'Y evaporator question','Your turn|h1':'Y h1','Your turn|s1':'Y s1',
+    'Your turn|h2':'Y h2','Your turn|h3':'Y h3','Your turn|h4':'Y h4','Your turn|cop':'Y COP','Your turn|W':'Y power','Your turn|cost':'Y cost'};
+
+  /* The 19 form questions, in order */
+  const ORDER=[['id'],
+    ['quiz',0],['quiz',1],['quiz',2],['quiz',3],['quiz',4],['quiz',5],['quiz2'],
+    ['step','Worked example',2],['step','Worked example',7],
+    ['step','Your turn',2],['step','Your turn',3],['step','Your turn',4],['step','Your turn',5],['step','Your turn',6],['step','Your turn',7],['step','Your turn',8],
+    ['wrong'],['min']];
+
+  function quiz2(){
+    const out=[];
+    for (let i=0;i<6;i++){ const q=r['quiz|'+i]; if (q && q.picks.length>1) out.push(`Q${i+1}: ${q.picks.join(' then ')}${q.ok?'':' (still wrong)'}`); }
+    return out.length?out.join('; '):'None';
+  }
+  function wrong(){
+    const out=Object.keys(WRONG_LABEL).filter(k=>r['wrong|'+k]!=null).map(k=>`${WRONG_LABEL[k]}: ${r['wrong|'+k]}`);
+    return out.length?out.join('; '):'None';
+  }
+  function minutes(){ return r['yt-start']&&r['yt-end']?String(Math.max(1,Math.round((r['yt-end']-r['yt-start'])/60000))):''; }
+  function value(q,sid){
+    if (q[0]==='id') return sid;
+    if (q[0]==='quiz'){ const x=r['quiz|'+q[1]]; return x?x.picks[0]:''; }
+    if (q[0]==='quiz2') return quiz2();
+    if (q[0]==='step') return STEP[r[q[1]+'|'+q[2]]]||'';
+    if (q[0]==='wrong') return wrong();
+    if (q[0]==='min') return minutes();
+    return '';
+  }
+  function link(sid){
+    let u; try{ u=new URL(form); }catch(e){ return null; }
+    const pairs=[...u.searchParams.entries()];
+    const keys=pairs.map(p=>p[0]).filter(k=>/^r[0-9a-f]{4,}$/i.test(k));
+    const out=new Map(pairs);
+    ORDER.forEach((q,i)=>{
+      const k=keys[i]; if (!k) return;
+      const quoted=/^".*"$/.test(out.get(k)||'');
+      const v=value(q,sid);
+      if (!v){ out.delete(k); return; }
+      out.set(k, quoted?`"${v}"`:v);
+    });
+    return u.origin+u.pathname+'?'+[...out].map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+  }
+  function summary(){
+    const rows=[];
+    for (let i=0;i<6;i++){ const q=r['quiz|'+i]; rows.push(['Self-check Q'+(i+1), q?q.picks.join(' then ')+(q.ok?'':' (wrong)'):'not answered']); }
+    [['Worked example',2],['Worked example',7]].concat([2,3,4,5,6,7,8].map(n=>['Your turn',n]))
+      .forEach(([s,n])=>rows.push([(s==='Worked example'?'Worked example step ':'Your turn step ')+n, STEP[r[s+'|'+n]]||'not recorded']));
+    return rows;
+  }
+  return {
+    on, link, summary,
+    set(k,v){ r[k]=v; save(); },
+    get(k){ return r[k]; },
+    once(k,v){ if (r[k]==null){ r[k]=v; save(); } }
+  };
+})();
+
+
+
 
 /* ============================================================
    Palette (hex mirrors of the CSS vars, for JS-drawn particles)
@@ -856,7 +748,7 @@ const STAGES = {
       {kind:'system', tag:'Open system', k:'A throttle, no work and no heat',
        t:'Fluid flows through a restriction. It consumes no mechanical or electrical work, and essentially no heat crosses its boundary. It is the simplest open system in the loop — nothing is added or removed, the flow is only redistributed.'},
       {kind:'law', tag:'1st law', k:'Energy is unchanged; pressure and temperature drop',
-       t:'No work is done and no heat is added or removed, so the total energy the refrigerant carries stays the same as it passes through. Even so, its pressure and temperature both fall sharply — the energy simply rearranges within the refrigerant. In symbols the throttle is isenthalpic: h\u2084 = h\u2083.'}
+       t:'No work is done and no heat is added or removed, so the total energy the refrigerant carries stays the same as it passes through. Even so, its pressure and temperature both fall sharply — the energy simply rearranges within the refrigerant.'}
     ]
   }
 };
@@ -867,7 +759,7 @@ const ORDER = ['evaporator','compressor','condenser','valve'];
 ============================================================ */
 let active = null;         // current component key
 let view = 'loop';         // 'loop' | 'detail'
-const visited = new Set();
+const visited = new Set((RESULTS.get('visited')||[]));
 let rafId = null;
 
 /* ============================================================
@@ -1476,6 +1368,7 @@ function startValveAnim(){
 function onNodeClick(key){
   active = key;
   visited.add(key);
+  RESULTS.set('visited',[...visited]);
   if (STAGES[key].zoom){ enterDetail(key); }
   else { enterLoop(); }
   renderInfo();
@@ -1530,6 +1423,7 @@ function renderProgress(){
     progressEl.appendChild(b);
   });
   progCap.textContent = `${visited.size} of 4 explored`;
+  if (window.__quizReady) updateQuizLock();
   if (view==='loop') syncActiveNode();
 }
 
@@ -1568,9 +1462,7 @@ function renderInfo(){
 
 /* buttons */
 backBtn.addEventListener('click', ()=>{ enterLoop(); renderProgress(); });
-document.getElementById('reset-btn').addEventListener('click', ()=>{
-  active=null; visited.clear(); enterLoop(); renderInfo(); renderProgress();
-});
+
 
 /* init */
 buildOverview();
@@ -1680,6 +1572,10 @@ function pickOption(i){
   st.retrying = false;
   if (i===item.correct){ st.resolved = true; st.correct = true; }
   else if (st.picks.length >= 2){ st.resolved = true; st.correct = false; }
+  if (st.resolved){
+    RESULTS.once('quiz|'+qi, { picks: st.picks.map(k=>MARKS[k]), ok: st.correct });
+    if (QUIZ.every((_,k)=>RESULTS.get('quiz|'+k))) quizDone();
+  }
   renderQuiz();
 }
 
@@ -1736,13 +1632,24 @@ function renderQuiz(){
   }
 }
 
+function quizDone(){
+  if (window.__unlockStage) window.__unlockStage(2);
+  const nb = document.getElementById('quiz-to-worked'); if (nb) nb.hidden = false;
+}
+function updateQuizLock(){
+  const open = visited.size>=4 || QUIZ.some((_,k)=>RESULTS.get('quiz|'+k));
+  document.getElementById('quiz-lock').hidden = open;
+  document.getElementById('quiz-inner').hidden = !open;
+  document.getElementById('quiz-lock-n').textContent = visited.size;
+}
 function showQuizSummary(){
   qBody.hidden = true;
   qSummary.hidden = false;
   qProgress.textContent = 'Done';
   renderQuizDots();
   const n = qState.reduce((s,st)=> s + (st.correct ? 1 : 0), 0);
-  qScore.innerHTML = `You answered <b>${n} of ${QUIZ.length}</b> correctly.`;
+  qScore.innerHTML = `You answered <b>${n} of ${QUIZ.length}</b> correctly. Your first answers are saved for your instructor.`;
+  quizDone();
 }
 
 qRetry.addEventListener('click', ()=>{ qState[qi].retrying = true; renderQuiz(); });
@@ -1757,66 +1664,16 @@ document.getElementById('quiz-reset-all').addEventListener('click', ()=>{
 });
 
 renderQuiz();
-(function(){
-  const ex=document.getElementById('explore'), an=document.getElementById('analyse');
-  const te=document.getElementById('tab-explore'), ta=document.getElementById('tab-analyse');
-  function setMode(m, push){
-    ex.hidden = m!=='explore'; an.hidden = m!=='analyse';
-    te.setAttribute('aria-selected', String(m==='explore'));
-    ta.setAttribute('aria-selected', String(m==='analyse'));
-    if (m==='analyse'){ stopAnim(); }
-    else { if (view==='detail' && active) enterDetail(active); else enterLoop(); renderProgress(); }
-    if (push){ try{ history.replaceState(null,'', m==='analyse' ? '#analyse' : '#explore'); }catch(e){} }
-  }
-  te.addEventListener('click',()=>setMode('explore',true));
-  ta.addEventListener('click',()=>setMode('analyse',true));
-  if (location.hash==='#analyse') setMode('analyse',false);
-})();
+window.__quizReady=true;
+updateQuizLock();
+document.getElementById('quiz-to-worked').addEventListener('click',()=>{ if (window.__goStage) window.__goStage(2); });
+window.addEventListener('load',()=>{ if (QUIZ.every((_,k)=>RESULTS.get('quiz|'+k))) quizDone(); });
+
+
 </script>
 <script>
 "use strict";
 const PROPS={"R134a":{"T0":-30,"sat":[[84.38,12.65,232.17,0.05301,0.95586,0.22594],[88.46,13.92,232.8,0.05824,0.95473,0.21612],[92.7,15.2,233.43,0.06344,0.95363,0.2068],[97.1,16.48,234.06,0.06864,0.95256,0.19796],[101.67,17.76,234.68,0.07382,0.95151,0.18958],[106.4,19.04,235.31,0.07899,0.95048,0.18162],[111.3,20.33,235.93,0.08414,0.94948,0.17407],[116.39,21.62,236.55,0.08929,0.9485,0.16688],[121.65,22.91,237.17,0.09441,0.94755,0.16006],[127.1,24.2,237.79,0.09953,0.94662,0.15357],[132.73,25.49,238.41,0.10464,0.94571,0.14739],[138.57,26.79,239.03,0.10973,0.94483,0.14152],[144.6,28.09,239.64,0.11481,0.94396,0.13592],[150.84,29.39,240.26,0.11988,0.94311,0.13059],[157.28,30.69,240.87,0.12493,0.94229,0.12551],[163.94,31.99,241.48,0.12998,0.94148,0.12067],[170.82,33.3,242.09,0.13501,0.9407,0.11605],[177.92,34.61,242.7,0.14003,0.93993,0.11165],[185.24,35.92,243.31,0.14505,0.93918,0.10744],[192.8,37.24,243.92,0.15005,0.93845,0.10343],[200.6,38.55,244.52,0.15504,0.93774,0.09959],[208.64,39.87,245.12,0.16002,0.93704,0.09593],[216.93,41.19,245.72,0.16499,0.93636,0.09242],[225.48,42.52,246.32,0.16995,0.9357,0.08907],[234.28,43.84,246.92,0.17489,0.93505,0.08587],[243.34,45.17,247.51,0.17983,0.93442,0.0828],[252.68,46.5,248.11,0.18476,0.9338,0.07987],[262.28,47.84,248.7,0.18968,0.9332,0.07705],[272.17,49.17,249.29,0.19459,0.93261,0.07436],[282.34,50.51,249.87,0.1995,0.93204,0.07178],[292.8,51.86,250.46,0.20439,0.93148,0.06931],[303.56,53.2,251.04,0.20927,0.93093,0.06694],[314.62,54.55,251.62,0.21415,0.93039,0.06466],[325.98,55.9,252.2,0.21902,0.92987,0.06248],[337.66,57.25,252.78,0.22387,0.92935,0.06039],[349.66,58.61,253.35,0.22872,0.92885,0.05837],[361.98,59.97,253.92,0.23357,0.92836,0.05644],[374.63,61.33,254.49,0.2384,0.92788,0.05459],[387.61,62.69,255.05,0.24323,0.92741,0.0528],[400.94,64.06,255.61,0.24805,0.92695,0.05109],[414.61,65.43,256.17,0.25286,0.9265,0.04944],[428.63,66.81,256.73,0.25767,0.92606,0.04786],[443.01,68.18,257.29,0.26247,0.92563,0.04633],[457.76,69.57,257.84,0.26726,0.9252,0.04486],[472.88,70.95,258.38,0.27204,0.92479,0.04345],[488.37,72.34,258.93,0.27682,0.92438,0.04209],[504.25,73.73,259.47,0.2816,0.92397,0.04078],[520.52,75.12,260.01,0.28636,0.92358,0.03952],[537.18,76.52,260.54,0.29112,0.92319,0.0383],[554.24,77.92,261.08,0.29588,0.92281,0.03713],[571.71,79.32,261.6,0.30063,0.92243,0.036],[589.59,80.73,262.13,0.30538,0.92206,0.03491],[607.89,82.14,262.65,0.31012,0.92169,0.03385],[626.62,83.56,263.17,0.31485,0.92133,0.03284],[645.78,84.98,263.68,0.31958,0.92097,0.03186],[665.38,86.4,264.19,0.32431,0.92062,0.03091],[685.43,87.83,264.7,0.32903,0.92026,0.03],[705.92,89.26,265.2,0.33375,0.91991,0.02912],[726.88,90.7,265.69,0.33847,0.91957,0.02826],[748.3,92.13,266.19,0.34318,0.91922,0.02744],[770.2,93.58,266.67,0.34789,0.91888,0.02664],[792.57,95.03,267.16,0.3526,0.91854,0.02587],[815.43,96.48,267.64,0.3573,0.9182,0.02513],[838.78,97.94,268.11,0.362,0.91786,0.02441],[862.63,99.4,268.58,0.3667,0.91752,0.02371],[886.98,100.86,269.04,0.3714,0.91718,0.02303],[911.85,102.33,269.5,0.37609,0.91683,0.02238],[937.24,103.81,269.96,0.38079,0.91649,0.02175],[963.15,105.29,270.41,0.38548,0.91615,0.02113],[989.6,106.77,270.85,0.39017,0.9158,0.02054],[1016.59,108.27,271.28,0.39487,0.91545,0.01997],[1044.13,109.76,271.72,0.39956,0.91509,0.01941],[1072.23,111.26,272.14,0.40425,0.91473,0.01887],[1100.89,112.77,272.56,0.40894,0.91437,0.01834],[1130.12,114.28,272.97,0.41364,0.914,0.01784],[1159.92,115.8,273.38,0.41833,0.91362,0.01734],[1190.32,117.32,273.77,0.42303,0.91324,0.01687],[1221.31,118.85,274.16,0.42773,0.91285,0.0164],[1252.89,120.39,274.55,0.43243,0.91246,0.01595],[1285.09,121.93,274.92,0.43714,0.91205,0.01551],[1317.91,123.48,275.29,0.44184,0.91164,0.01509],[1351.34,125.03,275.65,0.44655,0.91121,0.01468],[1385.42,126.6,276.01,0.45127,0.91078,0.01428],[1420.13,128.17,276.35,0.45599,0.91033,0.01389],[1455.49,129.74,276.68,0.46072,0.90987,0.01351],[1491.51,131.32,277.01,0.46545,0.9094,0.01314],[1528.2,132.92,277.32,0.47018,0.90892,0.01278],[1565.56,134.51,277.63,0.47493,0.90842,0.01243],[1603.61,136.12,277.93,0.47968,0.9079,0.01209],[1642.35,137.74,278.21,0.48444,0.90737,0.01177],[1681.78,139.36,278.49,0.48921,0.90681,0.01144],[1721.93,140.99,278.75,0.49399,0.90624,0.01113],[1762.8,142.63,279.0,0.49878,0.90565,0.01083],[1804.4,144.29,279.24,0.50358,0.90504,0.01053],[1846.74,145.95,279.46,0.50839,0.9044,0.01024],[1889.82,147.62,279.67,0.51321,0.90374,0.00996]],"SH":[0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80,84,88,92,96,100],"h":[[232.17,235.3,238.43,241.58,244.74,247.92,251.12,254.35,257.59,260.85,264.14,267.46,270.79,274.16,277.54,280.95,284.39,287.85,291.34,294.85,298.39,301.95,305.54,309.15,312.79,316.46],[232.8,235.94,239.09,242.25,245.42,248.61,251.82,255.05,258.31,261.58,264.88,268.21,271.55,274.92,278.32,281.74,285.18,288.65,292.15,295.67,299.22,302.79,306.38,310.01,313.65,317.33],[233.43,236.58,239.74,242.91,246.1,249.3,252.52,255.76,259.03,262.31,265.62,268.95,272.31,275.69,279.1,282.53,285.98,289.46,292.96,296.49,300.05,303.63,307.23,310.86,314.52,318.2],[234.06,237.22,240.39,243.57,246.77,249.99,253.22,256.47,259.75,263.04,266.36,269.7,273.07,276.46,279.87,283.31,286.77,290.26,293.78,297.31,300.88,304.46,308.08,311.72,315.38,319.07],[234.68,237.86,241.04,244.24,247.45,250.67,253.92,257.18,260.46,263.77,267.1,270.45,273.83,277.23,280.65,284.1,287.57,291.07,294.59,298.14,301.71,305.3,308.92,312.57,316.24,319.94],[235.31,238.5,241.69,244.9,248.12,251.36,254.61,257.89,261.18,264.5,267.84,271.2,274.59,278.0,281.43,284.88,288.37,291.87,295.4,298.96,302.54,306.14,309.77,313.43,317.11,320.81],[235.93,239.13,242.34,245.56,248.8,252.04,255.31,258.6,261.9,265.23,268.58,271.95,275.34,278.76,282.21,285.67,289.16,292.68,296.22,299.78,303.37,306.98,310.62,314.28,317.97,321.68],[236.55,239.77,242.99,246.22,249.47,252.73,256.01,259.3,262.62,265.96,269.32,272.7,276.1,279.53,282.98,286.46,289.96,293.48,297.03,300.6,304.2,307.82,311.47,315.14,318.84,322.56],[237.17,240.4,243.64,246.89,250.14,253.41,256.7,260.01,263.34,266.69,270.05,273.45,276.86,280.3,283.76,287.24,290.75,294.29,297.84,301.42,305.03,308.66,312.32,316.0,319.7,323.43],[237.79,241.04,244.29,247.55,250.81,254.1,257.4,260.72,264.05,267.41,270.79,274.19,277.62,281.07,284.54,288.03,291.55,295.09,298.66,302.25,305.86,309.5,313.16,316.85,320.57,324.3],[238.41,241.67,244.93,248.2,251.49,254.78,258.09,261.42,264.77,268.14,271.53,274.94,278.38,281.83,285.31,288.82,292.35,295.9,299.47,303.07,306.69,310.34,314.01,317.71,321.43,325.18],[239.03,242.3,245.58,248.86,252.16,255.46,258.79,262.13,265.49,268.87,272.27,275.69,279.13,282.6,286.09,289.6,293.14,296.7,300.28,303.89,307.53,311.18,314.86,318.57,322.3,326.05],[239.64,242.93,246.22,249.52,252.83,256.14,259.48,262.83,266.2,269.59,273.0,276.44,279.89,283.37,286.87,290.39,293.94,297.51,301.1,304.72,308.36,312.02,315.71,319.42,323.16,326.92],[240.26,243.56,246.87,250.18,253.49,256.83,260.17,263.54,266.92,270.32,273.74,277.18,280.65,284.14,287.64,291.18,294.73,298.31,301.91,305.54,309.19,312.86,316.56,320.28,324.03,327.8],[240.87,244.19,247.51,250.83,254.16,257.51,260.86,264.24,267.63,271.04,274.48,277.93,281.41,284.9,288.42,291.96,295.53,299.12,302.73,306.36,310.02,313.7,317.41,321.14,324.89,328.67],[241.48,244.82,248.15,251.49,254.83,258.19,261.56,264.94,268.35,271.77,275.21,278.68,282.16,285.67,289.2,292.75,296.32,299.92,303.54,307.18,310.85,314.54,318.26,322.0,325.76,329.55],[242.09,245.44,248.79,252.14,255.5,258.86,262.25,265.64,269.06,272.49,275.95,279.42,282.92,286.43,289.97,293.53,297.12,300.72,304.35,308.01,311.68,315.38,319.11,322.86,326.63,330.42],[242.7,246.07,249.43,252.79,256.16,259.54,262.94,266.35,269.77,273.22,276.68,280.17,283.67,287.2,290.75,294.32,297.91,301.53,305.17,308.83,312.52,316.22,319.96,323.71,327.49,331.3],[243.31,246.69,250.06,253.44,256.82,260.22,263.62,267.05,270.48,273.94,277.42,280.91,284.43,287.97,291.52,295.1,298.71,302.33,305.98,309.65,313.35,317.06,320.81,324.57,328.36,332.17],[243.92,247.31,250.7,254.09,257.49,260.89,264.31,267.75,271.2,274.66,278.15,281.66,285.18,288.73,292.3,295.89,299.5,303.14,306.79,310.47,314.18,317.9,321.66,325.43,329.23,333.05],[244.52,247.93,251.34,254.74,258.15,261.57,265.0,268.44,271.91,275.39,278.88,282.4,285.94,289.49,293.07,296.67,300.3,303.94,307.61,311.3,315.01,318.75,322.5,326.29,330.09,333.92],[245.12,248.55,251.97,255.39,258.81,262.24,265.68,269.14,272.62,276.11,279.61,283.14,286.69,290.26,293.85,297.46,301.09,304.74,308.42,312.12,315.84,319.59,323.35,327.14,330.96,334.8],[245.72,249.17,252.6,256.03,259.47,262.91,266.37,269.84,273.32,276.83,280.35,283.88,287.44,291.02,294.62,298.24,301.88,305.55,309.23,312.94,316.67,320.43,324.2,328.0,331.83,335.67],[246.32,249.78,253.23,256.68,260.13,263.58,267.05,270.54,274.03,277.55,281.08,284.63,288.2,291.78,295.39,299.02,302.68,306.35,310.04,313.76,317.5,321.27,325.05,328.86,332.69,336.55],[246.92,250.39,253.86,257.32,260.78,264.25,267.74,271.23,274.74,278.26,281.81,285.37,288.95,292.55,296.17,299.81,303.47,307.15,310.86,314.58,318.33,322.11,325.9,329.72,333.56,337.42],[247.51,251.01,254.49,257.96,261.44,264.92,268.42,271.92,275.45,278.98,282.54,286.11,289.7,293.31,296.94,300.59,304.26,307.95,311.67,315.4,319.16,322.94,326.75,330.57,334.42,338.3],[248.11,251.62,255.11,258.6,262.09,265.59,269.1,272.62,276.15,279.7,283.26,286.85,290.45,294.07,297.71,301.37,305.05,308.75,312.48,316.23,319.99,323.78,327.6,331.43,335.29,339.17],[248.7,252.22,255.73,259.24,262.75,266.26,269.78,273.31,276.85,280.41,283.99,287.59,291.2,294.83,298.48,302.15,305.84,309.56,313.29,317.05,320.82,324.62,328.44,332.29,336.16,340.05],[249.29,252.83,256.36,259.88,263.4,266.92,270.46,274.0,277.56,281.13,284.72,288.32,291.95,295.59,299.25,302.93,306.63,310.36,314.1,317.87,321.65,325.46,329.29,333.15,337.02,340.92],[249.87,253.43,256.98,260.51,264.05,267.59,271.13,274.69,278.26,281.84,285.44,289.06,292.7,296.35,300.02,303.71,307.42,311.16,314.91,318.69,322.48,326.3,330.14,334.0,337.89,341.79],[250.46,254.04,257.59,261.14,264.69,268.25,271.81,275.38,278.96,282.56,286.17,289.8,293.44,297.11,300.79,304.49,308.21,311.96,315.72,319.5,323.31,327.14,330.99,334.86,338.75,342.67],[251.04,254.64,258.21,261.78,265.34,268.91,272.48,276.07,279.66,283.27,286.89,290.53,294.19,297.86,301.56,305.27,309.0,312.76,316.53,320.32,324.14,327.98,331.83,335.72,339.62,343.54],[251.62,255.23,258.83,262.41,265.99,269.57,273.15,276.75,280.36,283.98,287.62,291.27,294.93,298.62,302.33,306.05,309.79,313.55,317.34,321.14,324.97,328.81,332.68,336.57,340.48,344.42],[252.2,255.83,259.44,263.04,266.63,270.22,273.83,277.44,281.06,284.69,288.34,292.0,295.68,299.38,303.09,306.83,310.58,314.35,318.15,321.96,325.79,329.65,333.53,337.43,341.35,345.29],[252.78,256.42,260.05,263.66,267.27,270.88,274.5,278.12,281.75,285.4,289.06,292.73,296.42,300.13,303.86,307.6,311.37,315.15,318.95,322.78,326.62,330.49,334.37,338.28,342.21,346.16],[253.35,257.01,260.66,264.29,267.91,271.54,275.16,278.8,282.45,286.11,289.78,293.46,297.17,300.89,304.62,308.38,312.15,315.95,319.76,323.59,327.45,331.32,335.22,339.14,343.08,347.04],[253.92,257.6,261.26,264.91,268.55,272.19,275.83,279.48,283.14,286.81,290.5,294.19,297.91,301.64,305.39,309.15,312.94,316.74,320.57,324.41,328.27,332.16,336.06,339.99,343.94,347.91],[254.49,258.19,261.87,265.53,269.19,272.84,276.5,280.16,283.83,287.52,291.21,294.92,298.65,302.39,306.15,309.93,313.72,317.54,321.37,325.23,329.1,332.99,336.91,340.85,344.8,348.78],[255.05,258.77,262.47,266.15,269.82,273.49,277.16,280.84,284.52,288.22,291.93,295.65,299.39,303.14,306.91,310.7,314.51,318.33,322.18,326.04,329.92,333.83,337.75,341.7,345.67,349.65],[255.61,259.36,263.07,266.77,270.45,274.14,277.82,281.51,285.21,288.92,292.64,296.38,300.13,303.89,307.68,311.47,315.29,319.13,322.98,326.86,330.75,334.66,338.6,342.55,346.53,350.53],[256.17,259.94,263.67,267.38,271.08,274.78,278.48,282.19,285.9,289.62,293.36,297.11,300.87,304.64,308.44,312.25,316.07,319.92,323.79,327.67,331.57,335.5,339.44,343.41,347.39,351.4],[256.73,260.51,264.26,267.99,271.71,275.43,279.14,282.86,286.59,290.32,294.07,297.83,301.6,305.39,309.2,313.02,316.86,320.71,324.59,328.48,332.4,336.33,340.28,344.26,348.25,352.27],[257.29,261.09,264.85,268.6,272.34,276.07,279.8,283.53,287.27,291.02,294.78,298.55,302.34,306.14,309.96,313.79,317.64,321.5,325.39,329.3,333.22,337.16,341.13,345.11,349.11,353.14],[257.84,261.66,265.44,269.21,272.96,276.71,280.45,284.2,287.96,291.72,295.49,299.28,303.07,306.89,310.71,314.56,318.42,322.3,326.19,330.11,334.04,337.99,341.97,345.96,349.97,354.01],[258.38,262.23,266.03,269.82,273.58,277.35,281.11,284.87,288.64,292.41,296.2,300.0,303.81,307.63,311.47,315.33,319.2,323.09,326.99,330.92,334.86,338.83,342.81,346.81,350.83,354.88],[258.93,262.79,266.62,270.42,274.2,277.98,281.76,285.54,289.32,293.11,296.91,300.72,304.54,308.38,312.23,316.09,319.98,323.88,327.79,331.73,335.68,339.66,343.65,347.66,351.69,355.75],[259.47,263.36,267.2,271.02,274.82,278.62,282.41,286.2,290.0,293.8,297.61,301.43,305.27,309.12,312.98,316.86,320.75,324.66,328.59,332.54,336.5,340.49,344.49,348.51,352.55,356.62],[260.01,263.92,267.78,271.62,275.44,279.25,283.06,286.86,290.67,294.49,298.32,302.15,306.0,309.86,313.73,317.62,321.53,325.45,329.39,333.35,337.32,341.32,345.33,349.36,353.41,357.48],[260.54,264.47,268.36,272.21,276.05,279.88,283.7,287.52,291.35,295.18,299.02,302.87,306.73,310.6,314.49,318.39,322.3,326.24,330.19,334.15,338.14,342.14,346.17,350.21,354.27,358.35],[261.08,265.03,268.93,272.81,276.66,280.51,284.34,288.18,292.02,295.87,299.72,303.58,307.45,311.34,315.24,319.15,323.08,327.02,330.98,334.96,338.96,342.97,347.01,351.06,355.13,359.22],[261.6,265.58,269.5,273.4,277.27,281.13,284.99,288.84,292.69,296.55,300.42,304.29,308.18,312.08,315.99,319.91,323.85,327.81,331.78,335.77,339.77,343.8,347.84,351.9,355.99,360.09],[262.13,266.12,270.07,273.98,277.88,281.75,285.63,289.49,293.36,297.24,301.12,305.01,308.9,312.81,316.74,320.67,324.62,328.59,332.57,336.57,340.59,344.63,348.68,352.75,356.84,360.95],[262.65,266.67,270.64,274.57,278.48,282.38,286.26,290.15,294.03,297.92,301.81,305.71,309.63,313.55,317.48,321.43,325.4,329.37,333.37,337.38,341.41,345.45,349.51,353.6,357.7,361.82],[263.17,267.21,271.2,275.15,279.08,282.99,286.9,290.8,294.7,298.6,302.51,306.42,310.35,314.28,318.23,322.19,326.17,330.15,334.16,338.18,342.22,346.28,350.35,354.44,358.55,362.68],[263.68,267.75,271.76,275.73,279.68,283.61,287.53,291.45,295.36,299.28,303.2,307.13,311.07,315.02,318.98,322.95,326.93,330.94,334.95,338.98,343.03,347.1,351.18,355.29,359.41,363.55],[264.19,268.28,272.31,276.31,280.27,284.22,288.16,292.09,296.02,299.96,303.89,307.83,311.79,315.75,319.72,323.7,327.7,331.71,335.74,339.79,343.85,347.92,352.02,356.13,360.26,364.41],[264.7,268.81,272.87,276.88,280.87,284.83,288.79,292.74,296.68,300.63,304.58,308.54,312.5,316.48,320.46,324.46,328.47,332.49,336.53,340.59,344.66,348.74,352.85,356.97,361.11,365.27],[265.2,269.34,273.42,277.45,281.46,285.44,289.41,293.38,297.34,301.3,305.27,309.24,313.22,317.2,321.2,325.21,329.23,333.27,337.32,341.39,345.47,349.57,353.68,357.81,361.97,366.13],[265.69,269.86,273.96,278.02,282.04,286.05,290.04,294.02,298.0,301.97,305.95,309.94,313.93,317.93,321.94,325.96,330.0,334.05,338.11,342.18,346.28,350.39,354.51,358.66,362.82,367.0],[266.19,270.38,274.5,278.58,282.63,286.65,290.66,294.66,298.65,302.64,306.64,310.64,314.64,318.66,322.68,326.71,330.76,334.82,338.89,342.98,347.09,351.21,355.34,359.5,363.67,367.86],[266.67,270.89,275.04,279.14,283.21,287.25,291.28,295.29,299.3,303.31,307.32,311.33,315.35,319.38,323.42,327.46,331.52,335.59,339.68,343.78,347.89,352.02,356.17,360.34,364.52,368.72],[267.16,271.4,275.58,279.7,283.79,287.85,291.89,295.92,299.95,303.98,308.0,312.03,316.06,320.1,324.15,328.21,332.28,336.37,340.46,344.57,348.7,352.84,357.0,361.17,365.37,369.58],[267.64,271.91,276.11,280.25,284.36,288.44,292.51,296.56,300.6,304.64,308.68,312.72,316.77,320.82,324.88,328.96,333.04,337.14,341.24,345.37,349.51,353.66,357.83,362.01,366.21,370.43],[268.11,272.41,276.64,280.8,284.93,289.03,293.12,297.18,301.24,305.3,309.35,313.41,317.47,321.54,325.62,329.7,333.8,337.91,342.03,346.16,350.31,354.47,358.65,362.85,367.06,371.29],[268.58,272.91,277.16,281.35,285.5,289.62,293.72,297.81,301.88,305.96,310.03,314.1,318.18,322.26,326.35,330.44,334.55,338.67,342.81,346.95,351.11,355.29,359.48,363.68,367.91,372.15],[269.04,273.4,277.68,281.9,286.07,290.21,294.33,298.43,302.52,306.61,310.7,314.79,318.88,322.97,327.07,331.19,335.31,339.44,343.59,347.74,351.91,356.1,360.3,364.52,368.75,373.0],[269.5,273.89,278.19,282.43,286.63,290.79,294.93,299.05,303.16,307.27,311.37,315.47,319.58,323.69,327.8,331.93,336.06,340.21,344.36,348.53,352.72,356.91,361.13,365.35,369.6,373.86],[269.96,274.38,278.71,282.97,287.19,291.37,295.53,299.67,303.8,307.92,312.04,316.15,320.27,324.4,328.53,332.67,336.81,340.97,345.14,349.32,353.52,357.72,361.95,366.19,370.44,374.71],[270.41,274.86,279.21,283.5,287.74,291.95,296.12,300.28,304.43,308.57,312.7,316.83,320.97,325.11,329.25,333.4,337.56,341.73,345.91,350.11,354.31,358.53,362.77,367.02,371.28,375.57],[270.85,275.33,279.72,284.03,288.29,292.52,296.72,300.89,305.06,309.21,313.36,317.51,321.66,325.81,329.97,334.14,338.31,342.49,346.69,350.89,355.11,359.34,363.59,367.85,372.13,376.42],[271.28,275.8,280.21,284.55,288.84,293.09,297.31,301.5,305.69,309.86,314.02,318.19,322.35,326.52,330.69,334.87,339.06,343.25,347.46,351.68,355.91,360.15,364.41,368.68,372.97,377.27],[271.72,276.26,280.71,285.07,289.39,293.65,297.89,302.11,306.31,310.5,314.68,318.86,323.04,327.22,331.41,335.6,339.8,344.01,348.23,352.46,356.7,360.96,365.23,369.51,373.81,378.12],[272.14,276.72,281.2,285.59,289.93,294.22,298.48,302.71,306.93,311.14,315.34,319.54,323.73,327.93,332.13,336.33,340.55,344.77,349.0,353.24,357.5,361.76,366.04,370.34,374.64,378.97],[272.56,277.18,281.68,286.1,290.46,294.78,299.06,303.31,307.55,311.78,315.99,320.21,324.42,328.63,332.84,337.06,341.29,345.52,349.77,354.02,358.29,362.57,366.86,371.16,375.48,379.82],[272.97,277.62,282.16,286.61,290.99,295.33,299.63,303.91,308.17,312.41,316.64,320.87,325.1,329.33,333.55,337.79,342.03,346.28,350.53,354.8,359.08,363.37,367.67,371.99,376.32,380.67],[273.38,278.07,282.63,287.11,291.52,295.88,300.21,304.5,308.78,313.04,317.29,321.54,325.78,330.02,334.27,338.51,342.77,347.03,351.3,355.58,359.87,364.17,368.48,372.81,377.15,381.51],[273.77,278.5,283.1,287.61,292.05,296.43,300.78,305.09,309.39,313.67,317.94,322.2,326.46,330.72,334.97,339.24,343.5,347.78,352.06,356.35,360.66,364.97,369.3,373.64,377.99,382.36],[274.16,278.93,283.56,288.1,292.56,296.97,301.34,305.68,310.0,314.3,318.58,322.86,327.14,331.41,335.68,339.96,344.24,348.53,352.82,357.13,361.44,365.77,370.11,374.46,378.82,383.2],[274.55,279.35,284.02,288.59,293.08,297.51,301.91,306.27,310.6,314.92,319.22,323.52,327.81,332.1,336.39,340.68,344.97,349.27,353.58,357.9,362.23,366.57,370.92,375.28,379.65,384.04],[274.92,279.77,284.47,289.07,293.59,298.05,302.47,306.85,311.2,315.54,319.86,324.17,328.48,332.79,337.09,341.39,345.7,350.02,354.34,358.67,363.01,367.36,371.72,376.1,380.49,384.89],[275.29,280.18,284.92,289.55,294.1,298.58,303.02,307.42,311.8,316.16,320.5,324.83,329.15,333.47,337.79,342.11,346.43,350.76,355.1,359.44,363.79,368.16,372.53,376.92,381.31,385.73],[275.65,280.59,285.36,290.02,294.6,299.11,303.57,308.0,312.4,316.77,321.13,325.48,329.82,334.15,338.49,342.82,347.16,351.5,355.85,360.21,364.57,368.95,373.34,377.73,382.14,386.57],[276.01,280.98,285.8,290.49,295.1,299.63,304.12,308.57,312.99,317.38,321.76,326.13,330.48,334.83,339.18,343.54,347.89,352.24,356.61,360.98,365.35,369.74,374.14,378.55,382.97,387.41],[276.35,281.37,286.23,290.95,295.59,300.15,304.67,309.14,313.58,317.99,322.39,326.77,331.15,335.51,339.88,344.24,348.61,352.98,357.36,361.74,366.13,370.53,374.94,379.36,383.8,388.24],[276.68,281.76,286.65,291.41,296.08,300.67,305.21,309.7,314.16,318.6,323.01,327.41,331.8,336.19,340.57,344.95,349.33,353.72,358.11,362.5,366.91,371.32,375.74,380.18,384.62,389.08],[277.01,282.13,287.06,291.86,296.56,301.18,305.74,310.26,314.74,319.2,323.63,328.05,332.46,336.86,341.26,345.66,350.05,354.45,358.86,363.27,367.68,372.11,376.54,380.99,385.45,389.91],[277.32,282.5,287.47,292.31,297.03,301.68,306.27,310.81,315.32,319.8,324.25,328.69,333.12,337.54,341.95,346.36,350.77,355.19,359.6,364.03,368.46,372.89,377.34,381.8,386.27,390.75],[277.63,282.86,287.87,292.75,297.51,302.19,306.8,311.37,315.89,320.39,324.87,329.32,333.77,338.2,342.63,347.06,351.49,355.92,360.35,364.78,369.23,373.68,378.14,382.61,387.09,391.58],[277.93,283.21,288.27,293.18,297.97,302.68,307.32,311.91,316.47,320.98,325.48,329.96,334.42,338.87,343.32,347.76,352.2,356.64,361.09,365.54,370.0,374.46,378.93,383.42,387.91,392.41],[278.21,283.55,288.66,293.61,298.43,303.17,307.84,312.46,317.03,321.57,326.09,330.58,335.06,339.53,344.0,348.46,352.91,357.37,361.83,366.3,370.77,375.24,379.73,384.22,388.73,393.24],[278.49,283.88,289.04,294.03,298.89,303.66,308.36,313.0,317.6,322.16,326.69,331.21,335.71,340.2,344.68,349.15,353.62,358.1,362.57,367.05,371.53,376.02,380.52,385.03,389.54,394.07],[278.75,284.2,289.41,294.44,299.34,304.14,308.87,313.53,318.16,322.74,327.3,331.83,336.35,340.86,345.35,349.84,354.33,358.82,363.31,367.8,372.3,376.8,381.31,385.83,390.36,394.9],[279.0,284.52,289.78,294.85,299.78,304.62,309.37,314.07,318.71,323.32,327.9,332.45,336.99,341.51,346.03,350.53,355.04,359.54,364.04,368.55,373.06,377.58,382.1,386.63,391.17,395.72],[279.24,284.82,290.13,295.25,300.22,305.09,309.87,314.59,319.26,323.89,328.49,333.07,337.62,342.16,346.7,351.22,355.74,360.26,364.78,369.3,373.82,378.35,382.89,387.43,391.99,396.55],[279.46,285.12,290.48,295.64,300.65,305.55,310.37,315.12,319.81,324.46,329.09,333.68,338.26,342.82,347.36,351.9,356.44,360.97,365.51,370.04,374.58,379.12,383.67,388.23,392.8,397.37],[279.67,285.4,290.82,296.03,301.08,306.01,310.86,315.63,320.35,325.03,329.68,334.29,338.89,343.46,348.03,352.59,357.14,361.69,366.24,370.79,375.34,379.89,384.46,389.03,393.61,398.19]],"s":[[0.95586,0.96861,0.98119,0.99362,1.00592,1.0181,1.03017,1.04213,1.05401,1.06579,1.07749,1.08911,1.10065,1.11212,1.12351,1.13484,1.1461,1.1573,1.16843,1.17951,1.19052,1.20148,1.21238,1.22323,1.23402,1.24477],[0.95473,0.96748,0.98006,0.99249,1.00478,1.01696,1.02902,1.04099,1.05285,1.06463,1.07632,1.08794,1.09947,1.11093,1.12232,1.13364,1.14489,1.15608,1.16721,1.17827,1.18928,1.20023,1.21113,1.22197,1.23275,1.24349],[0.95363,0.96638,0.97896,0.99139,1.00368,1.01585,1.02791,1.03987,1.05173,1.0635,1.07519,1.0868,1.09832,1.10978,1.12116,1.13247,1.14372,1.1549,1.16602,1.17707,1.18807,1.19902,1.2099,1.22073,1.23151,1.24224],[0.95256,0.96531,0.97789,0.99031,1.0026,1.01477,1.02683,1.03878,1.05064,1.0624,1.07408,1.08568,1.0972,1.10865,1.12002,1.13133,1.14257,1.15374,1.16485,1.1759,1.1869,1.19783,1.20871,1.21953,1.2303,1.24102],[0.95151,0.96426,0.97684,0.98927,1.00155,1.01372,1.02577,1.03772,1.04957,1.06133,1.07301,1.0846,1.09611,1.10755,1.11892,1.13022,1.14145,1.15262,1.16372,1.17476,1.18575,1.19668,1.20755,1.21836,1.22913,1.23984],[0.95048,0.96324,0.97582,0.98825,1.00053,1.01269,1.02474,1.03669,1.04853,1.06029,1.07196,1.08354,1.09505,1.10649,1.11785,1.12914,1.14036,1.15152,1.16262,1.17366,1.18463,1.19555,1.20641,1.21722,1.22798,1.23868],[0.94948,0.96225,0.97483,0.98725,0.99953,1.01169,1.02374,1.03568,1.04752,1.05927,1.07094,1.08252,1.09402,1.10545,1.1168,1.12809,1.1393,1.15046,1.16155,1.17257,1.18354,1.19446,1.20531,1.21611,1.22686,1.23756],[0.9485,0.96127,0.97386,0.98628,0.99856,1.01072,1.02276,1.0347,1.04654,1.05828,1.06994,1.08152,1.09301,1.10444,1.11578,1.12706,1.13827,1.14942,1.1605,1.17152,1.18249,1.19339,1.20424,1.21503,1.22577,1.23646],[0.94755,0.96032,0.97291,0.98533,0.99761,1.00977,1.02181,1.03374,1.04558,1.05732,1.06897,1.08054,1.09204,1.10345,1.11479,1.12607,1.13727,1.14841,1.15948,1.1705,1.18145,1.19235,1.20319,1.21398,1.22471,1.2354],[0.94662,0.9594,0.97199,0.98441,0.99669,1.00885,1.02088,1.03281,1.04465,1.05638,1.06803,1.0796,1.09108,1.10249,1.11383,1.1251,1.13629,1.14743,1.1585,1.1695,1.18045,1.19134,1.20218,1.21296,1.22368,1.23436],[0.94571,0.95849,0.97109,0.98351,0.99579,1.00795,1.01998,1.03191,1.04374,1.05547,1.06712,1.07868,1.09016,1.10156,1.11289,1.12415,1.13534,1.14647,1.15753,1.16854,1.17948,1.19036,1.20119,1.21196,1.22268,1.23335],[0.94483,0.95761,0.97021,0.98264,0.99492,1.00707,1.0191,1.03103,1.04285,1.05458,1.06623,1.07778,1.08926,1.10066,1.11198,1.12324,1.13442,1.14554,1.1566,1.16759,1.17853,1.18941,1.20023,1.21099,1.2217,1.23237],[0.94396,0.95675,0.96935,0.98178,0.99407,1.00622,1.01825,1.03017,1.042,1.05372,1.06536,1.07691,1.08838,1.09977,1.11109,1.12234,1.13352,1.14464,1.15569,1.16668,1.17761,1.18848,1.19929,1.21005,1.22076,1.23141],[0.94311,0.95592,0.96852,0.98095,0.99324,1.00539,1.01742,1.02934,1.04116,1.05288,1.06452,1.07606,1.08753,1.09892,1.11023,1.12148,1.13265,1.14376,1.1548,1.16579,1.17671,1.18757,1.19838,1.20913,1.21983,1.23048],[0.94229,0.9551,0.96771,0.98014,0.99243,1.00458,1.01661,1.02853,1.04035,1.05207,1.0637,1.07524,1.0867,1.09809,1.1094,1.12064,1.1318,1.14291,1.15395,1.16492,1.17584,1.1867,1.1975,1.20825,1.21894,1.22958],[0.94148,0.9543,0.96691,0.97935,0.99164,1.00379,1.01582,1.02774,1.03956,1.05127,1.0629,1.07444,1.0859,1.09728,1.10858,1.11982,1.13098,1.14208,1.15311,1.16408,1.17499,1.18585,1.19664,1.20738,1.21807,1.2287],[0.9407,0.95352,0.96614,0.97859,0.99088,1.00303,1.01506,1.02698,1.03879,1.0505,1.06213,1.07367,1.08512,1.0965,1.1078,1.11902,1.13018,1.14127,1.1523,1.16327,1.17417,1.18502,1.19581,1.20654,1.21722,1.22785],[0.93993,0.95277,0.96539,0.97784,0.99013,1.00229,1.01432,1.02623,1.03804,1.04976,1.06138,1.07291,1.08436,1.09573,1.10703,1.11825,1.12941,1.14049,1.15152,1.16248,1.17338,1.18422,1.195,1.20573,1.2164,1.22702],[0.93918,0.95203,0.96466,0.97711,0.98941,1.00156,1.01359,1.02551,1.03732,1.04903,1.06065,1.07218,1.08363,1.09499,1.10629,1.11751,1.12866,1.13974,1.15075,1.16171,1.1726,1.18344,1.19421,1.20494,1.2156,1.22622],[0.93845,0.95131,0.96395,0.9764,0.9887,1.00086,1.01289,1.02481,1.03662,1.04833,1.05994,1.07147,1.08291,1.09428,1.10557,1.11678,1.12793,1.139,1.15001,1.16096,1.17185,1.18268,1.19345,1.20417,1.21483,1.22544],[0.93774,0.9506,0.96325,0.97571,0.98801,1.00017,1.01221,1.02412,1.03593,1.04764,1.05926,1.07078,1.08222,1.09358,1.10487,1.11608,1.12722,1.13829,1.1493,1.16024,1.17112,1.18195,1.19271,1.20342,1.21408,1.22468],[0.93704,0.94992,0.96257,0.97504,0.98735,0.99951,1.01154,1.02346,1.03527,1.04698,1.05859,1.07011,1.08155,1.09291,1.10419,1.1154,1.12653,1.1376,1.1486,1.15954,1.17042,1.18124,1.192,1.2027,1.21335,1.22395],[0.93636,0.94925,0.96191,0.97439,0.9867,0.99886,1.0109,1.02282,1.03463,1.04633,1.05794,1.06946,1.0809,1.09226,1.10353,1.11474,1.12587,1.13693,1.14793,1.15886,1.16974,1.18055,1.19131,1.202,1.21265,1.22324],[0.9357,0.9486,0.96127,0.97375,0.98607,0.99824,1.01028,1.02219,1.034,1.04571,1.05732,1.06884,1.08027,1.09162,1.1029,1.1141,1.12522,1.13628,1.14728,1.15821,1.16908,1.17988,1.19063,1.20133,1.21197,1.22255],[0.93505,0.94796,0.96065,0.97313,0.98545,0.99763,1.00967,1.02159,1.0334,1.0451,1.05671,1.06823,1.07966,1.09101,1.10228,1.11348,1.1246,1.13566,1.14665,1.15757,1.16844,1.17924,1.18998,1.20067,1.21131,1.22189],[0.93442,0.94734,0.96004,0.97253,0.98486,0.99704,1.00908,1.021,1.03281,1.04452,1.05612,1.06764,1.07907,1.09042,1.10168,1.11288,1.124,1.13505,1.14604,1.15696,1.16782,1.17861,1.18936,1.20004,1.21067,1.22124],[0.9338,0.94674,0.95944,0.97195,0.98428,0.99646,1.00851,1.02043,1.03224,1.04395,1.05556,1.06707,1.0785,1.08984,1.10111,1.1123,1.12342,1.13446,1.14545,1.15636,1.16722,1.17801,1.18875,1.19943,1.21005,1.22062],[0.9332,0.94615,0.95887,0.97138,0.98372,0.9959,1.00795,1.01988,1.03169,1.0434,1.055,1.06652,1.07794,1.08929,1.10055,1.11174,1.12285,1.1339,1.14488,1.15579,1.16664,1.17743,1.18816,1.19883,1.20945,1.22002],[0.93261,0.94558,0.9583,0.97082,0.98317,0.99536,1.00742,1.01934,1.03116,1.04286,1.05447,1.06599,1.07741,1.08875,1.10001,1.1112,1.12231,1.13335,1.14432,1.15523,1.16608,1.17687,1.18759,1.19826,1.20888,1.21944],[0.93204,0.94502,0.95775,0.97029,0.98264,0.99484,1.00689,1.01883,1.03064,1.04235,1.05396,1.06547,1.07689,1.08823,1.09949,1.11067,1.12178,1.13282,1.14379,1.1547,1.16554,1.17632,1.18704,1.19771,1.20832,1.21888],[0.93148,0.94447,0.95722,0.96976,0.98212,0.99433,1.00639,1.01832,1.03014,1.04185,1.05346,1.06497,1.07639,1.08773,1.09899,1.11017,1.12128,1.13231,1.14328,1.15418,1.16502,1.1758,1.18652,1.19718,1.20778,1.21833],[0.93093,0.94394,0.9567,0.96925,0.98162,0.99383,1.0059,1.01784,1.02966,1.04137,1.05298,1.06449,1.07591,1.08725,1.09851,1.10968,1.12079,1.13182,1.14278,1.15368,1.16452,1.17529,1.18601,1.19666,1.20726,1.21781],[0.93039,0.94342,0.9562,0.96876,0.98114,0.99335,1.00542,1.01737,1.02919,1.0409,1.05251,1.06403,1.07545,1.08678,1.09804,1.10921,1.12032,1.13135,1.14231,1.1532,1.16403,1.1748,1.18551,1.19617,1.20676,1.21731],[0.92987,0.94291,0.9557,0.96828,0.98066,0.99289,1.00496,1.01691,1.02874,1.04045,1.05206,1.06358,1.075,1.08634,1.09759,1.10876,1.11986,1.13089,1.14185,1.15274,1.16357,1.17434,1.18504,1.19569,1.20628,1.21682],[0.92935,0.94242,0.95522,0.96781,0.9802,0.99244,1.00452,1.01647,1.0283,1.04002,1.05163,1.06315,1.07457,1.0859,1.09715,1.10833,1.11943,1.13045,1.14141,1.1523,1.16312,1.17388,1.18459,1.19523,1.20582,1.21635],[0.92885,0.94194,0.95476,0.96735,0.97976,0.992,1.00409,1.01605,1.02788,1.0396,1.05121,1.06273,1.07415,1.08549,1.09674,1.10791,1.11901,1.13003,1.14098,1.15187,1.16269,1.17345,1.18415,1.19479,1.20538,1.21591],[0.92836,0.94147,0.9543,0.96691,0.97933,0.99158,1.00367,1.01563,1.02747,1.03919,1.05081,1.06233,1.07375,1.08509,1.09634,1.10751,1.1186,1.12962,1.14057,1.15146,1.16228,1.17303,1.18373,1.19437,1.20495,1.21547],[0.92788,0.94101,0.95386,0.96648,0.97891,0.99116,1.00327,1.01524,1.02708,1.0388,1.05042,1.06194,1.07337,1.0847,1.09595,1.10712,1.11821,1.12923,1.14018,1.15106,1.16188,1.17263,1.18333,1.19396,1.20454,1.21506],[0.92741,0.94056,0.95343,0.96606,0.9785,0.99077,1.00288,1.01485,1.0267,1.03843,1.05005,1.06157,1.07299,1.08433,1.09558,1.10675,1.11784,1.12886,1.13981,1.15069,1.1615,1.17225,1.18294,1.19357,1.20415,1.21466],[0.92695,0.94012,0.95301,0.96566,0.97811,0.99038,1.0025,1.01448,1.02633,1.03807,1.04969,1.06121,1.07264,1.08398,1.09523,1.10639,1.11749,1.1285,1.13945,1.15032,1.16114,1.17188,1.18257,1.1932,1.20377,1.21428],[0.9265,0.93969,0.9526,0.96526,0.97772,0.99001,1.00214,1.01412,1.02598,1.03772,1.04934,1.06087,1.0723,1.08363,1.09489,1.10605,1.11714,1.12816,1.1391,1.14998,1.16079,1.17153,1.18222,1.19284,1.20341,1.21392],[0.92606,0.93927,0.9522,0.96488,0.97735,0.98965,1.00178,1.01378,1.02564,1.03738,1.04901,1.06054,1.07197,1.08331,1.09456,1.10573,1.11682,1.12783,1.13877,1.14965,1.16045,1.1712,1.18188,1.1925,1.20306,1.21357],[0.92563,0.93887,0.95181,0.96451,0.97699,0.9893,1.00144,1.01344,1.02531,1.03706,1.04869,1.06022,1.07166,1.083,1.09425,1.10542,1.11651,1.12752,1.13846,1.14933,1.16014,1.17088,1.18156,1.19218,1.20274,1.21324],[0.9252,0.93847,0.95143,0.96414,0.97664,0.98896,1.00112,1.01312,1.025,1.03675,1.04839,1.05992,1.07136,1.0827,1.09395,1.10512,1.11621,1.12722,1.13816,1.14903,1.15983,1.17057,1.18125,1.19186,1.20242,1.21292],[0.92479,0.93807,0.95106,0.96379,0.9763,0.98863,1.0008,1.01281,1.02469,1.03645,1.0481,1.05963,1.07107,1.08241,1.09366,1.10483,1.11592,1.12694,1.13787,1.14874,1.15955,1.17028,1.18096,1.19157,1.20213,1.21262],[0.92438,0.93769,0.9507,0.96345,0.97598,0.98832,1.00049,1.01252,1.0244,1.03617,1.04781,1.05935,1.07079,1.08214,1.09339,1.10456,1.11565,1.12667,1.1376,1.14847,1.15927,1.17001,1.18068,1.19129,1.20184,1.21234],[0.92397,0.93732,0.95034,0.96311,0.97566,0.98801,1.0002,1.01223,1.02412,1.03589,1.04755,1.05909,1.07053,1.08188,1.09314,1.10431,1.1154,1.12641,1.13735,1.14821,1.15901,1.16974,1.18041,1.19102,1.20157,1.21207],[0.92358,0.93695,0.95,0.96279,0.97535,0.98771,0.99991,1.01195,1.02386,1.03563,1.04729,1.05884,1.07028,1.08163,1.09289,1.10406,1.11515,1.12616,1.1371,1.14797,1.15877,1.1695,1.18016,1.19077,1.20132,1.21181],[0.92319,0.93659,0.94966,0.96247,0.97505,0.98743,0.99963,1.01169,1.0236,1.03538,1.04704,1.0586,1.07004,1.0814,1.09266,1.10383,1.11492,1.12593,1.13687,1.14774,1.15853,1.16926,1.17993,1.19053,1.20108,1.21157],[0.92281,0.93624,0.94933,0.96216,0.97475,0.98715,0.99937,1.01143,1.02335,1.03514,1.04681,1.05837,1.06982,1.08117,1.09244,1.10361,1.1147,1.12572,1.13665,1.14752,1.15831,1.16904,1.17971,1.19031,1.20085,1.21134],[0.92243,0.93589,0.94901,0.96186,0.97447,0.98688,0.99911,1.01118,1.02311,1.03491,1.04658,1.05815,1.0696,1.08096,1.09223,1.1034,1.1145,1.12551,1.13645,1.14731,1.15811,1.16883,1.1795,1.1901,1.20064,1.21112],[0.92206,0.93555,0.9487,0.96157,0.9742,0.98662,0.99887,1.01095,1.02289,1.03469,1.04637,1.05794,1.0694,1.08076,1.09203,1.10321,1.1143,1.12532,1.13625,1.14712,1.15791,1.16864,1.1793,1.1899,1.20044,1.21092],[0.92169,0.93522,0.94839,0.96128,0.97393,0.98637,0.99863,1.01072,1.02267,1.03448,1.04617,1.05774,1.06921,1.08057,1.09184,1.10302,1.11412,1.12514,1.13607,1.14694,1.15773,1.16846,1.17912,1.18972,1.20026,1.21073],[0.92133,0.93489,0.94809,0.961,0.97367,0.98613,0.9984,1.0105,1.02246,1.03428,1.04598,1.05756,1.06903,1.08039,1.09167,1.10285,1.11395,1.12497,1.1359,1.14677,1.15756,1.16829,1.17895,1.18955,1.20008,1.21056],[0.92097,0.93456,0.94779,0.96073,0.97342,0.98589,0.99818,1.0103,1.02226,1.03409,1.04579,1.05738,1.06885,1.08023,1.0915,1.10269,1.11379,1.12481,1.13575,1.14661,1.15741,1.16813,1.17879,1.18939,1.19992,1.2104],[0.92062,0.93424,0.94751,0.96047,0.97317,0.98566,0.99796,1.0101,1.02207,1.03391,1.04562,1.05721,1.06869,1.08007,1.09135,1.10254,1.11364,1.12466,1.1356,1.14647,1.15726,1.16798,1.17864,1.18924,1.19977,1.21025],[0.92026,0.93393,0.94722,0.96021,0.97294,0.98544,0.99776,1.0099,1.02189,1.03374,1.04546,1.05705,1.06854,1.07992,1.09121,1.1024,1.1135,1.12452,1.13547,1.14633,1.15713,1.16785,1.17851,1.1891,1.19964,1.21011],[0.91991,0.93362,0.94694,0.95995,0.9727,0.98523,0.99756,1.00972,1.02172,1.03358,1.0453,1.05691,1.0684,1.07979,1.09107,1.10227,1.11338,1.1244,1.13534,1.14621,1.157,1.16773,1.17839,1.18898,1.19951,1.20998],[0.91957,0.93331,0.94667,0.95971,0.97248,0.98502,0.99737,1.00954,1.02155,1.03342,1.04516,1.05677,1.06827,1.07966,1.09095,1.10215,1.11326,1.12428,1.13523,1.1461,1.15689,1.16762,1.17827,1.18887,1.1994,1.20987],[0.91922,0.93301,0.9464,0.95946,0.97226,0.98482,0.99719,1.00937,1.0214,1.03327,1.04502,1.05664,1.06814,1.07954,1.09084,1.10204,1.11315,1.12418,1.13513,1.146,1.15679,1.16752,1.17817,1.18877,1.19929,1.20976],[0.91888,0.93271,0.94613,0.95922,0.97204,0.98463,0.99701,1.00921,1.02125,1.03314,1.04489,1.05652,1.06803,1.07943,1.09073,1.10194,1.11306,1.12409,1.13503,1.1459,1.1567,1.16743,1.17808,1.18868,1.1992,1.20967],[0.91854,0.93241,0.94587,0.95899,0.97184,0.98444,0.99684,1.00906,1.02111,1.03301,1.04477,1.0564,1.06792,1.07933,1.09064,1.10185,1.11297,1.124,1.13495,1.14582,1.15662,1.16735,1.178,1.1886,1.19912,1.20959],[0.9182,0.93211,0.94561,0.95876,0.97163,0.98426,0.99668,1.00891,1.02097,1.03288,1.04466,1.0563,1.06783,1.07924,1.09055,1.10177,1.11289,1.12393,1.13488,1.14575,1.15655,1.16728,1.17794,1.18853,1.19905,1.20952],[0.91786,0.93182,0.94535,0.95854,0.97143,0.98408,0.99652,1.00877,1.02084,1.03277,1.04455,1.0562,1.06774,1.07916,1.09048,1.1017,1.11282,1.12386,1.13482,1.14569,1.15649,1.16722,1.17788,1.18847,1.199,1.20946],[0.91752,0.93152,0.9451,0.95831,0.97124,0.98391,0.99637,1.00863,1.02072,1.03266,1.04445,1.05611,1.06766,1.07908,1.09041,1.10163,1.11276,1.1238,1.13476,1.14564,1.15644,1.16717,1.17783,1.18842,1.19895,1.20941],[0.91718,0.93123,0.94484,0.95809,0.97105,0.98374,0.99622,1.0085,1.02061,1.03255,1.04436,1.05603,1.06758,1.07902,1.09035,1.10158,1.11271,1.12376,1.13472,1.1456,1.1564,1.16713,1.17779,1.18838,1.19891,1.20937],[0.91683,0.93094,0.94459,0.95788,0.97086,0.98358,0.99608,1.00838,1.0205,1.03246,1.04428,1.05596,1.06752,1.07896,1.09029,1.10153,1.11267,1.12372,1.13468,1.14556,1.15637,1.1671,1.17776,1.18835,1.19888,1.20935],[0.91649,0.93065,0.94434,0.95766,0.97067,0.98342,0.99594,1.00826,1.02039,1.03237,1.0442,1.05589,1.06746,1.07891,1.09025,1.10149,1.11263,1.12369,1.13465,1.14554,1.15635,1.16708,1.17774,1.18833,1.19886,1.20933],[0.91615,0.93036,0.9441,0.95745,0.97049,0.98327,0.99581,1.00814,1.0203,1.03229,1.04413,1.05583,1.0674,1.07886,1.09021,1.10146,1.11261,1.12366,1.13463,1.14552,1.15633,1.16707,1.17773,1.18832,1.19885,1.20932],[0.9158,0.93007,0.94385,0.95724,0.97032,0.98311,0.99568,1.00803,1.0202,1.03221,1.04406,1.05577,1.06736,1.07883,1.09018,1.10143,1.11259,1.12365,1.13462,1.14551,1.15633,1.16706,1.17773,1.18832,1.19885,1.20932],[0.91545,0.92977,0.9436,0.95704,0.97014,0.98297,0.99555,1.00793,1.02012,1.03214,1.044,1.05573,1.06732,1.0788,1.09016,1.10142,1.11258,1.12364,1.13462,1.14552,1.15633,1.16707,1.17773,1.18833,1.19886,1.20933],[0.91509,0.92948,0.94336,0.95683,0.96997,0.98282,0.99543,1.00783,1.02003,1.03207,1.04395,1.05568,1.06729,1.07877,1.09014,1.10141,1.11257,1.12364,1.13463,1.14552,1.15634,1.16708,1.17775,1.18835,1.19888,1.20934],[0.91473,0.92918,0.94311,0.95662,0.9698,0.98268,0.99531,1.00773,1.01996,1.03201,1.0439,1.05565,1.06726,1.07876,1.09014,1.10141,1.11258,1.12365,1.13464,1.14554,1.15636,1.1671,1.17777,1.18837,1.1989,1.20937],[0.91437,0.92888,0.94286,0.95642,0.96963,0.98254,0.9952,1.00764,1.01988,1.03195,1.04386,1.05562,1.06724,1.07875,1.09013,1.10141,1.11259,1.12367,1.13466,1.14556,1.15639,1.16713,1.1778,1.18841,1.19894,1.20941],[0.914,0.92858,0.94261,0.95621,0.96946,0.9824,0.99509,1.00755,1.01981,1.0319,1.04382,1.05559,1.06723,1.07874,1.09014,1.10142,1.11261,1.12369,1.13469,1.1456,1.15642,1.16717,1.17784,1.18845,1.19898,1.20945],[0.91362,0.92827,0.94236,0.95601,0.96929,0.98227,0.99498,1.00746,1.01975,1.03185,1.04378,1.05557,1.06722,1.07874,1.09015,1.10144,1.11263,1.12372,1.13472,1.14563,1.15646,1.16722,1.17789,1.1885,1.19903,1.2095],[0.91324,0.92796,0.94211,0.9558,0.96912,0.98213,0.99487,1.00738,1.01968,1.0318,1.04376,1.05556,1.06722,1.07875,1.09016,1.10146,1.11266,1.12376,1.13476,1.14568,1.15651,1.16727,1.17795,1.18855,1.19909,1.20956],[0.91285,0.92765,0.94186,0.9556,0.96896,0.982,0.99477,1.0073,1.01963,1.03176,1.04373,1.05555,1.06722,1.07876,1.09018,1.10149,1.1127,1.1238,1.13481,1.14573,1.15657,1.16733,1.17801,1.18862,1.19916,1.20963],[0.91246,0.92733,0.9416,0.95539,0.96879,0.98187,0.99467,1.00722,1.01957,1.03173,1.04371,1.05554,1.06723,1.07878,1.09021,1.10153,1.11274,1.12385,1.13487,1.14579,1.15663,1.1674,1.17808,1.18869,1.19923,1.2097],[0.91205,0.92701,0.94134,0.95518,0.96862,0.98173,0.99456,1.00715,1.01952,1.03169,1.0437,1.05554,1.06724,1.0788,1.09024,1.10157,1.11279,1.12391,1.13493,1.14586,1.1567,1.16747,1.17816,1.18877,1.19931,1.20979],[0.91164,0.92668,0.94107,0.95497,0.96845,0.9816,0.99446,1.00708,1.01947,1.03166,1.04368,1.05554,1.06725,1.07883,1.09028,1.10162,1.11284,1.12397,1.13499,1.14593,1.15678,1.16755,1.17824,1.18885,1.1994,1.20988],[0.91121,0.92634,0.9408,0.95475,0.96829,0.98147,0.99437,1.007,1.01942,1.03164,1.04367,1.05555,1.06727,1.07886,1.09032,1.10167,1.1129,1.12403,1.13507,1.14601,1.15686,1.16764,1.17833,1.18895,1.19949,1.20997],[0.91078,0.926,0.94053,0.95454,0.96812,0.98134,0.99427,1.00694,1.01937,1.03161,1.04367,1.05556,1.0673,1.0789,1.09037,1.10173,1.11297,1.12411,1.13515,1.14609,1.15695,1.16773,1.17843,1.18905,1.1996,1.21008],[0.91033,0.92564,0.94025,0.95432,0.96794,0.98121,0.99417,1.00687,1.01933,1.03159,1.04366,1.05557,1.06733,1.07894,1.09042,1.10179,1.11304,1.12418,1.13523,1.14618,1.15705,1.16783,1.17853,1.18915,1.19971,1.21019],[0.90987,0.92528,0.93997,0.95409,0.96777,0.98108,0.99407,1.0068,1.01929,1.03157,1.04366,1.05559,1.06736,1.07898,1.09048,1.10185,1.11311,1.12427,1.13532,1.14628,1.15715,1.16793,1.17864,1.18927,1.19982,1.2103],[0.9094,0.92491,0.93968,0.95387,0.9676,0.98095,0.99398,1.00673,1.01925,1.03155,1.04367,1.05561,1.06739,1.07903,1.09054,1.10192,1.11319,1.12435,1.13541,1.14638,1.15725,1.16804,1.17875,1.18938,1.19994,1.21043],[0.90892,0.92454,0.93938,0.95364,0.96742,0.98081,0.99388,1.00667,1.01921,1.03154,1.04367,1.05563,1.06743,1.07908,1.0906,1.102,1.11328,1.12445,1.13551,1.14649,1.15737,1.16816,1.17887,1.18951,1.20007,1.21056],[0.90842,0.92415,0.93908,0.9534,0.96723,0.98067,0.99378,1.0066,1.01917,1.03152,1.04368,1.05566,1.06747,1.07914,1.09067,1.10208,1.11337,1.12454,1.13562,1.1466,1.15748,1.16828,1.179,1.18964,1.2002,1.21069],[0.9079,0.92375,0.93877,0.95316,0.96705,0.98054,0.99368,1.00653,1.01913,1.03151,1.04369,1.05568,1.06752,1.0792,1.09074,1.10216,1.11346,1.12465,1.13573,1.14671,1.1576,1.16841,1.17913,1.18977,1.20034,1.21083],[0.90737,0.92334,0.93845,0.95291,0.96686,0.98039,0.99358,1.00647,1.0191,1.0315,1.0437,1.05571,1.06756,1.07926,1.09082,1.10225,1.11356,1.12475,1.13584,1.14683,1.15773,1.16854,1.17927,1.18991,1.20048,1.21098],[0.90681,0.92291,0.93812,0.95266,0.96667,0.98025,0.99348,1.0064,1.01906,1.03149,1.04371,1.05575,1.06761,1.07933,1.0909,1.10234,1.11366,1.12486,1.13596,1.14696,1.15786,1.16868,1.17941,1.19006,1.20063,1.21113],[0.90624,0.92248,0.93778,0.9524,0.96647,0.9801,0.99337,1.00633,1.01902,1.03148,1.04372,1.05578,1.06766,1.07939,1.09098,1.10243,1.11376,1.12497,1.13608,1.14709,1.158,1.16882,1.17956,1.19021,1.20079,1.21129],[0.90565,0.92202,0.93743,0.95213,0.96627,0.97995,0.99327,1.00626,1.01899,1.03147,1.04374,1.05581,1.06772,1.07946,1.09106,1.10253,1.11387,1.12509,1.13621,1.14722,1.15814,1.16897,1.17971,1.19037,1.20095,1.21146],[0.90504,0.92156,0.93708,0.95185,0.96606,0.9798,0.99316,1.00619,1.01895,1.03146,1.04375,1.05585,1.06777,1.07953,1.09115,1.10263,1.11398,1.12521,1.13634,1.14736,1.15828,1.16912,1.17986,1.19053,1.20111,1.21162],[0.9044,0.92108,0.93671,0.95157,0.96585,0.97964,0.99305,1.00612,1.01891,1.03145,1.04377,1.05589,1.06783,1.07961,1.09124,1.10273,1.11409,1.12534,1.13647,1.1475,1.15843,1.16927,1.18002,1.19069,1.20128,1.2118],[0.90374,0.92058,0.93633,0.95128,0.96563,0.97948,0.99293,1.00605,1.01887,1.03144,1.04379,1.05593,1.06789,1.07968,1.09133,1.10283,1.11421,1.12546,1.13661,1.14764,1.15858,1.16943,1.18019,1.19086,1.20146,1.21197]],"Tc":101.06,"Pc":4059.3,"dome":[[51.2,-0.0,225.86,-0.0,0.9687,-40.0],[56.8,2.51,227.13,0.0107,0.9659,-38.0],[62.9,5.04,228.39,0.0214,0.9632,-36.0],[69.5,7.57,229.66,0.032,0.9606,-34.0],[76.7,10.1,230.92,0.0425,0.9582,-32.0],[84.4,12.65,232.17,0.053,0.9559,-30.0],[92.7,15.2,233.43,0.0634,0.9536,-28.0],[101.7,17.76,234.68,0.0738,0.9515,-26.0],[111.3,20.33,235.93,0.0841,0.9495,-24.0],[121.6,22.91,237.17,0.0944,0.9476,-22.0],[132.7,25.49,238.41,0.1046,0.9457,-20.0],[144.6,28.09,239.64,0.1148,0.944,-18.0],[157.3,30.69,240.87,0.1249,0.9423,-16.0],[170.8,33.3,242.09,0.135,0.9407,-14.0],[185.2,35.92,243.31,0.145,0.9392,-12.0],[200.6,38.55,244.52,0.155,0.9377,-10.0],[216.9,41.19,245.72,0.165,0.9364,-8.0],[234.3,43.84,246.92,0.1749,0.9351,-6.0],[252.7,46.5,248.11,0.1848,0.9338,-4.0],[272.2,49.17,249.29,0.1946,0.9326,-2.0],[292.8,51.86,250.46,0.2044,0.9315,0.0],[314.6,54.55,251.62,0.2141,0.9304,2.0],[337.7,57.25,252.78,0.2239,0.9294,4.0],[362.0,59.97,253.92,0.2336,0.9284,6.0],[387.6,62.69,255.05,0.2432,0.9274,8.0],[414.6,65.43,256.17,0.2529,0.9265,10.0],[443.0,68.18,257.29,0.2625,0.9256,12.0],[472.9,70.95,258.38,0.272,0.9248,14.0],[504.3,73.73,259.47,0.2816,0.924,16.0],[537.2,76.52,260.54,0.2911,0.9232,18.0],[571.7,79.32,261.6,0.3006,0.9224,20.0],[607.9,82.14,262.65,0.3101,0.9217,22.0],[645.8,84.98,263.68,0.3196,0.921,24.0],[685.4,87.83,264.7,0.329,0.9203,26.0],[726.9,90.7,265.69,0.3385,0.9196,28.0],[770.2,93.58,266.67,0.3479,0.9189,30.0],[815.4,96.48,267.64,0.3573,0.9182,32.0],[862.6,99.4,268.58,0.3667,0.9175,34.0],[911.8,102.33,269.5,0.3761,0.9168,36.0],[963.2,105.29,270.41,0.3855,0.9161,38.0],[1016.6,108.27,271.28,0.3949,0.9154,40.0],[1072.2,111.26,272.14,0.4043,0.9147,42.0],[1130.1,114.28,272.97,0.4136,0.914,44.0],[1190.3,117.32,273.77,0.423,0.9132,46.0],[1252.9,120.39,274.55,0.4324,0.9125,48.0],[1317.9,123.48,275.29,0.4418,0.9116,50.0],[1385.4,126.6,276.01,0.4513,0.9108,52.0],[1455.5,129.74,276.68,0.4607,0.9099,54.0],[1528.2,132.92,277.32,0.4702,0.9089,56.0],[1603.6,136.12,277.93,0.4797,0.9079,58.0],[1681.8,139.36,278.49,0.4892,0.9068,60.0],[1762.8,142.63,279.0,0.4988,0.9057,62.0],[1846.7,145.95,279.46,0.5084,0.9044,64.0],[1933.7,149.3,279.87,0.5181,0.903,66.0],[2023.7,152.7,280.22,0.5278,0.9016,68.0],[2116.8,156.14,280.51,0.5376,0.9,70.0],[2213.2,159.63,280.72,0.5474,0.8983,72.0],[2313.0,163.18,280.85,0.5574,0.8964,74.0],[2416.1,166.8,280.9,0.5675,0.8943,76.0],[2522.8,170.48,280.84,0.5777,0.892,78.0],[2633.2,174.25,280.67,0.588,0.8894,80.0],[2747.3,178.1,280.37,0.5986,0.8865,82.0],[2865.3,182.06,279.91,0.6093,0.8833,84.0],[2987.4,186.14,279.27,0.6203,0.8796,86.0],[3113.6,190.37,278.41,0.6317,0.8754,88.0],[3244.2,194.78,277.27,0.6434,0.8706,90.0],[3379.3,199.44,275.77,0.6558,0.8648,92.0],[3519.3,204.43,273.78,0.6689,0.8578,94.0],[3664.5,209.93,271.04,0.6833,0.8489,96.0],[3815.2,216.33,266.99,0.7001,0.8366,98.0],[3972.4,225.15,259.54,0.7232,0.8153,100.0],[3937.3,222.77,261.78,0.7169,0.8216,99.56],[3993.5,226.85,257.84,0.7276,0.8106,100.26],[4034.4,231.44,252.83,0.7397,0.7969,100.76]]},"R32":{"T0":-30,"sat":[[273.44,16.22,373.05,0.06778,1.53529,0.13091],[284.91,17.86,373.45,0.07445,1.53088,0.12587],[296.75,19.5,373.84,0.08111,1.5265,0.12107],[308.96,21.14,374.22,0.08775,1.52217,0.11648],[321.57,22.78,374.6,0.09437,1.51786,0.11211],[334.56,24.43,374.97,0.10098,1.5136,0.10793],[347.96,26.08,375.34,0.10757,1.50937,0.10393],[361.77,27.73,375.7,0.11414,1.50517,0.10011],[376.0,29.39,376.06,0.1207,1.50101,0.09646],[390.66,31.05,376.4,0.12724,1.49688,0.09297],[405.75,32.71,376.75,0.13377,1.49278,0.08963],[421.29,34.38,377.08,0.14029,1.48871,0.08643],[437.28,36.05,377.41,0.14679,1.48467,0.08337],[453.74,37.72,377.73,0.15328,1.48066,0.08043],[470.67,39.4,378.05,0.15975,1.47668,0.07762],[488.07,41.08,378.36,0.16621,1.47273,0.07493],[505.97,42.76,378.66,0.17266,1.4688,0.07234],[524.37,44.45,378.95,0.17909,1.4649,0.06987],[543.27,46.14,379.24,0.18552,1.46102,0.06749],[562.69,47.84,379.52,0.19193,1.45717,0.0652],[582.63,49.54,379.79,0.19833,1.45334,0.06301],[603.11,51.24,380.06,0.20472,1.44953,0.06091],[624.14,52.95,380.32,0.2111,1.44574,0.05889],[645.72,54.66,380.56,0.21747,1.44198,0.05694],[667.86,56.38,380.81,0.22383,1.43823,0.05508],[690.58,58.1,381.04,0.23018,1.4345,0.05328],[713.88,59.83,381.26,0.23652,1.43079,0.05155],[737.77,61.56,381.48,0.24286,1.4271,0.04989],[762.26,63.29,381.69,0.24918,1.42342,0.04829],[787.37,65.03,381.88,0.2555,1.41976,0.04675],[813.1,66.77,382.07,0.26181,1.41612,0.04527],[839.46,68.52,382.25,0.26811,1.41248,0.04384],[866.47,70.28,382.42,0.2744,1.40886,0.04246],[894.13,72.04,382.59,0.28069,1.40526,0.04114],[922.45,73.8,382.74,0.28698,1.40166,0.03986],[951.45,75.57,382.88,0.29325,1.39807,0.03862],[981.13,77.35,383.01,0.29953,1.3945,0.03743],[1011.5,79.13,383.13,0.3058,1.39093,0.03629],[1042.58,80.92,383.24,0.31206,1.38737,0.03518],[1074.38,82.72,383.34,0.31832,1.38381,0.03411],[1106.91,84.52,383.43,0.32458,1.38026,0.03308],[1140.17,86.32,383.51,0.33083,1.37672,0.03208],[1174.18,88.14,383.58,0.33708,1.37318,0.03112],[1208.95,89.96,383.63,0.34333,1.36964,0.03019],[1244.49,91.78,383.68,0.34958,1.36611,0.02929],[1280.81,93.62,383.71,0.35583,1.36257,0.02842],[1317.93,95.46,383.73,0.36208,1.35904,0.02758],[1355.85,97.31,383.73,0.36833,1.3555,0.02676],[1394.59,99.16,383.73,0.37458,1.35196,0.02598],[1434.16,101.02,383.71,0.38083,1.34842,0.02521],[1474.57,102.89,383.67,0.38708,1.34487,0.02448],[1515.82,104.77,383.62,0.39334,1.34132,0.02376],[1557.95,106.66,383.56,0.3996,1.33776,0.02307],[1600.95,108.56,383.48,0.40586,1.33419,0.0224],[1644.83,110.46,383.39,0.41213,1.33062,0.02175],[1689.62,112.38,383.28,0.4184,1.32703,0.02112],[1735.32,114.3,383.16,0.42468,1.32343,0.02051],[1781.95,116.23,383.02,0.43097,1.31982,0.01992],[1829.51,118.17,382.86,0.43726,1.31619,0.01935],[1878.03,120.13,382.69,0.44357,1.31255,0.0188],[1927.51,122.09,382.5,0.44988,1.30889,0.01826],[1977.96,124.07,382.29,0.45621,1.30521,0.01773],[2029.41,126.05,382.06,0.46254,1.30151,0.01722],[2081.86,128.05,381.81,0.46889,1.29778,0.01673],[2135.33,130.06,381.54,0.47525,1.29403,0.01625],[2189.83,132.08,381.26,0.48163,1.29026,0.01579],[2245.38,134.11,380.95,0.48802,1.28645,0.01533],[2301.99,136.16,380.61,0.49443,1.28262,0.0149],[2359.67,138.22,380.26,0.50086,1.27875,0.01447],[2418.44,140.3,379.88,0.50731,1.27485,0.01405],[2478.31,142.39,379.48,0.51378,1.27091,0.01365],[2539.31,144.49,379.05,0.52028,1.26693,0.01326],[2601.43,146.61,378.6,0.5268,1.26291,0.01287],[2664.71,148.75,378.12,0.53335,1.25884,0.0125],[2729.16,150.91,377.61,0.53992,1.25473,0.01214],[2794.78,153.08,377.07,0.54653,1.25056,0.01178],[2861.61,155.28,376.5,0.55317,1.24633,0.01144],[2929.65,157.49,375.9,0.55985,1.24205,0.0111],[2998.92,159.72,375.26,0.56657,1.2377,0.01078],[3069.44,161.98,374.59,0.57332,1.23329,0.01046],[3141.23,164.26,373.88,0.58013,1.2288,0.01015],[3214.31,166.57,373.13,0.58698,1.22423,0.00984],[3288.7,168.9,372.34,0.59388,1.21958,0.00955],[3364.4,171.25,371.51,0.60084,1.21484,0.00926],[3441.46,173.64,370.63,0.60786,1.21,0.00897],[3519.88,176.06,369.7,0.61495,1.20505,0.0087],[3599.68,178.51,368.73,0.6221,1.2,0.00843],[3680.9,181.0,367.69,0.62934,1.19482,0.00816],[3763.55,183.52,366.6,0.63666,1.1895,0.0079],[3847.65,186.09,365.44,0.64408,1.18404,0.00765],[3933.23,188.7,364.22,0.65159,1.17842,0.0074],[4020.32,191.36,362.92,0.65922,1.17263,0.00715],[4108.94,194.07,361.54,0.66698,1.16665,0.00691],[4199.11,196.84,360.07,0.67487,1.16045,0.00667],[4290.88,199.67,358.5,0.68292,1.15401,0.00644],[4384.27,202.57,356.83,0.69114,1.14731,0.00621]],"SH":[0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80,84,88,92,96,100],"h":[[373.05,376.99,380.83,384.58,388.28,391.93,395.54,399.14,402.71,406.27,409.82,413.37,416.92,420.47,424.02,427.58,431.14,434.72,438.3,441.9,445.51,449.14,452.78,456.44,460.12,463.81],[373.45,377.42,381.27,385.05,388.76,392.43,396.07,399.67,403.26,406.84,410.41,413.97,417.53,421.09,424.65,428.22,431.8,435.39,438.99,442.6,446.22,449.86,453.51,457.18,460.86,464.57],[373.84,377.83,381.71,385.51,389.24,392.93,396.58,400.21,403.81,407.41,410.99,414.56,418.14,421.71,425.29,428.87,432.46,436.06,439.67,443.29,446.92,450.57,454.23,457.91,461.61,465.33],[374.22,378.24,382.15,385.97,389.72,393.43,397.1,400.74,404.36,407.97,411.56,415.15,418.74,422.33,425.92,429.51,433.12,436.73,440.35,443.98,447.62,451.28,454.96,458.65,462.36,466.08],[374.6,378.65,382.58,386.42,390.19,393.92,397.61,401.27,404.9,408.53,412.14,415.74,419.34,422.94,426.55,430.15,433.77,437.39,441.02,444.67,448.32,451.99,455.68,459.38,463.1,466.84],[374.97,379.05,383.0,386.86,390.66,394.4,398.11,401.79,405.44,409.08,412.71,416.33,419.94,423.55,427.17,430.79,434.42,438.05,441.7,445.35,449.02,452.7,456.4,460.11,463.84,467.59],[375.34,379.44,383.42,387.3,391.12,394.89,398.61,402.3,405.98,409.63,413.27,416.91,420.53,424.16,427.79,431.43,435.07,438.71,442.37,446.04,449.72,453.41,457.12,460.84,464.58,468.34],[375.7,379.83,383.83,387.74,391.58,395.36,399.11,402.82,406.51,410.18,413.83,417.48,421.13,424.77,428.41,432.06,435.71,439.37,443.04,446.72,450.41,454.11,457.83,461.57,465.32,469.08],[376.06,380.21,384.24,388.17,392.03,395.84,399.6,403.33,407.03,410.72,414.39,418.06,421.71,425.37,429.03,432.69,436.35,440.02,443.7,447.4,451.1,454.81,458.54,462.29,466.05,469.83],[376.4,380.59,384.64,388.6,392.48,396.3,400.08,403.83,407.55,411.26,414.95,418.63,422.3,425.97,429.64,433.31,436.99,440.67,444.37,448.07,451.79,455.51,459.26,463.01,466.78,470.57],[376.75,380.96,385.04,389.02,392.92,396.77,400.57,404.33,408.07,411.79,415.5,419.19,422.88,426.56,430.25,433.93,437.63,441.32,445.03,448.74,452.47,456.21,459.96,463.73,467.51,471.31],[377.08,381.33,385.43,389.43,393.36,397.22,401.04,404.83,408.59,412.32,416.04,419.75,423.46,427.15,430.85,434.55,438.26,441.97,445.69,449.41,453.15,456.9,460.67,464.45,468.24,472.05],[377.41,381.68,385.82,389.84,393.79,397.68,401.52,405.32,409.1,412.85,416.59,420.31,424.03,427.74,431.46,435.17,438.89,442.61,446.34,450.08,453.83,457.6,461.37,465.16,468.97,472.79],[377.73,382.04,386.19,390.25,394.22,398.12,401.98,405.81,409.6,413.37,417.12,420.87,424.6,428.33,432.05,435.78,439.51,443.25,446.99,450.75,454.51,458.29,462.07,465.88,469.69,473.53],[378.05,382.38,386.57,390.64,394.64,398.57,402.45,406.29,410.1,413.89,417.66,421.42,425.17,428.91,432.65,436.39,440.14,443.89,447.64,451.41,455.19,458.97,462.77,466.59,470.42,474.26],[378.36,382.72,386.93,391.04,395.05,399.0,402.91,406.77,410.6,414.4,418.19,421.96,425.73,429.49,433.24,437.0,440.76,444.52,448.29,452.07,455.86,459.66,463.47,467.29,471.13,474.99],[378.66,383.05,387.29,391.42,395.46,399.44,403.36,407.24,411.09,414.91,418.72,422.51,426.29,430.06,433.83,437.6,441.37,445.15,448.93,452.73,456.53,460.34,464.16,468.0,471.85,475.72],[378.95,383.38,387.65,391.8,395.87,399.86,403.81,407.71,411.57,415.42,419.24,423.04,426.84,430.63,434.42,438.2,441.99,445.78,449.57,453.38,457.19,461.02,464.85,468.7,472.57,476.44],[379.24,383.7,388.0,392.18,396.26,400.28,404.25,408.17,412.06,415.92,419.75,423.58,427.39,431.2,435.0,438.8,442.6,446.4,450.21,454.03,457.86,461.69,465.54,469.4,473.28,477.17],[379.52,384.01,388.34,392.54,396.66,400.7,404.69,408.63,412.53,416.41,420.27,424.11,427.94,431.76,435.57,439.39,443.2,447.02,450.85,454.68,458.52,462.37,466.23,470.1,473.99,477.89],[379.79,384.32,388.67,392.91,397.04,401.11,405.12,409.08,413.01,416.9,420.78,424.63,428.48,432.32,436.15,439.98,443.81,447.64,451.48,455.32,459.17,463.04,466.91,470.8,474.69,478.61],[380.06,384.61,389.0,393.26,397.43,401.51,405.54,409.53,413.47,417.39,421.28,425.16,429.02,432.87,436.72,440.56,444.41,448.25,452.1,455.96,459.83,463.7,467.59,471.49,475.4,479.32],[380.32,384.9,389.32,393.61,397.8,401.91,405.97,409.97,413.94,417.87,421.78,425.67,429.55,433.42,437.28,441.14,445.0,448.86,452.73,456.6,460.48,464.37,468.27,472.18,476.1,480.04],[380.56,385.19,389.64,393.95,398.17,402.31,406.38,410.41,414.39,418.35,422.28,426.19,430.08,433.97,437.85,441.72,445.6,449.47,453.35,457.24,461.13,465.03,468.94,472.86,476.8,480.75],[380.81,385.46,389.94,394.29,398.53,402.69,406.79,410.84,414.84,418.82,422.77,426.7,430.61,434.51,438.41,442.3,446.18,450.08,453.97,457.87,461.77,465.69,469.61,473.55,477.5,481.46],[381.04,385.73,390.24,394.62,398.89,403.07,407.2,411.26,415.29,419.29,423.25,427.2,431.13,435.05,438.96,442.87,446.77,450.68,454.58,458.5,462.42,466.34,470.28,474.23,478.19,482.16],[381.26,385.99,390.54,394.94,399.24,403.45,407.59,411.69,415.73,419.75,423.73,427.7,431.65,435.58,439.51,443.43,447.35,451.27,455.19,459.12,463.05,467.0,470.95,474.91,478.88,482.87],[381.48,386.25,390.82,395.26,399.58,403.82,407.99,412.1,416.17,420.2,424.21,428.19,432.16,436.11,440.06,443.99,447.93,451.86,455.8,459.74,463.69,467.65,471.61,475.58,479.57,483.57],[381.69,386.49,391.1,395.56,399.92,404.18,408.37,412.51,416.6,420.66,424.68,428.68,432.67,436.64,440.6,444.55,448.5,452.45,456.41,460.36,464.32,468.29,472.27,476.26,480.25,484.27],[381.88,386.73,391.37,395.87,400.25,404.54,408.75,412.91,417.03,421.1,425.15,429.17,433.17,437.16,441.14,445.11,449.07,453.04,457.01,460.98,464.95,468.93,472.92,476.93,480.94,484.96],[382.07,386.95,391.63,396.16,400.57,404.89,409.13,413.31,417.45,421.54,425.61,429.65,433.67,437.68,441.67,445.66,449.64,453.62,457.6,461.59,465.58,469.57,473.58,477.59,481.62,485.65],[382.25,387.17,391.89,396.45,400.89,405.23,409.5,413.7,417.86,421.98,426.07,430.13,434.17,438.19,442.2,446.2,450.2,454.2,458.2,462.2,466.2,470.21,474.23,478.26,482.29,486.34],[382.42,387.39,392.14,396.73,401.19,405.57,409.86,414.09,418.27,422.41,426.52,430.6,434.65,438.7,442.73,446.75,450.76,454.77,458.79,462.8,466.82,470.84,474.88,478.92,482.97,487.03],[382.59,387.59,392.37,397.0,401.5,405.9,410.22,414.47,418.68,422.84,426.96,431.06,435.14,439.2,443.25,447.28,451.32,455.34,459.37,463.4,467.43,471.47,475.52,479.57,483.64,487.71],[382.74,387.78,392.6,397.26,401.79,406.22,410.57,414.85,419.07,423.26,427.4,431.52,435.62,439.7,443.76,447.82,451.87,455.91,459.95,464.0,468.05,472.1,476.16,480.23,484.31,488.39],[382.88,387.97,392.83,397.52,402.08,406.54,410.91,415.21,419.47,423.67,427.84,431.98,436.1,440.19,444.27,448.35,452.41,456.47,460.53,464.59,468.65,472.72,476.8,480.88,484.97,489.07],[383.01,388.14,393.04,397.77,402.36,406.84,411.25,415.58,419.85,424.08,428.27,432.43,436.57,440.68,444.78,448.87,452.95,457.03,461.11,465.18,469.26,473.34,477.43,481.53,485.63,489.75],[383.13,388.31,393.25,398.01,402.63,407.15,411.58,415.93,420.23,424.48,428.7,432.88,437.03,441.17,445.29,449.39,453.49,457.59,461.68,465.77,469.86,473.96,478.06,482.17,486.29,490.42],[383.24,388.46,393.44,398.24,402.9,407.44,411.9,416.28,420.61,424.88,429.11,433.32,437.49,441.65,445.78,449.91,454.03,458.14,462.24,466.35,470.46,474.57,478.69,482.81,486.94,491.09],[383.34,388.61,393.63,398.46,403.15,407.73,412.22,416.62,420.97,425.27,429.53,433.75,437.95,442.12,446.28,450.42,454.55,458.68,462.81,466.93,471.05,475.18,479.31,483.45,487.6,491.75],[383.43,388.75,393.81,398.68,403.4,408.01,412.52,416.96,421.33,425.66,429.94,434.18,438.4,442.59,446.77,450.93,455.08,459.22,463.36,467.5,471.64,475.78,479.93,484.08,488.24,492.41],[383.51,388.87,393.98,398.89,403.65,408.28,412.83,417.29,421.69,426.04,430.34,434.61,438.84,443.06,447.25,451.43,455.6,459.76,463.92,468.07,472.23,476.39,480.55,484.71,488.89,493.07],[383.58,388.99,394.14,399.09,403.88,408.55,413.12,417.61,422.04,426.41,430.74,435.02,439.28,443.52,447.73,451.93,456.12,460.29,464.47,468.64,472.81,476.98,481.16,485.34,489.53,493.73],[383.63,389.1,394.29,399.28,404.1,408.81,413.41,417.93,422.38,426.78,431.13,435.44,439.72,443.97,448.2,452.42,456.63,460.82,465.01,469.2,473.39,477.58,481.77,485.97,490.17,494.38],[383.68,389.19,394.43,399.46,404.32,409.06,413.69,418.24,422.72,427.14,431.51,435.85,440.15,444.42,448.67,452.91,457.13,461.35,465.56,469.76,473.96,478.17,482.38,486.59,490.8,495.03],[383.71,389.28,394.56,399.63,404.53,409.3,413.97,418.54,423.05,427.49,431.89,436.25,440.57,444.87,449.14,453.39,457.64,461.87,466.09,470.31,474.53,478.75,482.98,487.2,491.44,495.68],[383.73,389.35,394.68,399.79,404.73,409.54,414.23,418.84,423.37,427.84,432.26,436.64,440.99,445.3,449.6,453.87,458.13,462.38,466.63,470.87,475.1,479.34,483.58,487.82,492.06,496.32],[383.73,389.41,394.79,399.94,404.92,409.76,414.49,419.13,423.69,428.18,432.63,437.03,441.4,445.74,450.05,454.35,458.63,462.9,467.16,471.41,475.66,479.92,484.17,488.43,492.69,496.96],[383.73,389.46,394.89,400.09,405.1,409.98,414.74,419.41,424.0,428.52,432.99,437.42,441.81,446.17,450.5,454.82,459.12,463.4,467.68,471.95,476.22,480.49,484.76,489.03,493.31,497.59],[383.71,389.5,394.98,400.22,405.28,410.19,414.98,419.68,424.3,428.85,433.35,437.8,442.21,446.59,450.95,455.28,459.6,463.9,468.2,472.49,476.78,481.06,485.35,489.64,493.93,498.23],[383.67,389.53,395.06,400.34,405.44,410.39,415.22,419.95,424.59,429.17,433.7,438.17,442.61,447.01,451.39,455.74,460.08,464.4,468.72,473.02,477.33,481.63,485.93,490.23,494.54,498.86],[383.62,389.54,395.13,400.46,405.6,410.58,415.45,420.21,424.88,429.49,434.04,438.54,443.0,447.42,451.82,456.19,460.55,464.9,469.23,473.55,477.87,482.19,486.51,490.83,495.15,499.48],[383.56,389.54,395.18,400.56,405.74,410.77,415.67,420.46,425.16,429.8,434.37,438.9,443.38,447.83,452.25,456.64,461.02,465.38,469.73,474.08,478.42,482.75,487.08,491.42,495.76,500.1],[383.48,389.53,395.23,400.66,405.88,410.94,415.88,420.7,425.44,430.1,434.7,439.25,443.76,448.23,452.67,457.09,461.49,465.87,470.24,474.6,478.95,483.31,487.66,492.01,496.36,500.72],[383.39,389.51,395.26,400.74,406.01,411.11,416.08,420.94,425.7,430.4,435.02,439.6,444.13,448.63,453.09,457.53,461.94,466.35,470.73,475.11,479.49,483.86,488.22,492.59,496.96,501.34],[383.28,389.47,395.28,400.81,406.12,411.27,416.27,421.16,425.96,430.68,435.34,439.94,444.5,449.02,453.5,457.96,462.4,466.82,471.23,475.63,480.02,484.4,488.79,493.17,497.56,501.95],[383.16,389.42,395.29,400.87,406.23,411.42,416.46,421.38,426.22,430.97,435.65,440.28,444.86,449.4,453.91,458.39,462.85,467.29,471.72,476.13,480.54,484.94,489.35,493.75,498.15,502.55],[383.02,389.35,395.29,400.92,406.33,411.55,416.64,421.6,426.46,431.24,435.95,440.61,445.21,449.78,454.31,458.81,463.29,467.75,472.2,476.63,481.06,485.48,489.9,494.32,498.74,503.16],[382.86,389.27,395.27,400.96,406.42,411.68,416.8,421.8,426.7,431.51,436.25,440.93,445.56,450.15,454.7,459.23,463.73,468.21,472.68,477.13,481.58,486.02,490.45,494.89,499.32,503.76],[382.69,389.18,395.24,400.99,406.49,411.8,416.96,422.0,426.93,431.77,436.54,441.25,445.9,450.52,455.09,459.64,464.16,468.67,473.15,477.63,482.09,486.55,491.0,495.45,499.9,504.35],[382.5,389.07,395.2,401.0,406.56,411.91,417.11,422.18,427.15,432.02,436.82,441.56,446.24,450.88,455.48,460.05,464.59,469.11,473.62,478.11,482.6,487.07,491.54,496.01,500.48,504.94],[382.29,388.95,395.14,401.01,406.61,412.01,417.25,422.36,427.36,432.26,437.09,441.86,446.57,451.23,455.86,460.45,465.02,469.56,474.09,478.6,483.1,487.59,492.08,496.56,501.05,505.53],[382.06,388.81,395.08,401.0,406.66,412.1,417.39,422.53,427.56,432.5,437.36,442.15,446.89,451.58,456.23,460.84,465.43,470.0,474.54,479.08,483.6,488.11,492.61,497.12,501.62,506.12],[381.81,388.65,394.99,400.98,406.69,412.18,417.51,422.69,427.76,432.73,437.62,442.44,447.21,451.92,456.6,461.23,465.84,470.43,475.0,479.55,484.09,488.62,493.14,497.66,502.18,506.7],[381.54,388.48,394.9,400.94,406.71,412.25,417.62,422.85,427.95,432.95,437.88,442.73,447.52,452.26,456.96,461.62,466.25,470.86,475.45,480.02,484.58,489.13,493.67,498.21,502.74,507.27],[381.26,388.29,394.78,400.9,406.72,412.31,417.73,422.99,428.13,433.17,438.12,443.0,447.82,452.59,457.31,462.0,466.65,471.28,475.89,480.48,485.06,489.63,494.19,498.74,503.3,507.85],[380.95,388.08,394.66,400.84,406.72,412.36,417.82,423.12,428.3,433.37,438.36,443.27,448.12,452.91,457.66,462.37,467.05,471.7,476.33,480.94,485.54,490.13,494.71,499.28,503.85,508.42],[380.61,387.85,394.52,400.77,406.7,412.4,417.9,423.25,428.47,433.57,438.59,443.53,448.41,453.23,458.0,462.74,467.44,472.11,476.76,481.4,486.01,490.62,495.22,499.81,504.4,508.98],[380.26,387.61,394.36,400.68,406.68,412.43,417.98,423.37,428.62,433.76,438.81,443.78,448.69,453.54,458.34,463.1,467.82,472.52,477.19,481.85,486.48,491.11,495.73,500.33,504.94,509.54],[379.88,387.35,394.18,400.58,406.64,412.44,418.04,423.47,428.77,433.95,439.03,444.03,448.97,453.84,458.67,463.45,468.2,472.92,477.62,482.29,486.95,491.59,496.23,500.86,505.48,510.1],[379.48,387.06,394.0,400.46,406.59,412.45,418.09,423.57,428.9,434.12,439.24,444.27,449.23,454.14,458.99,463.8,468.57,473.32,478.03,482.73,487.41,492.07,496.73,501.37,506.01,510.65],[379.05,386.76,393.79,400.34,406.53,412.44,418.14,423.66,429.03,434.28,439.44,444.5,449.5,454.43,459.31,464.14,468.94,473.71,478.45,483.16,487.86,492.55,497.22,501.89,506.54,511.2],[378.6,386.44,393.57,400.19,406.45,412.42,418.17,423.74,429.15,434.44,439.63,444.73,449.75,454.71,459.62,464.48,469.3,474.09,478.85,483.59,488.31,493.02,497.71,502.39,507.07,511.74],[378.12,386.1,393.32,400.03,406.36,412.39,418.19,423.8,429.26,434.59,439.81,444.94,450.0,454.99,459.92,464.81,469.66,474.47,479.26,484.02,488.76,493.48,498.2,502.9,507.59,512.28],[377.61,385.73,393.07,399.86,406.26,412.35,418.2,423.86,429.36,434.73,439.99,445.15,450.24,455.26,460.22,465.14,470.01,474.85,479.65,484.44,489.2,493.94,498.68,503.4,508.11,512.82],[377.07,385.34,392.79,399.67,406.14,412.3,418.2,423.91,429.45,434.86,440.16,445.36,450.47,455.52,460.51,465.45,470.35,475.21,480.04,484.85,489.63,494.4,499.15,503.89,508.62,513.35],[376.5,384.93,392.49,399.47,406.01,412.23,418.19,423.95,429.54,434.98,440.32,445.55,450.7,455.78,460.8,465.77,470.69,475.58,480.43,485.26,490.06,494.85,499.62,504.38,509.13,513.88],[375.9,384.49,392.18,399.24,405.87,412.15,418.17,423.97,429.61,435.1,440.47,445.74,450.92,456.03,461.08,466.07,471.02,475.93,480.81,485.66,490.49,495.29,500.09,504.87,509.64,514.4],[375.26,384.03,391.84,399.01,405.71,412.06,418.13,423.99,429.67,435.2,440.61,445.91,451.13,456.27,461.35,466.37,471.35,476.28,481.18,486.06,490.91,495.73,500.55,505.35,510.14,514.92],[374.59,383.55,391.49,398.75,405.53,411.95,418.09,424.0,429.72,435.3,440.74,446.08,451.33,456.51,461.61,466.66,471.67,476.63,481.55,486.45,491.32,496.17,501.0,505.82,510.63,515.43],[373.88,383.04,391.11,398.48,405.34,411.83,418.03,423.99,429.77,435.38,440.87,446.25,451.53,456.73,461.87,466.95,471.98,476.96,481.91,486.83,491.73,496.6,501.45,506.29,511.12,515.94],[373.13,382.5,390.72,398.19,405.14,411.7,417.96,423.98,429.8,435.46,440.99,446.4,451.72,456.95,462.12,467.23,472.28,477.3,482.27,487.21,492.13,497.02,501.9,506.76,511.61,516.44],[372.34,381.93,390.3,397.88,404.92,411.56,417.88,423.95,429.82,435.53,441.09,446.55,451.9,457.17,462.37,467.5,472.58,477.62,482.62,487.59,492.53,497.44,502.34,507.22,512.09,516.94],[371.51,381.33,389.85,397.56,404.69,411.4,417.78,423.91,429.83,435.58,441.19,446.68,452.07,457.37,462.6,467.77,472.88,477.94,482.97,487.96,492.92,497.86,502.78,507.68,512.56,517.44],[370.63,380.71,389.39,397.21,404.44,411.22,417.67,423.86,429.84,435.63,441.28,446.81,452.24,457.57,462.83,468.03,473.16,478.26,483.31,488.32,493.31,498.27,503.21,508.13,513.04,517.93],[369.7,380.05,388.9,396.85,404.17,411.03,417.55,423.8,429.83,435.67,441.36,446.93,452.39,457.76,463.05,468.28,473.45,478.56,483.64,488.68,493.69,498.67,503.63,508.57,513.5,518.42],[368.73,379.35,388.39,396.46,403.88,410.83,417.42,423.73,429.81,435.7,441.44,447.04,452.54,457.94,463.27,468.52,473.72,478.86,483.97,489.03,494.06,499.07,504.05,509.02,513.96,518.9],[367.69,378.63,387.85,396.06,403.58,410.62,417.28,423.64,429.78,435.72,441.5,447.15,452.68,458.12,463.48,468.76,473.99,479.16,484.29,489.38,494.43,499.46,504.47,509.45,514.42,519.37],[366.6,377.87,387.29,395.63,403.26,410.38,417.12,423.55,429.73,435.72,441.55,447.24,452.81,458.29,463.68,468.99,474.25,479.45,484.6,489.72,494.8,499.85,504.88,509.88,514.87,519.85],[365.44,377.07,386.7,395.19,402.93,410.14,416.94,423.44,429.68,435.72,441.59,447.32,452.94,458.44,463.87,469.22,474.5,479.73,484.91,490.05,495.15,500.23,505.28,510.31,515.32,520.31],[364.22,376.23,386.08,394.72,402.57,409.87,416.76,423.32,429.62,435.71,441.63,447.4,453.05,458.6,464.05,469.43,474.75,480.0,485.21,490.38,495.51,500.61,505.68,510.73,515.76,520.77],[362.92,375.35,385.43,394.23,402.2,409.59,416.55,423.18,429.54,435.69,441.65,447.47,453.16,458.74,464.23,469.64,474.98,480.27,485.51,490.7,495.85,500.98,506.07,511.14,516.2,521.23],[361.54,374.43,384.75,393.71,401.81,409.3,416.34,423.03,429.45,435.65,441.66,447.52,453.25,458.87,464.4,469.84,475.22,480.53,485.79,491.01,496.19,501.34,506.46,511.55,516.63,521.68],[360.07,373.47,384.05,393.18,401.4,408.99,416.11,422.87,429.36,435.61,441.67,447.57,453.34,459.0,464.56,470.03,475.44,480.78,486.08,491.32,496.53,501.7,506.84,511.96,517.05,522.13],[358.5,372.46,383.31,392.62,400.97,408.66,415.87,422.7,429.24,435.55,441.66,447.61,453.42,459.11,464.71,470.22,475.66,481.03,486.35,491.62,496.85,502.05,507.21,512.35,517.47,522.57],[356.83,371.4,382.54,392.04,400.52,408.31,415.61,422.51,429.12,435.48,441.64,447.64,453.49,459.22,464.85,470.4,475.87,481.27,486.62,491.92,497.17,502.39,507.58,512.75,517.88,523.01]],"s":[[1.53529,1.55139,1.56678,1.58161,1.59598,1.60995,1.6236,1.63694,1.65003,1.66288,1.67552,1.68796,1.70022,1.71233,1.72428,1.73609,1.74777,1.75934,1.77079,1.78213,1.79338,1.80454,1.8156,1.82659,1.83749,1.84832],[1.53088,1.54701,1.56243,1.57729,1.59168,1.60567,1.61933,1.63269,1.64578,1.65864,1.67128,1.68373,1.696,1.7081,1.72006,1.73187,1.74356,1.75512,1.76657,1.77792,1.78917,1.80032,1.81138,1.82237,1.83327,1.8441],[1.5265,1.54267,1.55813,1.57301,1.58742,1.60143,1.6151,1.62847,1.64158,1.65444,1.66709,1.67955,1.69182,1.70393,1.71589,1.72771,1.73939,1.75096,1.76241,1.77375,1.785,1.79615,1.80722,1.8182,1.8291,1.83992],[1.52217,1.53838,1.55386,1.56877,1.5832,1.59723,1.61092,1.6243,1.63742,1.65029,1.66295,1.67541,1.68769,1.6998,1.71176,1.72358,1.73527,1.74684,1.75829,1.76964,1.78088,1.79203,1.8031,1.81408,1.82498,1.8358],[1.51786,1.53412,1.54963,1.56457,1.57902,1.59308,1.60678,1.62018,1.6333,1.64619,1.65885,1.67132,1.6836,1.69572,1.70769,1.71951,1.7312,1.74277,1.75422,1.76557,1.77681,1.78796,1.79903,1.81001,1.82091,1.83173],[1.5136,1.52989,1.54544,1.56041,1.57489,1.58896,1.60268,1.61609,1.62923,1.64212,1.6548,1.66727,1.67956,1.69168,1.70365,1.71548,1.72717,1.73874,1.7502,1.76154,1.77279,1.78394,1.79501,1.80598,1.81688,1.82771],[1.50937,1.52571,1.54129,1.55629,1.57079,1.58488,1.59862,1.61204,1.6252,1.6381,1.65078,1.66327,1.67556,1.68769,1.69966,1.71149,1.72319,1.73476,1.74622,1.75757,1.76882,1.77997,1.79103,1.80201,1.81291,1.82373],[1.50517,1.52155,1.53718,1.5522,1.56673,1.58084,1.5946,1.60804,1.6212,1.63412,1.64681,1.6593,1.67161,1.68374,1.69572,1.70755,1.71925,1.73083,1.74229,1.75364,1.76489,1.77604,1.7871,1.79808,1.80898,1.8198],[1.50101,1.51744,1.5331,1.54815,1.56271,1.57684,1.59061,1.60407,1.61725,1.63018,1.64288,1.65538,1.66769,1.67983,1.69182,1.70365,1.71536,1.72694,1.7384,1.74975,1.761,1.77215,1.78322,1.7942,1.80509,1.81592],[1.49688,1.51335,1.52905,1.54414,1.55872,1.57288,1.58667,1.60014,1.61334,1.62628,1.63899,1.6515,1.66382,1.67596,1.68795,1.6998,1.7115,1.72309,1.73455,1.74591,1.75716,1.76831,1.77938,1.79036,1.80126,1.81208],[1.49278,1.5093,1.52504,1.54016,1.55477,1.56895,1.58276,1.59625,1.60946,1.62241,1.63514,1.64766,1.65998,1.67214,1.68413,1.69598,1.70769,1.71928,1.73075,1.74211,1.75336,1.76452,1.77558,1.78656,1.79746,1.80828],[1.48871,1.50528,1.52106,1.53621,1.55085,1.56505,1.57889,1.5924,1.60562,1.61859,1.63132,1.64385,1.65619,1.66835,1.68035,1.69221,1.70392,1.71551,1.72699,1.73835,1.7496,1.76076,1.77183,1.78281,1.79371,1.80453],[1.48467,1.50129,1.51711,1.5323,1.54696,1.5612,1.57505,1.58858,1.60182,1.6148,1.62755,1.64009,1.65243,1.6646,1.67661,1.68847,1.7002,1.71179,1.72327,1.73463,1.74589,1.75705,1.76812,1.7791,1.79,1.80083],[1.48066,1.49733,1.51319,1.52842,1.54311,1.55737,1.57125,1.5848,1.59805,1.61105,1.62381,1.63636,1.64871,1.66089,1.67291,1.68478,1.69651,1.70811,1.71958,1.73095,1.74221,1.75338,1.76445,1.77543,1.78634,1.79716],[1.47668,1.4934,1.50931,1.52457,1.53929,1.55358,1.56748,1.58105,1.59432,1.60733,1.62011,1.63267,1.64503,1.65722,1.66925,1.68112,1.69285,1.70446,1.71594,1.72731,1.73858,1.74975,1.76082,1.77181,1.78271,1.79354],[1.47273,1.4895,1.50545,1.52075,1.53551,1.54982,1.56374,1.57733,1.59062,1.60365,1.61644,1.62901,1.64139,1.65359,1.66562,1.6775,1.68924,1.70085,1.71234,1.72372,1.73499,1.74616,1.75723,1.76822,1.77913,1.78995],[1.4688,1.48563,1.50162,1.51696,1.53175,1.54609,1.56004,1.57365,1.58696,1.6,1.61281,1.62539,1.63778,1.64999,1.66203,1.67392,1.68567,1.69728,1.70878,1.72016,1.73143,1.7426,1.75368,1.76467,1.77558,1.78641],[1.4649,1.48178,1.49782,1.51319,1.52802,1.54239,1.55637,1.57,1.58333,1.59639,1.60921,1.62181,1.63421,1.64642,1.65847,1.67037,1.68213,1.69375,1.70525,1.71663,1.72791,1.73909,1.75017,1.76117,1.77208,1.7829],[1.46102,1.47796,1.49405,1.50946,1.52432,1.53872,1.55272,1.56638,1.57973,1.59281,1.60564,1.61825,1.63067,1.64289,1.65496,1.66686,1.67862,1.69025,1.70176,1.71315,1.72443,1.73561,1.7467,1.7577,1.76861,1.77944],[1.45717,1.47416,1.4903,1.50576,1.52065,1.53508,1.54911,1.56279,1.57616,1.58926,1.60211,1.61473,1.62716,1.6394,1.65147,1.66338,1.67515,1.68679,1.6983,1.7097,1.72099,1.73217,1.74326,1.75426,1.76518,1.77601],[1.45334,1.47039,1.48658,1.50208,1.51701,1.53147,1.54553,1.55923,1.57262,1.58574,1.5986,1.61125,1.62369,1.63594,1.64802,1.65994,1.67172,1.68337,1.69488,1.70629,1.71758,1.72877,1.73986,1.75087,1.76178,1.77262],[1.44953,1.46665,1.48288,1.49843,1.5134,1.52789,1.54197,1.5557,1.56912,1.58225,1.59513,1.60779,1.62024,1.63251,1.6446,1.65653,1.66832,1.67997,1.6915,1.70291,1.71421,1.7254,1.7365,1.74751,1.75843,1.76927],[1.44574,1.46292,1.47921,1.4948,1.50981,1.52434,1.53845,1.5522,1.56564,1.57879,1.59169,1.60437,1.61683,1.62911,1.64121,1.65316,1.66495,1.67661,1.68815,1.69956,1.71087,1.72207,1.73317,1.74418,1.75511,1.76595],[1.44198,1.45922,1.47556,1.4912,1.50625,1.52081,1.53495,1.54873,1.56219,1.57536,1.58828,1.60097,1.61345,1.62574,1.63786,1.64981,1.66162,1.67329,1.68483,1.69625,1.70756,1.71877,1.72988,1.74089,1.75182,1.76267],[1.43823,1.45554,1.47194,1.48762,1.50271,1.5173,1.53148,1.54528,1.55877,1.57196,1.5849,1.59761,1.61011,1.62241,1.63454,1.6465,1.65832,1.67,1.68154,1.69297,1.70429,1.7155,1.72661,1.73763,1.74857,1.75942],[1.4345,1.45188,1.46833,1.48406,1.49919,1.51383,1.52803,1.54187,1.55537,1.56859,1.58155,1.59427,1.60679,1.6191,1.63124,1.64322,1.65505,1.66673,1.67829,1.68973,1.70105,1.71227,1.72339,1.73441,1.74535,1.7562],[1.43079,1.44824,1.46475,1.48053,1.4957,1.51037,1.52461,1.53847,1.55201,1.56525,1.57823,1.59097,1.6035,1.61583,1.62798,1.63997,1.65181,1.6635,1.67507,1.68651,1.69784,1.70907,1.72019,1.73122,1.74216,1.75302],[1.4271,1.44462,1.46119,1.47702,1.49223,1.50694,1.52121,1.53511,1.54867,1.56193,1.57493,1.58769,1.60023,1.61258,1.62475,1.63675,1.6486,1.6603,1.67188,1.68333,1.69467,1.7059,1.71703,1.72806,1.73901,1.74987],[1.42342,1.44101,1.45765,1.47353,1.48879,1.50353,1.51784,1.53176,1.54535,1.55864,1.57166,1.58444,1.597,1.60936,1.62154,1.63356,1.64542,1.65713,1.66872,1.68018,1.69152,1.70276,1.7139,1.72494,1.73589,1.74676],[1.41976,1.43743,1.45412,1.47006,1.48536,1.50015,1.51449,1.52844,1.54206,1.55537,1.56841,1.58121,1.59379,1.60617,1.61837,1.63039,1.64227,1.65399,1.66559,1.67706,1.68841,1.69965,1.7108,1.72184,1.7328,1.74367],[1.41612,1.43386,1.45062,1.4666,1.48196,1.49679,1.51116,1.52515,1.53879,1.55213,1.5652,1.57802,1.59061,1.60301,1.61522,1.62726,1.63914,1.65088,1.66248,1.67396,1.68532,1.69658,1.70773,1.71878,1.72974,1.74062],[1.41248,1.4303,1.44713,1.46317,1.47858,1.49345,1.50786,1.52188,1.53555,1.54891,1.562,1.57484,1.58746,1.59987,1.6121,1.62415,1.63605,1.6478,1.65941,1.6709,1.68227,1.69353,1.70469,1.71575,1.72671,1.7376],[1.40886,1.42676,1.44366,1.45976,1.47521,1.49012,1.50458,1.51863,1.53233,1.54572,1.55883,1.57169,1.58433,1.59676,1.609,1.62107,1.63298,1.64474,1.65636,1.66786,1.67924,1.69051,1.70167,1.71274,1.72371,1.7346],[1.40526,1.42324,1.4402,1.45636,1.47187,1.48682,1.50131,1.5154,1.52913,1.54255,1.55569,1.56857,1.58123,1.59367,1.60593,1.61801,1.62994,1.64171,1.65335,1.66485,1.67624,1.68752,1.69869,1.70976,1.72075,1.73164],[1.40166,1.41973,1.43676,1.45298,1.46854,1.48354,1.49807,1.51219,1.52596,1.5394,1.55256,1.56547,1.57815,1.59061,1.60289,1.61498,1.62692,1.63871,1.65035,1.66187,1.67327,1.68456,1.69574,1.70682,1.7178,1.7287],[1.39807,1.41623,1.43334,1.44962,1.46523,1.48028,1.49485,1.50901,1.5228,1.53628,1.54946,1.56239,1.57509,1.58757,1.59987,1.61198,1.62393,1.63573,1.64739,1.65892,1.67033,1.68162,1.69281,1.7039,1.71489,1.7258],[1.3945,1.41274,1.42992,1.44627,1.46194,1.47703,1.49165,1.50584,1.51967,1.53317,1.54638,1.55934,1.57206,1.58456,1.59687,1.609,1.62097,1.63278,1.64445,1.65599,1.66741,1.67871,1.68991,1.701,1.71201,1.72292],[1.39093,1.40927,1.42653,1.44294,1.45866,1.4738,1.48846,1.50269,1.51655,1.53009,1.54333,1.55631,1.56905,1.58157,1.5939,1.60604,1.61802,1.62985,1.64154,1.65309,1.66452,1.67583,1.68703,1.69814,1.70915,1.72006],[1.38737,1.4058,1.42314,1.43962,1.4554,1.47059,1.48529,1.49956,1.51346,1.52702,1.54029,1.5533,1.56606,1.5786,1.59095,1.60311,1.61511,1.62695,1.63865,1.65021,1.66165,1.67297,1.68419,1.6953,1.70631,1.71724],[1.38381,1.40234,1.41977,1.43631,1.45215,1.4674,1.48214,1.49645,1.51038,1.52398,1.53728,1.55031,1.56309,1.57566,1.58802,1.6002,1.61222,1.62407,1.63578,1.64736,1.65881,1.67014,1.68136,1.69249,1.70351,1.71444],[1.38026,1.3989,1.4164,1.43302,1.44892,1.46422,1.47901,1.49336,1.50733,1.52096,1.53428,1.54734,1.56015,1.57273,1.58512,1.59732,1.60935,1.62122,1.63294,1.64453,1.65599,1.66733,1.67857,1.6897,1.70073,1.71167],[1.37672,1.39546,1.41305,1.42974,1.4457,1.46105,1.47589,1.49029,1.50429,1.51795,1.53131,1.54439,1.55722,1.56983,1.58224,1.59445,1.6065,1.61838,1.63012,1.64172,1.6532,1.66455,1.67579,1.68693,1.69797,1.70892],[1.37318,1.39202,1.4097,1.42647,1.4425,1.4579,1.47279,1.48723,1.50127,1.51496,1.52835,1.54146,1.55432,1.56695,1.57937,1.59161,1.60367,1.61557,1.62733,1.63894,1.65043,1.66179,1.67304,1.68419,1.69524,1.7062],[1.36964,1.3886,1.40637,1.42321,1.4393,1.45477,1.4697,1.48418,1.49826,1.51199,1.52541,1.53855,1.55143,1.56409,1.57653,1.58879,1.60087,1.61278,1.62455,1.63618,1.64768,1.65906,1.67032,1.68148,1.69253,1.7035],[1.36611,1.38518,1.40304,1.41996,1.43612,1.45164,1.46663,1.48116,1.49528,1.50904,1.52249,1.53566,1.54857,1.56125,1.57371,1.58599,1.59808,1.61002,1.6218,1.63344,1.64495,1.65634,1.66762,1.67878,1.68985,1.70082],[1.36257,1.38176,1.39972,1.41672,1.43295,1.44853,1.46357,1.47814,1.4923,1.50611,1.51959,1.53278,1.54572,1.55842,1.57091,1.58321,1.59532,1.60727,1.61907,1.63073,1.64225,1.65365,1.66494,1.67611,1.68719,1.69817],[1.35904,1.37835,1.39641,1.41349,1.42979,1.44543,1.46053,1.47514,1.48935,1.50319,1.5167,1.52993,1.54289,1.55562,1.56813,1.58045,1.59258,1.60455,1.61636,1.62803,1.63957,1.65098,1.66228,1.67347,1.68455,1.69554],[1.3555,1.37494,1.3931,1.41027,1.42664,1.44235,1.45749,1.47216,1.48641,1.50028,1.51383,1.52709,1.54008,1.55283,1.56537,1.5777,1.58986,1.60184,1.61367,1.62536,1.63691,1.64833,1.65964,1.67084,1.68194,1.69294],[1.35196,1.37153,1.3898,1.40706,1.4235,1.43927,1.45447,1.46919,1.48348,1.49739,1.51098,1.52427,1.53729,1.55006,1.56262,1.57498,1.58715,1.59916,1.611,1.6227,1.63427,1.64571,1.65703,1.66824,1.67934,1.69035],[1.34842,1.36812,1.3865,1.40385,1.42037,1.4362,1.45146,1.46623,1.48056,1.49452,1.50814,1.52146,1.53451,1.54731,1.5599,1.57228,1.58447,1.59649,1.60835,1.62007,1.63165,1.6431,1.65443,1.66566,1.67677,1.68779],[1.34487,1.36471,1.3832,1.40064,1.41724,1.43315,1.44847,1.46328,1.47766,1.49166,1.50532,1.51867,1.53175,1.54458,1.55719,1.56959,1.5818,1.59384,1.60572,1.61746,1.62905,1.64052,1.65186,1.66309,1.67422,1.68525],[1.34132,1.3613,1.37991,1.39745,1.41413,1.4301,1.44548,1.46035,1.47477,1.48881,1.50251,1.51589,1.529,1.54186,1.55449,1.56692,1.57915,1.59121,1.60311,1.61486,1.62647,1.63795,1.64931,1.66055,1.67169,1.68273],[1.33776,1.35789,1.37662,1.39425,1.41102,1.42706,1.4425,1.45742,1.4719,1.48598,1.49971,1.51313,1.52627,1.53916,1.55182,1.56427,1.57652,1.5886,1.60052,1.61228,1.62391,1.6354,1.64677,1.65803,1.66918,1.68023],[1.33419,1.35448,1.37333,1.39106,1.40791,1.42403,1.43953,1.45451,1.46903,1.48316,1.49693,1.51038,1.52356,1.53647,1.54916,1.56163,1.57391,1.58601,1.59794,1.60972,1.62136,1.63287,1.64426,1.65553,1.66669,1.67775],[1.33062,1.35106,1.37004,1.38788,1.40481,1.42101,1.43657,1.45161,1.46618,1.48035,1.49416,1.50765,1.52086,1.5338,1.54651,1.55901,1.57131,1.58343,1.59538,1.60718,1.61884,1.63036,1.64176,1.65304,1.66422,1.67529],[1.32703,1.34764,1.36675,1.38469,1.40172,1.41799,1.43362,1.44871,1.46334,1.47755,1.4914,1.50493,1.51817,1.53115,1.54388,1.55641,1.56873,1.58087,1.59284,1.60466,1.61633,1.62787,1.63928,1.65058,1.66176,1.67284],[1.32343,1.34421,1.36345,1.38151,1.39863,1.41498,1.43068,1.44583,1.46051,1.47477,1.48866,1.50223,1.5155,1.5285,1.54127,1.55382,1.56616,1.57833,1.59032,1.60215,1.61384,1.6254,1.63682,1.64813,1.65933,1.67042],[1.31982,1.34078,1.36016,1.37833,1.39554,1.41197,1.42774,1.44296,1.45769,1.47199,1.48593,1.49953,1.51284,1.52587,1.53867,1.55124,1.56361,1.5758,1.58781,1.59966,1.61137,1.62294,1.63438,1.6457,1.65691,1.66802],[1.31619,1.33734,1.35686,1.37515,1.39246,1.40897,1.42481,1.44009,1.45487,1.46923,1.48321,1.49685,1.51019,1.52326,1.53608,1.54868,1.56108,1.57328,1.58532,1.59719,1.60891,1.6205,1.63196,1.64329,1.65451,1.66563],[1.31255,1.33389,1.35356,1.37197,1.38938,1.40597,1.42189,1.43723,1.45207,1.46647,1.4805,1.49418,1.50755,1.52066,1.53351,1.54614,1.55856,1.57079,1.58284,1.59473,1.60647,1.61808,1.62955,1.6409,1.65213,1.66326],[1.30889,1.33042,1.35025,1.36879,1.3863,1.40298,1.41897,1.43438,1.44927,1.46373,1.4778,1.49152,1.50493,1.51807,1.53095,1.5436,1.55605,1.5683,1.58038,1.59229,1.60405,1.61567,1.62716,1.63852,1.64977,1.66091],[1.30521,1.32695,1.34694,1.3656,1.38322,1.39999,1.41606,1.43153,1.44649,1.46099,1.47511,1.48887,1.50232,1.51549,1.5284,1.54109,1.55356,1.56583,1.57793,1.58986,1.60164,1.61328,1.62478,1.63616,1.64742,1.65857],[1.30151,1.32347,1.34362,1.36241,1.38014,1.39701,1.41315,1.42869,1.4437,1.45827,1.47243,1.48623,1.49972,1.51292,1.52587,1.53858,1.55108,1.56338,1.5755,1.58745,1.59925,1.6109,1.62242,1.63381,1.64509,1.65625],[1.29778,1.31997,1.34029,1.35922,1.37706,1.39402,1.41025,1.42585,1.44093,1.45555,1.46975,1.4836,1.49713,1.51037,1.52335,1.53609,1.54861,1.56093,1.57308,1.58505,1.59687,1.60854,1.62007,1.63148,1.64277,1.65395],[1.29403,1.31645,1.33696,1.35603,1.37398,1.39104,1.40735,1.42303,1.43816,1.45283,1.46709,1.48098,1.49455,1.50783,1.52084,1.53361,1.54616,1.55851,1.57067,1.58266,1.5945,1.60619,1.61774,1.62917,1.64047,1.65166],[1.29026,1.31292,1.33361,1.35283,1.3709,1.38806,1.40445,1.4202,1.4354,1.45013,1.46444,1.47837,1.49198,1.50529,1.51834,1.53114,1.54371,1.55609,1.56828,1.58029,1.59215,1.60386,1.61543,1.62687,1.63819,1.64939],[1.28645,1.30937,1.33025,1.34962,1.36782,1.38507,1.40155,1.41738,1.43265,1.44743,1.46179,1.47577,1.48942,1.50277,1.51585,1.52868,1.54128,1.55368,1.5659,1.57793,1.58981,1.60154,1.61312,1.62458,1.63591,1.64713],[1.28262,1.30581,1.32689,1.34641,1.36473,1.38209,1.39866,1.41456,1.4299,1.44474,1.45915,1.47318,1.48687,1.50026,1.51337,1.52623,1.53887,1.55129,1.56353,1.57559,1.58749,1.59923,1.61084,1.62231,1.63366,1.64489],[1.27875,1.30222,1.3235,1.34319,1.36164,1.37911,1.39577,1.41175,1.42715,1.44205,1.45652,1.4706,1.48433,1.49775,1.5109,1.52379,1.53646,1.54891,1.56117,1.57325,1.58517,1.59694,1.60856,1.62005,1.63141,1.64266],[1.27485,1.29861,1.32011,1.33996,1.35854,1.37612,1.39288,1.40894,1.42441,1.43937,1.45389,1.46802,1.48179,1.49526,1.50844,1.52137,1.53406,1.54654,1.55883,1.57093,1.58287,1.59466,1.6063,1.6178,1.62919,1.64045],[1.27091,1.29498,1.3167,1.33672,1.35544,1.37314,1.38998,1.40613,1.42167,1.4367,1.45127,1.46545,1.47927,1.49277,1.50599,1.51895,1.53167,1.54418,1.55649,1.56862,1.58058,1.59239,1.60405,1.61557,1.62697,1.63825],[1.26693,1.29132,1.31327,1.33347,1.35234,1.37015,1.38709,1.40332,1.41894,1.43403,1.44866,1.46288,1.47675,1.49029,1.50355,1.51654,1.5293,1.54183,1.55417,1.56633,1.57831,1.59013,1.60181,1.61335,1.62477,1.63606],[1.26291,1.28764,1.30983,1.33021,1.34922,1.36715,1.3842,1.40051,1.4162,1.43136,1.44605,1.46032,1.47424,1.48782,1.50112,1.51414,1.52693,1.5395,1.55186,1.56404,1.57604,1.58789,1.59959,1.61115,1.62258,1.63389],[1.25884,1.28392,1.30637,1.32694,1.3461,1.36415,1.38131,1.39771,1.41347,1.4287,1.44344,1.45777,1.47173,1.48536,1.49869,1.51175,1.52457,1.53717,1.54956,1.56176,1.57379,1.58566,1.59737,1.60895,1.6204,1.63172],[1.25473,1.28018,1.30288,1.32366,1.34297,1.36115,1.37841,1.3949,1.41075,1.42604,1.44084,1.45523,1.46923,1.4829,1.49627,1.50937,1.52222,1.53485,1.54727,1.55949,1.57155,1.58343,1.59517,1.60677,1.61823,1.62957],[1.25056,1.2764,1.29938,1.32036,1.33983,1.35814,1.37551,1.39209,1.40802,1.42338,1.43825,1.45268,1.46674,1.48046,1.49387,1.507,1.51988,1.53254,1.54498,1.55724,1.56931,1.58122,1.59298,1.6046,1.61608,1.62743],[1.24633,1.27259,1.29586,1.31704,1.33669,1.35513,1.37261,1.38929,1.40529,1.42072,1.43565,1.45015,1.46425,1.47801,1.49146,1.50463,1.51755,1.53024,1.54271,1.55499,1.56709,1.57902,1.5908,1.60243,1.61393,1.62531],[1.24205,1.26875,1.29231,1.31371,1.33353,1.35211,1.3697,1.38648,1.40257,1.41807,1.43306,1.44761,1.46177,1.47557,1.48907,1.50227,1.51523,1.52794,1.54045,1.55275,1.56487,1.57683,1.58863,1.60028,1.6118,1.62319],[1.2377,1.26486,1.28873,1.31037,1.33036,1.34908,1.36679,1.38367,1.39984,1.41542,1.43048,1.44508,1.45929,1.47314,1.48668,1.49992,1.51291,1.52566,1.53819,1.55052,1.56267,1.57465,1.58647,1.59814,1.60968,1.62108],[1.23329,1.26094,1.28513,1.307,1.32718,1.34605,1.36388,1.38085,1.39711,1.41277,1.42789,1.44256,1.45682,1.47072,1.48429,1.49758,1.5106,1.52338,1.53594,1.5483,1.56047,1.57247,1.58432,1.59601,1.60756,1.61899],[1.2288,1.25697,1.28151,1.30362,1.32398,1.343,1.36096,1.37804,1.39439,1.41012,1.42531,1.44003,1.45435,1.46829,1.48191,1.49524,1.50829,1.52111,1.5337,1.54609,1.55829,1.57031,1.58217,1.59389,1.60546,1.6169],[1.22423,1.25295,1.27785,1.30022,1.32078,1.33995,1.35803,1.37522,1.39166,1.40746,1.42273,1.43751,1.45188,1.46588,1.47954,1.4929,1.506,1.51884,1.53146,1.54388,1.55611,1.56815,1.58004,1.59177,1.60337,1.61483],[1.21958,1.24889,1.27416,1.2968,1.31755,1.33689,1.3551,1.37239,1.38893,1.40481,1.42015,1.43499,1.44942,1.46346,1.47717,1.49057,1.5037,1.51658,1.52924,1.54168,1.55393,1.56601,1.57792,1.58967,1.60128,1.61276],[1.21484,1.24478,1.27044,1.29335,1.31431,1.33381,1.35216,1.36956,1.38619,1.40216,1.41756,1.43248,1.44695,1.46105,1.4748,1.48825,1.50142,1.51433,1.52702,1.53949,1.55177,1.56387,1.5758,1.58757,1.59921,1.6107],[1.21,1.24061,1.26668,1.28988,1.31106,1.33073,1.34921,1.36673,1.38345,1.39951,1.41498,1.42996,1.4445,1.45864,1.47244,1.48593,1.49914,1.51209,1.5248,1.5373,1.54961,1.56173,1.57369,1.58549,1.59714,1.60865],[1.20505,1.23639,1.26289,1.28639,1.30779,1.32763,1.34625,1.36389,1.38071,1.39685,1.4124,1.42744,1.44204,1.45624,1.47008,1.48361,1.49686,1.50984,1.52259,1.53513,1.54746,1.55961,1.57159,1.58341,1.59508,1.60661],[1.2,1.2321,1.25906,1.28287,1.3045,1.32452,1.34328,1.36104,1.37797,1.39419,1.40982,1.42493,1.43958,1.45383,1.46773,1.4813,1.49459,1.50761,1.52039,1.53295,1.54531,1.55749,1.56949,1.58133,1.59303,1.60458],[1.19482,1.22775,1.25519,1.27932,1.30119,1.32139,1.3403,1.35819,1.37522,1.39153,1.40723,1.42241,1.43713,1.45143,1.46537,1.47899,1.49232,1.50537,1.51819,1.53078,1.54317,1.55537,1.5674,1.57927,1.59098,1.60255],[1.1895,1.22333,1.25128,1.27575,1.29786,1.31825,1.33732,1.35532,1.37246,1.38886,1.40465,1.41989,1.43467,1.44903,1.46302,1.47669,1.49005,1.50315,1.51599,1.52862,1.54104,1.55326,1.56532,1.5772,1.58894,1.60053],[1.18404,1.21885,1.24732,1.27214,1.29451,1.3151,1.33432,1.35245,1.3697,1.3862,1.40206,1.41738,1.43221,1.44663,1.46067,1.47438,1.48779,1.50092,1.5138,1.52646,1.53891,1.55116,1.56324,1.57515,1.58691,1.59852],[1.17842,1.21428,1.24332,1.26851,1.29114,1.31193,1.33131,1.34957,1.36693,1.38352,1.39947,1.41485,1.42976,1.44423,1.45832,1.47208,1.48553,1.4987,1.51162,1.5243,1.53678,1.54906,1.56116,1.5731,1.58488,1.59651],[1.17263,1.20964,1.23927,1.26484,1.28774,1.30874,1.32828,1.34668,1.36415,1.38084,1.39687,1.41233,1.4273,1.44183,1.45598,1.46978,1.48327,1.49648,1.50943,1.52215,1.53466,1.54697,1.5591,1.57105,1.58286,1.59451],[1.16665,1.2049,1.23517,1.26114,1.28432,1.30553,1.32525,1.34379,1.36137,1.37816,1.39427,1.40981,1.42484,1.43943,1.45363,1.46747,1.48101,1.49426,1.50725,1.52,1.53254,1.54488,1.55703,1.56901,1.58084,1.59251],[1.16045,1.20008,1.23102,1.2574,1.28088,1.30231,1.32219,1.34087,1.35858,1.37546,1.39166,1.40728,1.42237,1.43702,1.45128,1.46517,1.47875,1.49204,1.50507,1.51785,1.53042,1.54279,1.55497,1.56698,1.57882,1.59052],[1.15401,1.19517,1.22681,1.25363,1.27741,1.29906,1.31913,1.33795,1.35577,1.37276,1.38905,1.40474,1.41991,1.43462,1.44892,1.46287,1.47649,1.48982,1.50289,1.51571,1.52831,1.5407,1.55291,1.56494,1.57681,1.58853],[1.14731,1.19015,1.22255,1.24981,1.27391,1.29579,1.31604,1.33502,1.35296,1.37005,1.38643,1.4022,1.41744,1.43221,1.44657,1.46057,1.47423,1.4876,1.50071,1.51356,1.52619,1.53862,1.55085,1.56291,1.5748,1.58654]],"Tc":78.11,"Pc":5782.6,"dome":[[177.4,-0.0,368.79,-0.0,1.5818,-40.0],[194.1,3.23,369.68,0.0137,1.5721,-38.0],[212.0,6.46,370.56,0.0273,1.5626,-36.0],[231.1,9.7,371.41,0.0409,1.5534,-34.0],[251.6,12.96,372.24,0.0544,1.5442,-32.0],[273.4,16.22,373.05,0.0678,1.5353,-30.0],[296.7,19.5,373.84,0.0811,1.5265,-28.0],[321.6,22.78,374.6,0.0944,1.5179,-26.0],[348.0,26.08,375.34,0.1076,1.5094,-24.0],[376.0,29.39,376.06,0.1207,1.501,-22.0],[405.8,32.71,376.75,0.1338,1.4928,-20.0],[437.3,36.05,377.41,0.1468,1.4847,-18.0],[470.7,39.4,378.05,0.1597,1.4767,-16.0],[506.0,42.76,378.66,0.1727,1.4688,-14.0],[543.3,46.14,379.24,0.1855,1.461,-12.0],[582.6,49.54,379.79,0.1983,1.4533,-10.0],[624.1,52.95,380.32,0.2111,1.4457,-8.0],[667.9,56.38,380.81,0.2238,1.4382,-6.0],[713.9,59.83,381.26,0.2365,1.4308,-4.0],[762.3,63.29,381.69,0.2492,1.4234,-2.0],[813.1,66.77,382.07,0.2618,1.4161,0.0],[866.5,70.28,382.42,0.2744,1.4089,2.0],[922.5,73.8,382.74,0.287,1.4017,4.0],[981.1,77.35,383.01,0.2995,1.3945,6.0],[1042.6,80.92,383.24,0.3121,1.3874,8.0],[1106.9,84.52,383.43,0.3246,1.3803,10.0],[1174.2,88.14,383.58,0.3371,1.3732,12.0],[1244.5,91.78,383.68,0.3496,1.3661,14.0],[1317.9,95.46,383.73,0.3621,1.359,16.0],[1394.6,99.16,383.73,0.3746,1.352,18.0],[1474.6,102.89,383.67,0.3871,1.3449,20.0],[1557.9,106.66,383.56,0.3996,1.3378,22.0],[1644.8,110.46,383.39,0.4121,1.3306,24.0],[1735.3,114.3,383.16,0.4247,1.3234,26.0],[1829.5,118.17,382.86,0.4373,1.3162,28.0],[1927.5,122.09,382.5,0.4499,1.3089,30.0],[2029.4,126.05,382.06,0.4625,1.3015,32.0],[2135.3,130.06,381.54,0.4753,1.294,34.0],[2245.4,134.11,380.95,0.488,1.2865,36.0],[2359.7,138.22,380.26,0.5009,1.2788,38.0],[2478.3,142.39,379.48,0.5138,1.2709,40.0],[2601.4,146.61,378.6,0.5268,1.2629,42.0],[2729.2,150.91,377.61,0.5399,1.2547,44.0],[2861.6,155.28,376.5,0.5532,1.2463,46.0],[2998.9,159.72,375.26,0.5666,1.2377,48.0],[3141.2,164.26,373.88,0.5801,1.2288,50.0],[3288.7,168.9,372.34,0.5939,1.2196,52.0],[3441.5,173.64,370.63,0.6079,1.21,54.0],[3599.7,178.51,368.73,0.6221,1.2,56.0],[3763.5,183.52,366.6,0.6367,1.1895,58.0],[3933.2,188.7,364.22,0.6516,1.1784,60.0],[4108.9,194.07,361.54,0.667,1.1666,62.0],[4290.9,199.67,358.5,0.6829,1.154,64.0],[4479.3,205.56,355.04,0.6996,1.1403,66.0],[4674.5,211.8,351.02,0.7171,1.1252,68.0],[4876.8,218.51,346.29,0.7359,1.1082,70.0],[5086.6,225.88,340.54,0.7564,1.0886,72.0],[5304.6,234.3,333.18,0.7797,1.0645,74.0],[5531.5,244.81,322.63,0.8088,1.0317,76.0],[5602.2,248.88,318.09,0.8201,1.018,76.61],[5685.3,254.93,310.92,0.837,0.9967,77.31],[5745.8,261.81,302.33,0.8563,0.9717,77.81]]}};
-/* ============================================================
-   Results for the instructor (optional).
-   The page keeps each student's result for the question steps and,
-   at the end of Your turn, opens a Microsoft Form with them filled in.
-   Active only when FORM_URL at the top of the page holds the form's
-   pre-filled link. Nothing is sent until the student presses Submit.
-============================================================ */
-const RESULTS=(function(){
-  const KEY='acsim-results';
-  let r={}; try{ r=JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){}
-  const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(r)); }catch(e){} };
-  const form=String(window.FORM_URL||'').trim();
-  const on=/^https:\/\/forms\.(office|microsoft|cloud\.microsoft)\.com\//.test(form) || /^https:\/\/forms\.cloud\.microsoft\//.test(form);
-  /* Form questions, in order: student ID, 2 worked-example checks, 7 your-turn checks, minutes */
-  const ORDER=[['id'],['Worked example',2],['Worked example',7],['Your turn',2],['Your turn',3],['Your turn',4],['Your turn',5],['Your turn',6],['Your turn',7],['Your turn',8],['min']];
-  const LABEL={'correct first try':'First try','correct after retry':'After a retry','revealed answer':'Revealed the answer'};
-  function link(sid){
-    let u; try{ u=new URL(form); }catch(e){ return null; }
-    const pairs=[...u.searchParams.entries()];
-    const keys=pairs.map(p=>p[0]).filter(k=>/^r[0-9a-f]{4,}$/i.test(k));
-    const out=new Map(pairs);
-    const mins=r['yt-start']&&r['yt-end']?Math.max(1,Math.round((r['yt-end']-r['yt-start'])/60000)):'';
-    ORDER.forEach((q,i)=>{
-      const k=keys[i]; if (!k) return;
-      const sample=out.get(k)||'', quoted=/^".*"$/.test(sample);
-      let v = q[0]==='id' ? sid : q[0]==='min' ? String(mins) : (LABEL[r[q[0]+'|'+q[1]]]||'');
-      if (!v){ out.delete(k); return; }
-      out.set(k, quoted?`"${v}"`:v);
-    });
-    return u.origin+u.pathname+'?'+[...out].map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
-  }
-  return {
-    on,
-    set(k,v){ r[k]=v; save(); },
-    get(k){ return r[k]; },
-    once(k,v){ if (r[k]==null){ r[k]=v; save(); } },
-    link,
-    summary(){ return ORDER.filter(q=>q.length===2).map(q=>[q[0],q[1],LABEL[r[q[0]+'|'+q[1]]]||'not recorded']); }
-  };
-})();
-
 /* ============================================================
    Refrigerant property lookups + cycle / room model
    Property data: CoolProp 8, ASHRAE reference state
@@ -1979,7 +1836,7 @@ function simulate(p,mode){
   return { series:out, kWh:E/3.6e6, tReach, starts };
 }
 
-if (typeof module!=='undefined') module.exports={tsPath,cycle,satAt,TsatAtP,steady,simulate,roomLoads};
+
 
 /* ============================================================
    Shared thermodynamic diagrams: T-s, P-T boiling curve, linking
@@ -2077,431 +1934,6 @@ function linkStates(scope){
 }
 
 /* ============================================================
-   Analyse mode UI
-============================================================ */
-(function(){
-const $=id=>document.getElementById(id);
-const NS='http://www.w3.org/2000/svg';
-const fmt=(v,d=0)=>Number(v).toLocaleString('en-SG',{minimumFractionDigits:d,maximumFractionDigits:d});
-const money=v=>'S$'+fmt(v,2);
-const pct=v=>(v>=0?'+':'−')+fmt(Math.abs(v)*100,0)+'%';
-const reduceMotion=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const COL={ inv:'#1F72A3', onoff:'#C8741A', ink:'#14212A', soft:'#55636C', line:'#D6DEE3', cold:'#2A6F8E', hot:'#BC4A2B', warm:'#DE9127', mix:'#6B7A83', neutral:'#C3CCD1' };
-const STATE_COL=[COL.cold,COL.hot,COL.warm,'#4E8FA9'];
-const FL_LABEL={R32:'R-32',R134a:'R-134a'};
-
-let sun=0, fl='R32';
-
-/* ---------- inputs ---------- */
-const SL={
-  tout:['in-tout','o-tout',v=>fmt(v,1)+' °C'], area:['in-area','o-area',v=>v+' m²'], people:['in-people','o-people',v=>v],
-  equip:['in-equip','o-equip',v=>v+' W'], cap:['in-cap','o-cap',v=>fmt(v,1)+' kW'], tariff:['in-tariff','o-tariff',v=>fmt(v,2)+' ¢/kWh'],
-  hours:['in-hours','o-hours',v=>v+' h'], dte:['in-dte','o-dte',v=>fmt(v,1)+' K'], dtc:['in-dtc','o-dtc',v=>fmt(v,1)+' K'],
-  sh:['in-sh','o-sh',v=>v+' K'], sc:['in-sc','o-sc',v=>v+' K'], eta:['in-eta','o-eta',v=>fmt(v*100,0)+'%'], motor:['in-motor','o-motor',v=>fmt(v*100,0)+'%'],
-  tset:['in-tset','o-tset',v=>fmt(v,1)+' °C'], sa:['in-sa','o-sa',v=>fmt(v,0)+' °C'], sb:['in-sb','o-sb',v=>fmt(v,0)+' °C'],
-  t0:['in-t0','o-t0',v=>fmt(v,1)+' °C'], tset2:['in-tset2','o-tset2',v=>fmt(v,1)+' °C'], simh:['in-simh','o-simh',v=>v+' h']
-};
-const val=k=>parseFloat($(SL[k][0]).value);
-function syncOutputs(){ for (const k in SL){ $(SL[k][1]).textContent=SL[k][2](val(k)); } }
-function params(){
-  return { fl, Tout:val('tout'), area:val('area'), people:val('people'), equip:val('equip'), sun, cap:val('cap'),
-    dTe:val('dte'), dTc:val('dtc'), SH:val('sh'), SC:val('sc'), eta:val('eta'), motor:val('motor') };
-}
-
-function seg(id,cb){
-  const g=$(id);
-  g.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
-    g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
-    cb(b.dataset.v); renderAll();
-  }));
-}
-seg('seg-sun',v=>{ sun=parseFloat(v); });
-seg('seg-fl',v=>{ fl=v; });
-
-/* ---------- svg helpers ---------- */
-function el(tag,attrs,parent,text){
-  const e=document.createElementNS(NS,tag);
-  for (const k in attrs) e.setAttribute(k,attrs[k]);
-  if (text!==undefined) e.textContent=text;
-  if (parent) parent.appendChild(e);
-  return e;
-}
-function svgRoot(box,W,H,label){
-  box.innerHTML='';
-  const s=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':label},box);
-  return s;
-}
-function tipAt(box,svg,W,H,x,y,html){
-  let t=box.querySelector('.tip');
-  if (!t){ t=document.createElement('div'); t.className='tip'; box.appendChild(t); }
-  t.innerHTML=html; t.hidden=false;
-  const r=svg.getBoundingClientRect(), br=box.getBoundingClientRect();
-  const px=r.left-br.left+x*r.width/W, py=r.top-br.top+y*r.height/H;
-  const tw=t.offsetWidth, th=t.offsetHeight;
-  let left=px+12; if (left+tw>br.width) left=px-tw-12; if (left<0) left=0;
-  let top=py-th-10; if (top<0) top=py+14;
-  t.style.left=left+'px'; t.style.top=top+'px';
-}
-function hideTip(box){ const t=box.querySelector('.tip'); if (t) t.hidden=true; }
-
-/* ============================================================
-   1 · P-h diagram
-============================================================ */
-function drawPH(p,main,ghost,ghostT){
-  const box=$('ph-box'), W=620, H=440, m={l:64,r:18,t:14,b:50};
-  const svg=svgRoot(box,W,H,'Pressure–enthalpy diagram of the refrigeration cycle');
-  const d=PROPS[p.fl];
-  const hgMax=Math.max(...d.dome.map(r=>r[2]));
-  const x0=0, x1=Math.ceil((hgMax+90)/50)*50;
-  const y0=Math.log(d.dome[0][0]*0.9), y1=Math.log(d.Pc*1.3);
-  const X=h=>m.l+(h-x0)/(x1-x0)*(W-m.l-m.r);
-  const Y=P=>H-m.b-(Math.log(P)-y0)/(y1-y0)*(H-m.t-m.b);
-
-  const g=el('g',{class:'grid'},svg), ax=el('g',{class:'ax'},svg);
-  for (let h=x0;h<=x1;h+=50){ el('line',{x1:X(h),x2:X(h),y1:m.t,y2:H-m.b},g); el('text',{x:X(h),y:H-m.b+16,'text-anchor':'middle'},ax,h); }
-  [20,50,100,200,500,1000,2000,5000,10000].forEach(P=>{
-    if (Math.log(P)<y0||Math.log(P)>y1) return;
-    el('line',{x1:m.l,x2:W-m.r,y1:Y(P),y2:Y(P)},g);
-    el('text',{x:m.l-8,y:Y(P)+4,'text-anchor':'end'},ax,fmt(P));
-  });
-  el('text',{x:(m.l+W-m.r)/2,y:H-10,'text-anchor':'middle',class:'t'},ax,'Specific enthalpy h (kJ/kg)');
-  el('text',{x:16,y:(m.t+H-m.b)/2,'text-anchor':'middle',class:'t',transform:`rotate(-90 16 ${(m.t+H-m.b)/2})`},ax,'Pressure P (kPa, log scale)');
-
-  // saturation dome
-  const liq=d.dome.map(r=>`${X(r[1]).toFixed(1)},${Y(r[0]).toFixed(1)}`);
-  const vap=d.dome.slice().reverse().map(r=>`${X(r[2]).toFixed(1)},${Y(r[0]).toFixed(1)}`);
-  const cx=X((d.dome[d.dome.length-1][1]+d.dome[d.dome.length-1][2])/2), cy=Y(d.Pc);
-  el('path',{d:`M${liq.join(' L')} L${cx.toFixed(1)},${cy.toFixed(1)} L${vap.join(' L')}`,fill:'#E9EEF1',stroke:COL.soft,'stroke-width':1.6,'stroke-linejoin':'round'},svg);
-  el('circle',{cx,cy,r:3,fill:COL.soft},svg);
-  el('text',{x:cx+6,y:cy-6,style:"font:italic 11px 'Inter',sans-serif",fill:COL.soft},svg,'critical point');
-  // region labels
-  const Pm=Math.exp(y0+(y1-y0)*0.18), sm=satAt(p.fl,TsatAtP(p.fl,Pm));
-  el('text',{x:X((sm.hf+sm.hg)/2),y:Y(Pm)+4,'text-anchor':'middle',style:"font:italic 11.5px 'Inter',sans-serif",fill:COL.soft},svg,'liquid + vapour');
-  if (X(sm.hf)-8>m.l+50) el('text',{x:X(sm.hf)-8,y:Y(Pm)-40,'text-anchor':'end',style:"font:italic 11.5px 'Inter',sans-serif",fill:COL.soft},svg,'liquid');
-  el('text',{x:Math.min(X(sm.hg)+10,W-m.r-60),y:Y(Pm)+26,style:"font:italic 11.5px 'Inter',sans-serif",fill:COL.soft},svg,'vapour');
-
-  // ghost cycle
-  if (ghost){
-    const s=ghost.states;
-    const pts=[s[0],s[1],s[2],s[3],s[0]].map(q=>`${X(q.h).toFixed(1)},${Y(q.P).toFixed(1)}`).join(' L');
-    el('path',{d:'M'+pts,fill:'none',stroke:COL.onoff,'stroke-width':1.8,'stroke-dasharray':'5 4',opacity:0.85},svg);
-    el('text',{x:X(s[1].h)+6,y:Y(s[1].P)-8,style:"font:600 11px 'Inter',sans-serif",fill:COL.onoff},svg,`at ${fmt(ghostT,0)} °C`);
-  }
-
-  // main cycle
-  const s=main.states, s2s=main.st2s;
-  const seg=(a,b,col,dash,w=2.6)=>el('line',{x1:X(a.h),y1:Y(a.P),x2:X(b.h),y2:Y(b.P),stroke:col,'stroke-width':w,'stroke-linecap':'round','stroke-dasharray':dash||'none'},svg);
-  seg(s[0],s2s,COL.soft,'4 4',1.6);
-  seg(s[0],s[1],COL.ink);          // compression
-  seg(s[1],s[2],COL.hot);          // condensation
-  seg(s[2],s[3],COL.warm);         // throttling
-  seg(s[3],s[0],COL.cold);         // evaporation
-  el('circle',{cx:X(s2s.h),cy:Y(s2s.P),r:3.5,fill:'#fff',stroke:COL.soft,'stroke-width':1.5},svg);
-  el('text',{x:X(s2s.h)-4,y:Y(s2s.P)-8,'text-anchor':'end',style:"font:600 11px 'Inter',sans-serif",fill:COL.soft},svg,'2s');
-
-  // line annotations
-  const lab=(x,y,t,col,anchor='middle')=>el('text',{x,y,'text-anchor':anchor,style:"font:600 11.5px 'Inter',sans-serif",fill:col},svg,t);
-  lab((X(s[3].h)+X(s[0].h))/2,Y(s[0].P)+17,`evaporating at ${fmt(main.Te,1)} °C · ${fmt(s[0].P)} kPa`,COL.cold);
-  lab((X(s[2].h)+X(s[1].h))/2,Y(s[1].P)-9,`condensing at ${fmt(main.Tc,1)} °C · ${fmt(s[1].P)} kPa`,COL.hot);
-  lab(X(s[2].h)-7,(Y(s[2].P)+Y(s[3].P))/2,'valve: h₄ = h₃',COL.warm,'end');
-
-  // state points
-  s.forEach((q,i)=>{
-    const cxp=X(q.h), cyp=Y(q.P);
-    el('circle',{class:'stpt','data-st':i,cx:cxp,cy:cyp,r:9,fill:STATE_COL[i],stroke:'#fff','stroke-width':2},svg);
-    el('text',{x:cxp,y:cyp+4,'text-anchor':'middle','pointer-events':'none',style:"font:700 11px 'Space Grotesk',sans-serif",fill:'#fff'},svg,i+1);
-    const hit=el('circle',{'data-st':i,cx:cxp,cy:cyp,r:18,fill:'transparent',style:'cursor:pointer'},svg);
-    const show=()=>{
-      tipAt(box,svg,W,H,cxp,cyp,`<b>State ${i+1}</b> · ${q.phase}<br>P = ${fmt(q.P)} kPa · T = ${fmt(q.T,1)} °C<br>h = ${fmt(q.h,2)} kJ/kg · s = ${fmt(q.s,4)} kJ/kg·K${q.x!=null?'<br>quality x = '+fmt(q.x,3):''}`);
-      
-    };
-    hit.addEventListener('mouseenter',show); hit.addEventListener('focus',show);
-    hit.addEventListener('mouseleave',()=>{ hideTip(box);  });
-  });
-}
-
-function renderCycle(p){
-  const Tset=val('tset');
-  const st=steady(p,Tset);
-  const c=st.cyc;
-  const ghostT=val('sa');
-  $('ghost-t').textContent=fmt(ghostT,0)+' °C';
-  const ghost=$('in-ghost').checked && Math.abs(ghostT-Tset)>0.25 ? steady(p,ghostT).cyc : null;
-  drawPH(p,c,ghost,ghostT);
-  const e10=satAt(p.fl,-10);
-  drawTS($('ts-box'),{fl:p.fl,W:620,H:440,s:[Math.floor((e10.sf-0.05)*10)/10,Math.ceil((e10.sg+0.25)*10)/10],T:p.fl==='R32'?[-10,110]:[-10,90],
-    room:Tset,out:p.Tout,main:{c,n:4},ghost:ghost?{c:ghost,label:`${fmt(ghostT,0)} °C`}:null});
-  linkStates($('cyc-scope'));
-
-  const TL=Tset+273.15, TH=p.Tout+273.15;
-  const copRev=TH>TL? TL/(TH-TL) : Infinity;
-  const Qrej=st.Q+st.Q/c.cop;   // heat released outdoors by the refrigerant
-  const K=(k,v,u,s)=>`<div class="kpi"><div class="k">${k}</div><div class="v">${v}<small>${u}</small></div><div class="s">${s}</div></div>`;
-  $('kpis').innerHTML=
-    K('COP of the cycle',fmt(c.cop,2),'','q<sub>L</sub> ÷ w<sub>in</sub>')+
-    K('Carnot limit',isFinite(copRev)?fmt(copRev,1):'∞','',`COP<sub>R,rev</sub> between ${fmt(Tset,1)} and ${fmt(p.Tout,1)} °C`)+
-    K('Second-law efficiency',isFinite(copRev)?fmt(c.cop/copRev*100,0):'—','%','COP ÷ COP<sub>R,rev</sub>')+
-    K('Cooling delivered',fmt(st.Q),'W',`${fmt(st.plr*100,0)}% of the unit's ${fmt(p.cap,1)} kW`)+
-    K('Electricity drawn',fmt(st.Pel),'W',`compressor ${fmt(st.Wcomp)} W + fans 60 W`)+
-    K('Refrigerant flow',fmt(st.mdot*1000,2),'g/s',`heat released outdoors ${fmt(Qrej)} W`);
-
-  const rows=c.states.map((q,i)=>`<tr data-st="${i}"><td><span class="sn" style="background:${STATE_COL[i]}">${i+1}</span></td><td>${fmt(q.P)}</td><td>${fmt(q.T,1)}</td><td>${fmt(q.h,2)}</td><td>${fmt(q.s,4)}</td><td class="phase-cell">${q.x!=null?'x = '+fmt(q.x,3):q.phase}</td></tr>`).join('');
-  $('st-table').innerHTML=`<thead><tr><th>State</th><th>P (kPa)</th><th>T (°C)</th><th>h (kJ/kg)</th><th>s (kJ/kg·K)</th><th>Phase / quality</th></tr></thead><tbody>${rows}</tbody>`;
-
-  $('balance').innerHTML=`<b>First law check:</b> q<sub>H</sub> = h₂ − h₃ = ${fmt(c.qH,1)} kJ/kg, and q<sub>L</sub> + w<sub>in</sub> = ${fmt(c.qL,1)} + ${fmt(c.w,1)} = ${fmt(c.qL+c.w,1)} kJ/kg ✓. The outdoor unit always rejects more heat than the room loses.`;
-  $('cap-warn').innerHTML=st.short?`<div class="warnbox"><b>Unit too small for this setpoint.</b> The room gains ${fmt(st.L.total)} W but the unit delivers at most ${fmt(p.cap*1000)} W, so the room settles above ${fmt(Tset,1)} °C. Figures shown assume full capacity.</div>`:'';
-  $('ref-note').textContent=`${FL_LABEL[p.fl]} properties, ASHRAE reference state (h = 0 and s = 0 for saturated liquid at −40 °C), as in Çengel's R-134a tables.`;
-}
-
-/* ============================================================
-   2 · setpoint comparison
-============================================================ */
-function monthly(p,st){ const kWh=st.Pel/1000*val('hours')*30; return { kWh, cost:kWh*val('tariff')/100 }; }
-
-function renderCompare(p){
-  const A=val('sa'), B=val('sb');
-  const sA=steady(p,A), sB=steady(p,B), mA=monthly(p,sA), mB=monthly(p,sB);
-  const card=(cls,label,T,s,mo)=>`<div class="cmp-card ${cls}">
-    <h3><span>Setpoint ${label}</span><span class="big">${fmt(T,0)} °C</span></h3>
-    <div class="load-bar" aria-hidden="true">${loadBar(s.L)}</div>
-    <dl>
-      <dt>Heat to remove from the room</dt><dd>${fmt(s.L.total)} W</dd>
-      <dt>Refrigerant evaporates at</dt><dd>${fmt(s.cyc.Te,1)} °C</dd>
-      <dt>Temperature lift (T<sub>cond</sub> − T<sub>evap</sub>)</dt><dd>${fmt(s.cyc.Tc-s.cyc.Te,1)} K</dd>
-      <dt>COP</dt><dd>${fmt(s.cyc.cop,2)}</dd>
-      <dt>Electricity drawn</dt><dd>${fmt(s.Pel)} W</dd>
-      <dt>Energy per month</dt><dd>${fmt(mo.kWh,0)} kWh</dd>
-      <dt>Cost per month</dt><dd class="money">${money(mo.cost)}</dd>
-    </dl>${s.short?'<div class="warnbox">The unit cannot hold this setpoint.</div>':''}</div>`;
-  $('cmp').innerHTML=card('a','A',A,sA,mA)+card('b','B',B,sB,mB)+
-    `<div class="load-leg" style="grid-column:1/-1">${LOADS.map(l=>`<span><i style="background:${l.c}"></i>${l.n}</span>`).join('')}</div>`;
-
-  if (Math.abs(A-B)<0.25){
-    $('verdict').innerHTML='Pick two different setpoints to compare them.'; $('why').innerHTML='';
-  } else {
-    const cold=A<B?{T:A,s:sA,m:mA,n:'A'}:{T:B,s:sB,m:mB,n:'B'}, warm=A<B?{T:B,s:sB,m:mB,n:'B'}:{T:A,s:sA,m:mA,n:'A'};
-    const eRatio=cold.s.Pel/warm.s.Pel, lRatio=cold.s.L.total/warm.s.L.total, cRatio=cold.s.cyc.cop/warm.s.cyc.cop;
-    const dYear=(cold.m.cost-warm.m.cost)*12;
-    const perDeg=Math.pow(eRatio,1/(warm.T-cold.T))-1;
-    $('verdict').innerHTML=`Setting <b>${fmt(cold.T,0)} °C</b> instead of <b>${fmt(warm.T,0)} °C</b> uses <b>${fmt((eRatio-1)*100,0)}% more electricity</b>: about <b>${money(cold.m.cost-warm.m.cost)} more a month</b>, or ${money(dYear)} a year for this one room. That is roughly ${fmt(perDeg*100,0)}% more for every degree colder.`;
-    $('why').innerHTML=
-      `<div class="why"><div class="k">1 · More heat leaks in (${pct(lRatio-1)})</div>The room–outdoor temperature difference grows from ${fmt(p.Tout-warm.T,1)} K to ${fmt(p.Tout-cold.T,1)} K, so heat conducted through walls and windows rises from ${fmt(warm.s.L.env)} W to ${fmt(cold.s.L.env)} W. People and equipment add the same heat either way.</div>`+
-      `<div class="why"><div class="k">2 · Each kWh moves less heat (COP ${pct(cRatio-1)})</div>A colder room needs colder refrigerant: it evaporates at ${fmt(cold.s.cyc.Te,1)} °C instead of ${fmt(warm.s.cyc.Te,1)} °C. The compressor must lift heat across ${fmt(cold.s.cyc.Tc-cold.s.cyc.Te,1)} K instead of ${fmt(warm.s.cyc.Tc-warm.s.cyc.Te,1)} K, and the Carnot limit falls from ${fmt((warm.T+273.15)/(p.Tout-warm.T),1)} to ${fmt((cold.T+273.15)/(p.Tout-cold.T),1)}.</div>`+
-      `<div class="why"><div class="k">3 · The two effects multiply</div>Electricity = heat load ÷ COP. ${fmt(lRatio,2)} × more heat ÷ ${fmt(cRatio,2)} of the COP = ${fmt(eRatio,2)} × the electricity (plus the fans, which cost the same). This model counts only the sensible heat leaking in; a colder coil also pulls more moisture from the air, so the real penalty is a little larger.</div>`;
-  }
-  renderBars(p,A,B);
-}
-
-const LOADS=[{k:'env',n:'Through walls and windows',c:'#BC4A2B'},{k:'sun',n:'Sun',c:'#DE9127'},{k:'people',n:'People',c:'#8A6BB0'},{k:'equip',n:'Equipment',c:'#6B7A83'},{k:'latent',n:'Moisture removal',c:'#2A6F8E'}];
-function loadBar(L){ return LOADS.filter(l=>L[l.k]>0).map(l=>`<span style="flex:${Math.max(L[l.k],0)};background:${l.c}" title="${l.n}: ${fmt(L[l.k])} W"></span>`).join(''); }
-
-function renderBars(p,A,B){
-  const box=$('bar-box'), W=880, H=280, m={l:56,r:10,t:22,b:40};
-  const svg=svgRoot(box,W,H,'Monthly electricity cost against setpoint');
-  const Ts=[]; for (let T=16;T<=28;T++) Ts.push(T);
-  const data=Ts.map(T=>{ const s=steady(p,T); return {T,s,...monthly(p,s)}; });
-  const vmax=Math.max(...data.map(d=>d.cost));
-  const step=vmax>200?50:vmax>80?20:vmax>40?10:5;
-  const ymax=Math.ceil(vmax*1.12/step)*step;
-  const bw=(W-m.l-m.r)/Ts.length;
-  const Y=v=>H-m.b-v/ymax*(H-m.t-m.b);
-  const g=el('g',{class:'grid'},svg), ax=el('g',{class:'ax'},svg);
-  for (let v=0;v<=ymax+1e-9;v+=step){ el('line',{x1:m.l,x2:W-m.r,y1:Y(v),y2:Y(v)},g); el('text',{x:m.l-8,y:Y(v)+4,'text-anchor':'end'},ax,'S$'+v); }
-  el('text',{x:(m.l+W-m.r)/2,y:H-6,'text-anchor':'middle',class:'t'},ax,'Setpoint (°C)');
-  const defs=el('defs',{},svg);
-  const pat=el('pattern',{id:'hatch',width:6,height:6,patternUnits:'userSpaceOnUse',patternTransform:'rotate(45)'},defs);
-  el('rect',{width:6,height:6,fill:'#E3E8EB'},pat); el('line',{x1:0,y1:0,x2:0,y2:6,stroke:'#AEB9C0','stroke-width':2},pat);
-  data.forEach((d,i)=>{
-    const x=m.l+i*bw+2, w=bw-4, y=Y(d.cost), h=H-m.b-y;
-    const isA=Math.abs(d.T-A)<0.5, isB=Math.abs(d.T-B)<0.5;
-    const fill=d.s.short?'url(#hatch)':isA?COL.onoff:isB?COL.inv:COL.neutral;
-    const r=Math.min(4,w/2,h);
-    el('path',{d:`M${x},${H-m.b} L${x},${y+r} Q${x},${y} ${x+r},${y} L${x+w-r},${y} Q${x+w},${y} ${x+w},${y+r} L${x+w},${H-m.b} Z`,fill},svg);
-    el('text',{x:x+w/2,y:H-m.b+16,'text-anchor':'middle',class:'',style:`font:${isA||isB?'700':'400'} 11px 'Inter',sans-serif`,fill:isA||isB?COL.ink:COL.soft},svg,d.T);
-    if (isA||isB) el('text',{x:x+w/2,y:y-6,'text-anchor':'middle',style:"font:700 11.5px 'Space Grotesk',sans-serif",fill:COL.ink},svg,'S$'+fmt(d.cost,0));
-    if (d.T===25) el('text',{x:x+w/2,y:H-m.b+30,'text-anchor':'middle',style:"font:600 9.5px 'Inter',sans-serif",fill:COL.cold},svg,'Go 25');
-    const hit=el('rect',{x:m.l+i*bw,y:m.t,width:bw,height:H-m.t-m.b,fill:'transparent'},svg);
-    hit.addEventListener('mouseenter',()=>tipAt(box,svg,W,H,x+w/2,y,`<b>${d.T} °C</b><br>${fmt(d.s.Pel)} W · COP ${fmt(d.s.cyc.cop,2)}<br>${fmt(d.kWh,0)} kWh · ${money(d.cost)} per month${d.s.short?'<br>unit too small to hold this':''}`));
-    hit.addEventListener('mouseleave',()=>hideTip(box));
-  });
-  el('line',{x1:m.l,x2:W-m.r,y1:H-m.b,y2:H-m.b,stroke:COL.soft,'stroke-width':1},svg);
-  const sunTxt=sun===0?'no sun':sun===250?'some sun':'west sun';
-  $('bar-sub').textContent=`Outdoor ${fmt(p.Tout,1)} °C, ${p.area} m², ${p.people} people, ${p.equip} W equipment, ${sunTxt}; ${val('hours')} h a day for 30 days at ${fmt(val('tariff'),2)} ¢/kWh. Hatched bars: the unit is too small to hold that setpoint.`;
-}
-
-/* ============================================================
-   3 · pull-down
-============================================================ */
-let pdAnim=null;
-function lineChart(box,W,H,m,xmax,ymin,ymax,yticks,ylab,series,extra,fmtY,xlab){
-  const svg=svgRoot(box,W,H,ylab+' against time');
-  const X=t=>m.l+t/xmax*(W-m.l-m.r), Y=v=>H-m.b-(v-ymin)/(ymax-ymin)*(H-m.t-m.b);
-  const g=el('g',{class:'grid'},svg), ax=el('g',{class:'ax'},svg);
-  yticks.forEach(v=>{ el('line',{x1:m.l,x2:W-m.r,y1:Y(v),y2:Y(v)},g); el('text',{x:m.l-8,y:Y(v)+4,'text-anchor':'end'},ax,fmtY(v)); });
-  const xs=xmax<=3?0.5:1;
-  for (let t=0;t<=xmax+1e-9;t+=xs){ el('line',{x1:X(t),x2:X(t),y1:H-m.b,y2:H-m.b+4,stroke:COL.soft},ax); if (xlab) el('text',{x:X(t),y:H-m.b+17,'text-anchor':'middle'},ax,fmt(t,xs<1?1:0)); }
-  if (xlab) el('text',{x:(m.l+W-m.r)/2,y:H-4,'text-anchor':'middle',class:'t'},ax,xlab);
-  el('text',{x:m.l,y:m.t-6,class:'t'},ax,ylab);
-  el('line',{x1:m.l,x2:W-m.r,y1:H-m.b,y2:H-m.b,stroke:COL.soft},svg);
-  const clipId='clip'+Math.random().toString(36).slice(2,7);
-  const cp=el('clipPath',{id:clipId},el('defs',{},svg));
-  const clipRect=el('rect',{x:0,y:0,width:W,height:H},cp);
-  if (extra) extra(svg,X,Y);
-  const lg=el('g',{'clip-path':`url(#${clipId})`},svg);
-  series.forEach(s=>{
-    el('path',{d:'M'+s.pts.map(q=>`${X(q[0]).toFixed(1)},${Y(q[1]).toFixed(1)}`).join(' L'),fill:'none',stroke:s.color,'stroke-width':2,'stroke-dasharray':s.dash||'none','stroke-linejoin':'round'},lg);
-  });
-  return {svg,X,Y,clipRect};
-}
-
-function renderPulldown(p){
-  const q={...p, T0:val('t0'), Tset:val('tset2'), hours:val('simh')};
-  const inv=simulate(q,'inverter'), oo=simulate(q,'onoff');
-  const W=880, xmax=q.hours;
-  // temperature
-  const Tall=[...inv.series.map(s=>s.T),...oo.series.map(s=>s.T),q.Tset];
-  let tmin=Math.floor(Math.min(...Tall)-0.5), tmax=Math.ceil(Math.max(...Tall)+0.5);
-  const tstep=(tmax-tmin)>8?2:1; const tt=[]; for(let v=tmin;v<=tmax;v+=tstep) tt.push(v);
-  const c1=lineChart($('pd-temp'),W,230,{l:52,r:14,t:22,b:12},xmax,tmin,tmax,tt,'Room temperature (°C)',[
-    {pts:oo.series.map(s=>[s.t,s.T]),color:COL.onoff,dash:'6 4'},
-    {pts:inv.series.map(s=>[s.t,s.T]),color:COL.inv}
-  ],(svg,X,Y)=>{ el('line',{x1:X(0),x2:X(xmax),y1:Y(q.Tset),y2:Y(q.Tset),stroke:COL.soft,'stroke-width':1.3,'stroke-dasharray':'3 4'},svg);
-      el('text',{x:X(xmax)-4,y:Y(q.Tset)-6,'text-anchor':'end',style:"font:600 11px 'Inter',sans-serif",fill:COL.soft},svg,`setpoint ${fmt(q.Tset,1)} °C`); },v=>v+'°');
-  // power
-  const pmax=Math.max(...inv.series.map(s=>s.P),...oo.series.map(s=>s.P))*1000;
-  const pstep=pmax>1500?500:pmax>600?200:100; const ymaxP=Math.ceil(pmax*1.1/pstep)*pstep; const pt=[]; for(let v=0;v<=ymaxP;v+=pstep) pt.push(v);
-  const c2=lineChart($('pd-power'),W,190,{l:52,r:14,t:22,b:36},xmax,0,ymaxP,pt,'Electricity drawn (W)',[
-    {pts:oo.series.map(s=>[s.t,s.P*1000]),color:COL.onoff,dash:'6 4'},
-    {pts:inv.series.map(s=>[s.t,s.P*1000]),color:COL.inv}
-  ],null,v=>fmt(v),'Time since switching on (hours)');
-
-  // crosshair on both charts
-  [[c1,$('pd-temp'),230],[c2,$('pd-power'),190]].forEach(([c,box,H])=>{
-    const vl=el('line',{y1:0,y2:H,stroke:COL.ink,'stroke-width':1,opacity:0,'pointer-events':'none'},c.svg);
-    const hit=el('rect',{x:52,y:0,width:W-66,height:H,fill:'transparent'},c.svg);
-    hit.addEventListener('mousemove',ev=>{
-      const r=c.svg.getBoundingClientRect(); const x=(ev.clientX-r.left)*W/r.width;
-      const t=clampN((x-52)/(W-66)*xmax,0,xmax); const i=Math.round(t*60);
-      const a=inv.series[Math.min(i,inv.series.length-1)], b=oo.series[Math.min(i,oo.series.length-1)];
-      vl.setAttribute('x1',c.X(a.t)); vl.setAttribute('x2',c.X(a.t)); vl.setAttribute('opacity',0.35);
-      const hh=Math.floor(a.t), mm=Math.round((a.t-hh)*60);
-      tipAt(box,c.svg,W,H,c.X(a.t),40,`<b>${hh} h ${String(mm).padStart(2,'0')} min</b><br><span style="color:#8FC3E6">Inverter</span> ${fmt(a.T,1)} °C · ${fmt(a.P*1000)} W<br><span style="color:#F0B374">Fixed-speed</span> ${fmt(b.T,1)} °C · ${fmt(b.P*1000)} W`);
-    });
-    hit.addEventListener('mouseleave',()=>{ vl.setAttribute('opacity',0); hideTip(box); });
-  });
-
-  const tr=v=>v==null?'not reached':fmt(v,0)+' min';
-  const saving=(oo.kWh-inv.kWh)/oo.kWh;
-  $('pd-res').innerHTML=`<thead><tr><th></th><th style="color:${COL.inv}">Inverter</th><th style="color:${COL.onoff}">Fixed-speed</th></tr></thead><tbody>
-    <tr><td>Time to reach setpoint</td><td>${tr(inv.tReach)}</td><td>${tr(oo.tReach)}</td></tr>
-    <tr><td>Energy used over ${q.hours} h</td><td>${fmt(inv.kWh,2)} kWh</td><td>${fmt(oo.kWh,2)} kWh</td></tr>
-    <tr><td>Cost over ${q.hours} h</td><td>${money(inv.kWh*val('tariff')/100)}</td><td>${money(oo.kWh*val('tariff')/100)}</td></tr>
-    <tr><td>Compressor starts</td><td>${inv.starts}</td><td>${oo.starts}</td></tr></tbody>`;
-  $('pd-note').innerHTML=`Over ${q.hours} h the inverter unit uses <b>${fmt(Math.abs(saving)*100,0)}% ${saving>=0?'less':'more'}</b> electricity. Once the room is cool it runs slowly: less heat crosses each coil, so the evaporator runs warmer and the condenser cooler, the temperature lift shrinks and COP rises. The fixed-speed unit always runs at full lift, loses cooling each time it restarts, and lets the room swing ±0.75 K.`;
-
-  // replay animation
-  if (pdAnim) cancelAnimationFrame(pdAnim);
-  pdAnimTargets=[c1.clipRect,c2.clipRect];
-}
-let pdAnimTargets=[];
-function replay(){
-  if (reduceMotion) return;
-  const W=880, t0=performance.now(), dur=3500;
-  const f=now=>{ const k=Math.min(1,(now-t0)/dur); pdAnimTargets.forEach(r=>r.setAttribute('width',52+k*(W-66))); if (k<1) pdAnim=requestAnimationFrame(f); };
-  pdAnim=requestAnimationFrame(f);
-}
-$('btn-play').addEventListener('click',replay);
-
-/* ============================================================
-   4 · textbook problem (R-134a, ideal or actual)
-============================================================ */
-const PE=[100,140,180,200,240,280,320], PC=[600,700,800,900,1000,1200,1400];
-let prob=null;
-function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
-function newProblem(){
-  let pe,pc; do { pe=pick(PE); pc=pick(PC); } while (pc/pe<2.8);
-  const actual=Math.random()<0.5, eta=actual?pick([0.75,0.8,0.85]):1;
-  const mdot=Math.round((0.02+Math.random()*0.13)*200)/200;
-  const Te=TsatAtP('R134a',pe), Tc=TsatAtP('R134a',pc);
-  const c=cycle('R134a',Te,Tc,0,0,eta);
-  prob={pe,pc,eta,actual,mdot,c,ans:[mdot*c.qL, mdot*c.w, c.cop]};
-  const Pf=v=>fmt(v/1000,2)+' MPa';
-  $('prob').innerHTML=`A refrigerator uses refrigerant-134a as the working fluid and operates on ${actual?'a vapour-compression refrigeration cycle':'an ideal vapour-compression refrigeration cycle'} between <b>${Pf(pe)}</b> and <b>${Pf(pc)}</b>. Refrigerant leaves the evaporator as saturated vapour and leaves the condenser as saturated liquid.${actual?` The compressor has an isentropic efficiency of <b>${fmt(eta*100,0)}%</b>.`:''} The mass flow rate of the refrigerant is <b>${fmt(mdot,3)} kg/s</b>. Determine (a) the rate of heat removal from the refrigerated space, (b) the power input to the compressor, and (c) the COP of the refrigerator.`;
-  const F=(id,l,u)=>`<div class="ans"><label for="${id}">${l}</label><div class="inrow"><input id="${id}" inputmode="decimal" autocomplete="off"><span class="unit">${u}</span></div><span class="fb" id="${id}-fb"></span></div>`;
-  $('ans').innerHTML=F('a-ql','(a) Heat removal rate, Q̇<sub>L</sub>','kW')+F('a-w','(b) Power input, Ẇ<sub>in</sub>','kW')+F('a-cop','(c) COP<sub>R</sub>','');
-  $('sol').hidden=true; $('btn-sol').textContent='Show solution';
-}
-function checkAnswers(){
-  if (!prob) return;
-  ['a-ql','a-w','a-cop'].forEach((id,i)=>{
-    const inp=$(id), fb=$(id+'-fb'), v=parseFloat(inp.value);
-    inp.classList.remove('ok','bad');
-    if (isNaN(v)){ fb.textContent='Enter a number.'; fb.style.color=COL.soft; return; }
-    const err=Math.abs(v-prob.ans[i])/prob.ans[i];
-    if (err<=0.02){ inp.classList.add('ok'); fb.textContent='Correct.'; fb.style.color='#3E7D5A'; }
-    else { inp.classList.add('bad'); fb.textContent=err<=0.1?'Close. Check your table interpolation.':'Not quite. Check your enthalpies.'; fb.style.color=COL.hot; }
-  });
-}
-function showSolution(){
-  const s=$('sol');
-  if (!s.hidden){ s.hidden=true; $('btn-sol').textContent='Show solution'; return; }
-  const {c,pe,pc,eta,actual,mdot}=prob, [s1,s2,s3,s4]=c.states;
-  s.innerHTML=`<b>States</b> (Tables A-12 and A-13)<br>
-    <code>P₁ = ${fmt(pe)} kPa, sat. vapour → h₁ = h<sub>g</sub> = ${fmt(s1.h,2)} kJ/kg, s₁ = s<sub>g</sub> = ${fmt(s1.s,4)} kJ/kg·K</code><br>
-    <code>P₂ = ${fmt(pc)} kPa, s₂ₛ = s₁ → h₂ₛ = ${fmt(c.st2s.h,2)} kJ/kg</code> (superheated table, interpolate)<br>
-    ${actual?`<code>h₂ = h₁ + (h₂ₛ − h₁)/η = ${fmt(s1.h,2)} + (${fmt(c.st2s.h,2)} − ${fmt(s1.h,2)})/${fmt(eta,2)} = ${fmt(s2.h,2)} kJ/kg</code><br>`:''}
-    <code>P₃ = ${fmt(pc)} kPa, sat. liquid → h₃ = h<sub>f</sub> = ${fmt(s3.h,2)} kJ/kg</code><br>
-    <code>h₄ ≅ h₃ = ${fmt(s4.h,2)} kJ/kg</code> (throttling)<br><br>
-    <b>(a)</b> <code>Q̇<sub>L</sub> = ṁ(h₁ − h₄) = ${fmt(mdot,3)} × (${fmt(s1.h,2)} − ${fmt(s4.h,2)}) = ${fmt(prob.ans[0],2)} kW</code><br>
-    <b>(b)</b> <code>Ẇ<sub>in</sub> = ṁ(h₂ − h₁) = ${fmt(mdot,3)} × (${fmt(s2.h,2)} − ${fmt(s1.h,2)}) = ${fmt(prob.ans[1],3)} kW</code><br>
-    <b>(c)</b> <code>COP<sub>R</sub> = Q̇<sub>L</sub>/Ẇ<sub>in</sub> = ${fmt(prob.ans[0],2)} / ${fmt(prob.ans[1],3)} = ${fmt(prob.ans[2],2)}</code><br><br>
-    <span style="color:var(--ink-soft)">Values from CoolProp may differ from the printed tables in the last digit.</span>`;
-  s.hidden=false; $('btn-sol').textContent='Hide solution';
-}
-$('btn-new').addEventListener('click',newProblem);
-$('btn-check').addEventListener('click',checkAnswers);
-$('btn-sol').addEventListener('click',showSolution);
-
-
-/* ---------- predict-first gates ---------- */
-document.querySelectorAll('.predict').forEach(pr=>{
-  const gate=$(pr.dataset.gate), fb=pr.querySelector('.p-fb');
-  pr.querySelectorAll('[data-k]').forEach(btn=>btn.addEventListener('click',()=>{
-    if (pr.dataset.answered) return; pr.dataset.answered='1';
-    const k=+btn.dataset.k; let correct=+pr.dataset.correct, why=fb.dataset.why;
-    if (pr.dataset.dyn){
-      const p=params(), a=steady(p,25).Pel, b=steady(p,26).Pel, s=(a-b)/a;
-      correct= s<0.03?0:s<=0.15?1:2;
-      why=`In this scenario, 26 °C uses ${fmt(s*100,0)}% less electricity than 25 °C, about ${money((a-b)/1000*val('hours')*30*val('tariff')/100)} a month for this one room. That is why the campaign asks for 25 °C <i>or above</i>.`;
-    }
-    pr.querySelectorAll('[data-k]').forEach((x,i)=>{ x.classList.add('locked'); if (i===correct) x.classList.add('correct'); else if (i===k) x.classList.add('wrong'); });
-    fb.hidden=false; fb.className='p-fb quiz-feedback '+(k===correct?'good':'bad');
-    fb.innerHTML=`<strong>${k===correct?'Your prediction was right.':'Not what the model shows.'}</strong>${why}`;
-    gate.hidden=false; renderAll();
-  }));
-});
-
-/* ============================================================
-   wiring
-============================================================ */
-function renderAll(){
-  syncOutputs();
-  const p=params();
-  renderCycle(p); renderCompare(p); renderPulldown(p);
-}
-let raf=null;
-for (const k in SL) $(SL[k][0]).addEventListener('input',()=>{ if (raf) cancelAnimationFrame(raf); raf=requestAnimationFrame(renderAll); });
-$('in-ghost').addEventListener('change',renderAll);
-
-renderAll();
-newProblem();
-window.__analyseRender=renderAll;
-})();
-
-</script>
-<script>
-"use strict";
-/* ============================================================
    Guided stages: worked example (25 °C) and your turn (20 °C)
    R-134a, ideal cycle, 0.40 / 0.32 MPa evaporator, 1.2 MPa condenser.
    Values from CoolProp (ASHRAE reference) = Çengel Tables A-12/A-13
@@ -2528,8 +1960,8 @@ function build(g,Troom){
 const WX=build(G.w,25), YT=build(G.y,20);
 
 /* ---------- progress (per viewer, optional) ---------- */
-const store={ get(){ try{ return JSON.parse(localStorage.getItem('acsim-progress')||'{}'); }catch(e){ return {}; } },
-              set(v){ try{ localStorage.setItem('acsim-progress',JSON.stringify(v)); }catch(e){} } };
+const store={ get(){ try{ return JSON.parse(localStorage.getItem('acsim-p1-progress')||'{}'); }catch(e){ return {}; } },
+              set(v){ try{ localStorage.setItem('acsim-p1-progress',JSON.stringify(v)); }catch(e){} } };
 let prog=Object.assign({unlocked:1,stage:1},store.get());
 
 /* ---------- diagram ---------- */
@@ -2602,8 +2034,9 @@ function Guide(pfx,c,steps,ghostAtEnd){
     if (pfx==='gy' && i===steps.length-1) RESULTS.once('yt-end',Date.now());
     if (pfx==='gy') showSend(i===steps.length-1);
     const needs=!!s.task && !S.done;
-    drawBoth(pfx,c,s.show,(s.ghost&&ghostAtEnd)?ghostAtEnd:null);
-    drawTable(pfx+'-tbl',c,s.show);
+    const nShow=(S.done && s.showAfter!=null)?s.showAfter:s.show;
+    drawBoth(pfx,c,nShow,(s.ghost&&ghostAtEnd)?ghostAtEnd:null);
+    drawTable(pfx+'-tbl',c,nShow);
     let task='';
     if (s.task && s.task.type==='mcq'){
       const t=s.task;
@@ -2624,13 +2057,13 @@ function Guide(pfx,c,steps,ghostAtEnd){
       <h3 class="g-title">${s.title}</h3><div class="g-body">${typeof s.html==='function'?s.html():s.html}</div>${s.pt?`<div class="pt-inset"><div class="snip-t">Boiling curve of R-134a (from Table A-11)</div><div class="chart-box" id="${pfx}-pt"></div></div>`:''}${task}
       ${S.done&&s.after?`<div class="g-body g-after">${s.after}</div>`:''}
       <div class="g-nav">${i>0?'<button type="button" class="btn ghost" data-back>← Back</button>':'<span></span>'}
-        ${s.finish?`<button type="button" class="btn" data-finish ${needs?'disabled':''}>${s.finish}</button>`:`<button type="button" class="btn" data-next ${needs?'disabled':''}>${needs?'Answer to continue':'Next →'}</button>`}</div>`;
+        ${s.finish===null?'<span></span>':s.finish?`<button type="button" class="btn" data-finish ${needs?'disabled':''}>${s.finish}</button>`:`<button type="button" class="btn" data-next ${needs?'disabled':''}>${needs?'Answer to continue':'Next →'}</button>`}</div>`;
     if (s.pt) drawPT($(pfx+'-pt'),s.pt);
     wire();
   }
   function wire(){
     const s=steps[i], S=st[i];
-    card.querySelectorAll('[data-k]').forEach(b=>b.addEventListener('click',()=>{ if(S.done) return; const k=+b.dataset.k; S.mcq=k; if(k===s.task.correct) S.done=true; else S.mcqWrong++; render(); }));
+    card.querySelectorAll('[data-k]').forEach(b=>b.addEventListener('click',()=>{ if(S.done) return; const k=+b.dataset.k; S.mcq=k; if(k===s.task.correct) S.done=true; else { S.mcqWrong++; RESULTS.once('wrong|'+STAGE+'|mcq'+(i+1),'ABCD'[k]); } render(); }));
     const chk=card.querySelector('[data-check]');
     if (chk) chk.addEventListener('click',()=>{
       s.task.fields.forEach(fl=>{
@@ -2638,7 +2071,7 @@ function Guide(pfx,c,steps,ghostAtEnd){
         const inp=$(pfx+'-'+fl.id), v=parseFloat(String(inp.value).replace(/[^0-9.\-]/g,''));
         if (isNaN(v)) return;
         if (Math.abs(v-fl.ans)<=Math.abs(fl.ans)*fl.tol){ S.rev[fl.id]='ok'; }
-        else S.att[fl.id]=(S.att[fl.id]||0)+1;
+        else { S.att[fl.id]=(S.att[fl.id]||0)+1; RESULTS.once('wrong|'+STAGE+'|'+fl.id,String(inp.value).trim().slice(0,20)); }
       });
       S.done=s.task.fields.every(fl=>S.rev[fl.id]); render();
     });
@@ -2656,9 +2089,11 @@ const w=WX;
 const W_STEPS=[
  {show:0,title:'The situation',html:`
    <p>A 14 m² bedroom. Two people are asleep, and it is <b>${TOUT} °C</b> outside. The air conditioner holds the room at <b>25 °C</b>. How much electricity does it need, and what does that cost?</p>
+   <p><b>Steady state.</b> The room temperature stays at 25 °C, so nothing in the room is warming up or cooling down. The air conditioner must therefore remove heat exactly as fast as it enters: Q̇<sub>L</sub> = heat gained by the room.</p>
    <div class="calc"><div>Heat leaking in through walls and windows = <i>UA</i>(T<sub>out</sub> − T<sub>room</sub>) = ${UA} × (${TOUT} − 25) = <b>${f(w.env,0)} W</b></div>
    <div>Heat from people and equipment, plus moisture to remove = <b>${OTHER} W</b> (given)</div>
    <div>Heat the unit must remove, Q̇<sub>L</sub> = ${f(w.env,0)} + ${OTHER} = <b>${f(w.QL,0)} W</b></div></div>
+   <p class="g-hint"><i>UA</i> is the overall thermal conductance of the walls and windows: <i>UA</i> = 1/R<sub>total</sub>, the same thermal-resistance idea as in Week 5. Here <i>UA</i> = ${UA} W/K, so each kelvin of difference between outdoors and the room lets in ${UA} W.</p>
    <p><b>To keep things simple (an ideal cycle):</b> refrigerant R-134a leaves the evaporator as saturated vapour and leaves the condenser as saturated liquid; the compressor is isentropic; the valve is a throttle.</p>
    <p class="g-hint">Keep Çengel Tables A-12 and A-13 open. Every number here comes from them.</p>`},
  {show:0,title:'Choose the evaporator pressure',html:`
@@ -2707,7 +2142,7 @@ const W_STEPS=[
    <div>Cost per month: ${f(w.kWh,1)} kWh × S$${f(TARIFF/100,4)} = <b>S$${f(w.cost,2)}</b></div></div>
    <p class="g-hint">A real unit uses more: real compressors are not isentropic, the motor and fans use power, and the coils need bigger temperature differences. You will add these in Explore.</p>
    <p><b>Next:</b> the same room set to <b>20 °C</b>. You do the calculation, with hints.</p>`,
-  finish:'Start your turn →', onFinish:()=>{ unlock(2); go(2); }}
+  finish:'Start your turn →', onFinish:()=>{ unlock(3); go(3); }}
 ];
 
 /* ---------- your turn steps ---------- */
@@ -2716,7 +2151,7 @@ const Y_STEPS=[
  {show:0,title:'Your turn: the same room at 20 °C',html:`
    <p>Same bedroom, same ${TOUT} °C outdoors, but the unit is now set to <b>20 °C</b>. Work through the same steps. Answers within a small tolerance are accepted, and you can ask for a hint.</p>
    <div class="calc"><div><b>Worked example at 25 °C:</b> Q̇<sub>L</sub> = ${f(w.QL,0)} W, COP = ${f(w.cop,2)}, compressor ${f(w.W,0)} W, S$${f(w.cost,2)} per month.</div></div>`},
- {show:0,title:'How much heat leaks in now?',html:`<p>The walls and windows still have <i>UA</i> = ${UA} W/K. People, equipment and moisture still add ${OTHER} W.</p>`,
+ {show:0,title:'How much heat leaks in now?',html:`<p>Still at <b>steady state</b>: the room is held at 20 °C, so Q̇<sub>L</sub> equals the heat the room gains. Outdoors is still <b>${TOUT} °C</b>. The walls and windows still have <i>UA</i> = ${UA} W/K, and people, equipment and moisture still add ${OTHER} W.</p>`,
   task:{type:'num',fields:[{id:'env',label:'Heat through walls and windows',unit:'W',ans:y.env,tol:0.01,d:0,hint:`UA × (T<sub>out</sub> − T<sub>room</sub>) = ${UA} × (${TOUT} − 20).`}]},
   after:`So Q̇<sub>L</sub> = ${f(y.env,0)} + ${OTHER} = <b>${f(y.QL,0)} W</b>, compared with ${f(w.QL,0)} W at 25 °C. A colder room lets more heat leak in.`},
  {show:0,title:'The evaporator pressure drops',html:`<p>To hold 20 °C, this unit lowers its evaporator pressure to <b>${y.Pe/1000} MPa</b>, where R-134a boils at <b>${f(y.Te,1)} °C</b> (it was ${f(w.Te,1)} °C at 0.40 MPa).</p>`,
@@ -2724,17 +2159,17 @@ const Y_STEPS=[
     opts:['A lower pressure makes the compressor use less power.','The room air is colder, so the refrigerant must be colder still for heat to keep flowing into it fast enough.','The condenser needs colder refrigerant.'],correct:1,
     wrong:{0:'It is the opposite: a lower evaporator pressure means a bigger pressure rise for the compressor.',2:'The condenser is on the high-pressure side; its pressure has not changed.'},
     why:'Colder room air needs colder refrigerant. The catch: the compressor now has to lift the refrigerant from a lower pressure.'}},
- {show:1,title:'State 1: leaving the evaporator',html:`<p>Saturated vapour at <b>${y.Pe/1000} MPa</b>. Use Table A-12.</p>`,
+ {show:0,showAfter:1,title:'State 1: leaving the evaporator',html:`<p>Saturated vapour at <b>${y.Pe/1000} MPa</b>. Use Table A-12.</p>`,
   task:{type:'num',fields:[
     {id:'h1',label:'h₁',unit:'kJ/kg',ans:y.h1,tol:0.003,d:2,hint:`Table A-12, row P = ${y.Pe/1000} MPa, column h<sub>g</sub>.`},
     {id:'s1',label:'s₁',unit:'kJ/kg·K',ans:y.s1,tol:0.003,d:5,hint:`Same row, column s<sub>g</sub>.`}]}},
- {show:2,title:'State 2: leaving the compressor',html:`<p>Isentropic: s₂ = s₁ = ${f(y.s1,5)} kJ/kg·K at 1.2 MPa. Interpolate between these rows of Table A-13:</p>${a13(y)}`,
+ {show:1,showAfter:2,title:'State 2: leaving the compressor',html:`<p>Isentropic: s₂ = s₁ = ${f(y.s1,5)} kJ/kg·K at 1.2 MPa. Interpolate between these rows of Table A-13:</p>${a13(y)}`,
   task:{type:'num',fields:[{id:'h2',label:'h₂',unit:'kJ/kg',ans:y.h2,tol:0.003,d:2,hint:`fraction = (${f(y.s1,5)} − ${f(y.lo[2],5)}) / (${f(y.hi[2],5)} − ${f(y.lo[2],5)}); then h₂ = ${f(y.lo[1],2)} + fraction × (${f(y.hi[1],2)} − ${f(y.lo[1],2)}).`}]},
   after:`fraction = ${f(y.frac,3)}, so h₂ = <b>${f(y.h2,2)} kJ/kg</b> (T₂ ≈ ${f(y.T2,0)} °C).`},
- {show:4,title:'States 3 and 4: condenser and valve',html:`<p>The condenser pressure is still 1.2 MPa, and it leaves as saturated liquid. Then the valve throttles it.</p>`,
+ {show:2,showAfter:4,title:'States 3 and 4: condenser and valve',html:`<p>The refrigerant leaves the condenser as <b>saturated liquid</b> at the condenser pressure, <b>1.2 MPa</b>. Then the expansion valve throttles it to the evaporator pressure.</p>`,
   task:{type:'num',fields:[
-    {id:'h3',label:'h₃',unit:'kJ/kg',ans:y.h3,tol:0.003,d:2,hint:'Condenser pressure has not changed. Is h₃ different from the worked example?'},
-    {id:'h4',label:'h₄',unit:'kJ/kg',ans:y.h3,tol:0.003,d:2,hint:'The valve is isenthalpic.'}]}},
+    {id:'h3',label:'h₃',unit:'kJ/kg',ans:y.h3,tol:0.003,d:2,hint:'Saturated liquid at 1.2 MPa: Table A-12, row P = 1.20 MPa, column h<sub>f</sub>.'},
+    {id:'h4',label:'h₄',unit:'kJ/kg',ans:y.h3,tol:0.003,d:2,hint:'The expansion valve does no work and has no heat transfer: it is isenthalpic. What does that make h₄?'}]}},
  {show:4,title:'The COP',html:`<p>q<sub>L</sub> = h₁ − h₄ and w<sub>in</sub> = h₂ − h₁.</p>`,
   task:{type:'num',fields:[{id:'cop',label:'COP<sub>R</sub>',unit:'',ans:y.cop,tol:0.02,d:2,hint:`q<sub>L</sub> = ${f(y.h1,2)} − ${f(y.h3,2)}; w<sub>in</sub> = ${f(y.h2,2)} − ${f(y.h1,2)}.`}]},
   after:`q<sub>L</sub> = ${f(y.qL,2)} kJ/kg, w<sub>in</sub> = ${f(y.w,2)} kJ/kg, COP = <b>${f(y.cop,2)}</b> (it was ${f(w.cop,2)} at 25 °C).`},
@@ -2752,8 +2187,9 @@ const Y_STEPS=[
      <tr><td>Cost per month</td><td>S$${f(w.cost,2)}</td><td>S$${f(y.cost,2)}</td><td>+S$${f(y.cost-w.cost,2)}</td></tr></tbody></table></div>
      <p>Two things go wrong at the same time. The colder room lets <b>${f((y.QL/w.QL-1)*100,0)}% more heat</b> leak in, and the colder refrigerant makes the compressor lift heat further, so the <b>COP falls ${f((1-y.cop/w.cop)*100,0)}%</b>. Together: ${f(y.QL/w.QL,2)} ÷ ${f(y.cop/w.cop,2)} = <b>${f(r,2)} × the electricity</b>.</p>
      <p><b>See it on the diagrams</b> (dashed orange = the 25 °C cycle). On <b>T-s</b>, the room line has dropped, so the evaporating line must drop too: the gap between the evaporating and condensing lines, the <b>temperature lift</b>, is now ${f(y.Tc-y.Te,1)} K instead of ${f(w.Tc-w.Te,1)} K. On <b>P-h</b>, the bottom line is lower and the compression line is wider: more work for each kilogram.</p>
-     <p>That is why Singapore's <b>Go 25</b> campaign asks for 25 °C or above.</p>`;},
-  finish:'Unlock Explore →', onFinish:()=>{ unlock(4); go(3); }}
+     <p>That is why Singapore's <b>Go 25</b> campaign asks for 25 °C or above.</p>
+     <p class="g-hint"><b>Before you leave this page:</b> send your results to your instructor in the box below this panel.</p>`;},
+  finish:null}
 ];
 
 /* ---------- stages ---------- */
@@ -2761,22 +2197,37 @@ function unlock(n){ prog.unlocked=Math.max(prog.unlocked,n); store.set(prog); re
 function go(n,scroll=true){
   if (n>prog.unlocked) return;
   prog.stage=n; store.set(prog);
-  for (let k=1;k<=4;k++) $('stage-'+k).hidden=k!==n;
+  for (let k=1;k<=3;k++) $('stage-'+k).hidden=k!==n;
   renderStages();
-  if (n>=3 && window.__analyseRender) window.__analyseRender();
-  const an=$('analyse'); if (scroll && an && !an.hidden) $('stages').scrollIntoView({block:'nearest'});
+  if (scroll) $('stages').scrollIntoView({block:'start'});
 }
 function renderStages(){
   document.querySelectorAll('#stages .stage').forEach(b=>{
     const n=+b.dataset.s, locked=n>prog.unlocked;
     b.classList.toggle('locked',locked); b.classList.toggle('on',n===prog.stage);
     b.setAttribute('aria-selected',String(n===prog.stage));
-    b.querySelector('.lk').textContent=locked?(n===2?'Locked: finish the worked example':'Locked: finish Your turn'):b.dataset.sub;
+    b.querySelector('.lk').textContent=locked?(n===2?'Locked: finish the self-check':'Locked: finish the worked example'):b.dataset.sub;
   });
-  $('skip-row').hidden=prog.unlocked>=4;
 }
 document.querySelectorAll('#stages .stage').forEach(b=>b.addEventListener('click',()=>go(+b.dataset.s)));
-$('unlock-all').addEventListener('click',()=>{ unlock(4); });
+if (/teacher/.test(location.hash)){ $('skip-row').hidden=false; }
+$('unlock-all').addEventListener('click',()=>{ unlock(3); });
+window.__unlockStage=n=>{ const first=prog.unlocked<n; unlock(n); return first; };
+window.__goStage=n=>go(n);
+
+/* ---------- given box ---------- */
+function given(id,c,Troom){
+  $(id).innerHTML=`<div class="snip-t">Given</div><dl class="given">
+    <dt>Room held at</dt><dd>${Troom} °C (steady state)</dd>
+    <dt>Outdoor air</dt><dd>${TOUT} °C</dd>
+    <dt>Walls and windows</dt><dd><i>UA</i> = ${UA} W/K</dd>
+    <dt>People, equipment, moisture</dt><dd>${OTHER} W</dd>
+    <dt>Refrigerant</dt><dd>R-134a, ideal cycle</dd>
+    <dt>Evaporator</dt><dd>${f(c.Pe/1000,2)} MPa</dd>
+    <dt>Condenser</dt><dd>1.20 MPa</dd>
+    <dt>Use</dt><dd>${HOURS} h a night, ${DAYS} days, ${TARIFF} ¢/kWh</dd></dl>`;
+}
+given('gw-given',WX,25); given('gy-given',YT,20);
 
 /* ---------- send results (Microsoft Form) ---------- */
 function showSend(show){
@@ -2800,6 +2251,5 @@ go(Math.min(prog.stage||1,prog.unlocked),false);
 })();
 
 </script>
-
 </body>
 </html>
