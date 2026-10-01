@@ -358,7 +358,7 @@ const PsyChart=(function(){
       for(let T=Math.ceil(V.T0/lT)*lT;T<=V.T0+V.sT+1e-9;T+=lT){ const t=Math.round(T*10)/10; s+='<line x1="'+f(X(t),1)+'" x2="'+f(X(t),1)+'" y1="'+(MT+PH)+'" y2="'+(MT+PH+5)+'" stroke="#14212A"/><text x="'+f(X(t),1)+'" y="'+(MT+PH+19)+'" text-anchor="middle" font-size="13" fill="#14212A">'+t+'</text>'; }
       for(let w=Math.ceil(V.w0/lW)*lW;w<=V.w0+V.sW+1e-9;w+=lW){ const ww=Math.round(w*10000)/10000; s+='<line x1="'+(ML+PW)+'" x2="'+(ML+PW+5)+'" y1="'+f(Y(ww),1)+'" y2="'+f(Y(ww),1)+'" stroke="#14212A"/><text x="'+(ML+PW+9)+'" y="'+f(Y(ww)+4,1)+'" font-size="13" fill="#14212A">'+ww.toFixed(z>=4?4:3)+'</text>'; }
       s+='<text x="'+(ML+PW/2)+'" y="'+(H-10)+'" text-anchor="middle" font-size="13" font-weight="600" fill="#14212A">Dry-bulb temperature, T (°C)</text>';
-      s+='<text transform="translate('+(W-14)+' '+(MT+PH/2)+') rotate(90)" text-anchor="middle" font-size="13" font-weight="600" fill="#14212A">Humidity ratio, ω (kg water vapour per kg dry air)</text>';
+      s+='<text transform="translate('+(W-28)+' '+(MT+PH/2)+') rotate(90)" text-anchor="middle" font-size="13" font-weight="600" fill="#14212A">Humidity ratio (specific humidity), ω</text><text transform="translate('+(W-11)+' '+(MT+PH/2)+') rotate(90)" text-anchor="middle" font-size="12" fill="#55636C">kg water vapour per kg dry air</text>';
       s+= '<text x="'+ML+'" y="'+(MT-31)+'" font-size="12.5" fill="'+COL.h+'" font-weight="600">h, kJ/kg dry air</text><text x="'+ML+'" y="'+(MT-11)+'" font-size="12.5" fill="'+COL.wb+'" font-weight="600">T_wb, °C</text>';
       s+='<text x="'+ML+'" y="'+(H-10)+'" font-size="12.5" fill="#55636C">After Çengel Fig. A–31</text>';
       base.innerHTML=s; svg.setAttribute('data-focus',st.focus||''); zl.textContent=(Math.round(st.z*10)/10)+'×';
@@ -607,8 +607,8 @@ const FAMS=[
   p:'The temperature an ordinary thermometer reads. It is on the bottom axis, and the <b>vertical lines</b> are lines of constant T.',
   read:'From any point, drop straight down to the bottom axis.',use:'Heating or cooling with no change in moisture moves a state <b>sideways</b>: T changes, but ω stays the same.',
   ov:()=>({curves:[{type:'T',value:25,color:COLS.ink,width:3}],texts:[{T:25,w:0.0285,text:'T = 25 °C (every state on this line)',dx:6}]})},
- {id:'w',chip:'Humidity ratio ω',title:'Humidity ratio, ω',focus:'none',
-  p:'The mass of water vapour carried by each kg of <b>dry</b> air (Çengel calls it specific humidity). It is the right-hand axis, and the <b>horizontal lines</b> are lines of constant ω. Room air is typically 0.008 to 0.020 kg/kg.',
+ {id:'w',chip:'Humidity ratio ω',title:'Humidity ratio (specific humidity), ω',focus:'none',
+  p:'The mass of water vapour carried by each kg of <b>dry</b> air (also called specific humidity). It is the right-hand axis, and the <b>horizontal lines</b> are lines of constant ω. Room air is typically 0.008 to 0.020 kg/kg.',
   read:'From any point, go straight across to the right-hand axis. The unit is kg/kg, so 0.0142 means about 14 g of vapour per kg of dry air.',use:'Moving <b>up</b> adds water vapour (humidifying). Moving <b>down</b> removes it (dehumidifying: the water condenses).',
   ov:()=>({curves:[{type:'w',value:0.010,color:COLS.ink,width:3}],traces:[{pts:[[42,0.006],[42,0.0135]],arrow:true,color:'#BC4A2B',width:3}],texts:[{T:42,w:0.0095,text:'adding vapour',dx:8,color:'#BC4A2B'},{T:2,w:0.0107,text:'ω = 0.010 kg/kg'}]})},
  {id:'rh',chip:'Relative humidity φ',title:'Relative humidity, φ, and the saturation line',focus:'rh',
