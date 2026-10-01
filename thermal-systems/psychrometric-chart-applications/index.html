@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Psychrometric Chart Simulator Part 2</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+:root{--bg:#EDF1F3;--panel:#FFF;--ink:#14212A;--ink-soft:#55636C;--line:#D6DEE3;--cold:#2A6F8E;--cold-soft:#DBEAF0;--hot:#BC4A2B;--hot-soft:#F4DED5;--warm:#DE9127;--warm-soft:#FAEBD3;--mix:#6B7A83;--mix-soft:#E5EAEC;--ok:#3E7D5A;--ok-soft:#E1EFE7;--lo-tint:#E7F1F5;--radius:14px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:'Space Grotesk',system-ui,sans-serif;margin:0}
+[hidden]{display:none!important}
+.wrap{max-width:1340px;margin:0 auto;padding:40px 22px 72px}
+header.page{max-width:720px;margin-bottom:28px}
+header.page .eyebrow,.eyebrow{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;color:var(--cold);letter-spacing:.02em;margin-bottom:10px}
+header.page h1{font-size:clamp(27px,4vw,37px);font-weight:700;letter-spacing:-.01em;line-height:1.12}
+header.page p{margin-top:12px;font-size:16px;color:var(--ink-soft);max-width:66ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.stage-pane{display:flex;flex-direction:column;gap:24px}
+.board{display:grid;grid-template-columns:1.8fr 1fr;gap:24px;align-items:start}
+@media(max-width:1000px){.board{grid-template-columns:1fr}}
+.board .chartcol{position:sticky;top:12px}
+@media(max-width:1000px){.board .chartcol{position:static}}
+.sec-head{display:flex;flex-direction:column;gap:2px;margin-bottom:14px}
+.sec-head h2{font-size:21px;text-wrap:balance}
+.lede{font-size:14.5px;color:var(--ink-soft);max-width:70ch;margin:6px 0 0}
+.stages{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:22px}
+@media(max-width:760px){.stages{grid-template-columns:repeat(2,1fr)}}
+.stage{display:flex;gap:10px;align-items:center;text-align:left;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;font:inherit}
+.stage .num{flex:none;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font:700 13px 'Space Grotesk',sans-serif;background:var(--mix-soft);color:var(--ink)}
+.stage .st-txt{display:flex;flex-direction:column;min-width:0}
+.stage b{font-family:'Space Grotesk',sans-serif;font-size:14px}
+.stage .lk{font-size:11.5px;color:var(--ink-soft)}
+.stage.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.stage.on .num{background:var(--ink);color:#fff}
+.stage.done .num{background:var(--ok);color:#fff}
+.stage.locked{opacity:.55;cursor:not-allowed}
+.btn{font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;padding:9px 16px;border-radius:9px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.ghost{background:var(--panel);color:var(--ink);border-color:var(--line)}
+.btn:hover{opacity:.92}
+.btn[disabled],.btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.linkbtn{background:none;border:0;padding:0;font:inherit;font-size:12.5px;color:var(--cold);text-decoration:underline;cursor:pointer}
+.note-s{font-size:12px;color:var(--ink-soft);margin-top:10px}
+button:focus-visible,input:focus-visible,a:focus-visible,select:focus-visible{outline:2px solid var(--cold);outline-offset:2px}
+
+/* families / chips */
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px}
+.chip{font:500 12.5px 'Inter',sans-serif;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink-soft);cursor:pointer}
+.chip:hover{border-color:var(--ink-soft)}
+.chip.visited{color:var(--ink);border-color:var(--mix)}
+.chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--mix);margin-right:6px;vertical-align:middle;opacity:0}
+.chip.visited .dot{opacity:1}.chip.active .dot{background:#fff}
+.progress-caption{font-size:12.5px;color:var(--ink-soft);margin-bottom:16px}
+.fam-card h2{font-size:20px;margin-bottom:6px}
+.fam-card p{font-size:14.5px;margin:0 0 10px}
+.callout{margin-top:12px;padding:13px 15px;border-radius:10px;font-size:13.5px}
+.callout .k{font:600 12px 'Space Grotesk',sans-serif;letter-spacing:.02em;margin-bottom:5px}
+.callout.read{background:var(--lo-tint);border-left:3px solid var(--cold)}.callout.read .k{color:var(--cold)}
+.callout.use{background:var(--warm-soft);border-left:3px solid var(--warm)}.callout.use .k{color:#a86a13}
+.callout.law{background:var(--mix-soft);border-left:3px solid var(--ink-soft)}
+
+/* quiz */
+.quiz-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.quiz-opts{display:flex;flex-direction:column;gap:9px;max-width:700px;margin-top:12px}
+.quiz-opt{display:flex;gap:12px;align-items:flex-start;text-align:left;font:inherit;font-size:14.5px;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.quiz-opt:hover:not([disabled]){border-color:var(--ink-soft)}
+.quiz-opt .mark{flex:none;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--mix);display:inline-flex;align-items:center;justify-content:center;font:600 11.5px 'Space Grotesk',sans-serif;color:var(--ink-soft)}
+.quiz-opt.correct{border-color:var(--ok);background:var(--ok-soft)}.quiz-opt.correct .mark{border-color:var(--ok);color:var(--ok)}
+.quiz-opt.wrong{border-color:var(--hot);background:var(--hot-soft)}.quiz-opt.wrong .mark{border-color:var(--hot);color:var(--hot)}
+.quiz-opt[disabled]{cursor:default}
+.quiz-feedback{margin-top:14px;font-size:14px;padding:12px 15px;border-radius:9px;background:var(--mix-soft);max-width:700px}
+.quiz-feedback strong{font-family:'Space Grotesk',sans-serif;display:block;margin-bottom:3px;font-size:13px}
+.quiz-feedback.good{background:var(--ok-soft)}.quiz-feedback.bad{background:var(--hot-soft)}
+.quiz-nav{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap}
+.locked-note{padding:14px 16px;border:1px dashed var(--mix);border-radius:10px;font-size:14px;color:var(--ink-soft)}
+
+/* guide */
+.given-box{background:var(--cold-soft);border-radius:11px;padding:12px 14px;font-size:13.5px;margin-bottom:14px;border-left:3px solid var(--cold)}
+.given-box .gk{font:600 11.5px 'Space Grotesk',sans-serif;letter-spacing:.04em;text-transform:uppercase;color:var(--cold);margin-bottom:4px}
+.given-box ul{margin:0;padding-left:18px}
+.given-box .find{margin-top:6px;padding-top:6px;border-top:1px solid rgba(42,111,142,.25)}
+.guide-step{display:flex;flex-direction:column;gap:12px}
+.g-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.g-count{font:600 12.5px 'Space Grotesk',sans-serif;color:var(--ink-soft)}
+.g-title{font-size:19px;text-wrap:balance}
+.g-body{font-size:14.5px;display:flex;flex-direction:column;gap:10px}
+.g-body p{margin:0;max-width:62ch}
+.g-after{background:var(--ok-soft);padding:11px 13px;border-radius:9px;font-size:14px}
+.g-hint{font-size:13px;color:var(--ink-soft)}
+.g-nav{display:flex;justify-content:space-between;gap:10px;margin-top:6px}
+.g-task{border-top:1px solid var(--line);padding-top:12px}
+.g-q{font-weight:600;font-size:14.5px;margin-bottom:10px}
+.plot-prompt{display:flex;gap:10px;align-items:center;background:var(--warm-soft);border-radius:9px;padding:10px 12px;font-size:14px}
+.plot-prompt b{font-family:'Space Grotesk',sans-serif}
+.fb{font-size:13px;margin-top:8px;padding:9px 12px;border-radius:8px}
+.fb.bad{background:var(--hot-soft)}.fb.good{background:var(--ok-soft)}
+.ans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:6px}
+.ans{display:flex;flex-direction:column;gap:4px}
+.ans label{font-size:12.5px;color:var(--ink-soft)}
+.ans .inrow{display:flex;align-items:center;gap:6px}
+.ans input{font:inherit;font-size:14px;width:100%;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font-variant-numeric:tabular-nums}
+.ans .unit{font-size:12.5px;color:var(--ink-soft);white-space:nowrap}
+.ans input.ok{border-color:var(--ok);background:var(--ok-soft)}
+.ans input.bad{border-color:var(--hot);background:var(--hot-soft)}
+.ans input.rev{background:var(--bg);color:var(--ink-soft);border-color:var(--mix)}
+.ans .fbf{font-size:11.5px;min-height:1em}
+.calc{background:var(--lo-tint);border-radius:9px;padding:11px 13px;font-size:13.5px;display:block;font-variant-numeric:tabular-nums;overflow-x:auto}
+.tbl-wrap{overflow-x:auto;margin-top:16px}
+table.st{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
+table.st th{text-align:right;font-weight:600;color:var(--ink-soft);font-size:11.5px;padding:6px 7px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.st td{text-align:right;padding:6px 7px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.st th:first-child,table.st td:first-child{text-align:left}
+table.st td.empty{color:var(--line)}
+.sn{display:inline-flex;width:20px;height:20px;border-radius:50%;align-items:center;justify-content:center;font:700 11px 'Space Grotesk',sans-serif;color:#fff;margin-right:6px;background:var(--ink)}
+.id-in{font:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;min-width:220px}
+table.res{border-collapse:collapse;width:100%;font-size:13px;margin-top:14px}
+table.res th,table.res td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left}
+table.res th{font-size:12px;color:var(--ink-soft);font-weight:600}
+
+/* part 2 */
+.predict{background:var(--warm-soft);border-radius:12px;padding:14px 16px;margin-bottom:6px}
+.p-k{font:600 12px 'Space Grotesk',sans-serif;letter-spacing:.04em;text-transform:uppercase;color:#8a5a12;margin-bottom:6px}
+.predict .quiz-opts{max-width:none}
+.tryit{margin-top:14px;padding:12px 14px;border:1px dashed var(--mix);border-radius:10px;font-size:13.5px}
+.tryit .p-k{color:var(--cold)}
+.tryit ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.ctrl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px 20px;margin:12px 0}
+.ctrl{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ctrl label{font-size:12.5px;color:var(--ink-soft);display:flex;justify-content:space-between;gap:8px}
+.ctrl output{font:600 14px 'Space Grotesk',sans-serif;color:var(--ink);font-variant-numeric:tabular-nums}
+.ctrl input[type=range]{width:100%;accent-color:var(--ink)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:10px 0}
+.kpi{background:var(--bg);border-radius:10px;padding:9px 12px}
+.kpi .k{font-size:11.5px;color:var(--ink-soft)}
+.kpi .v{font:700 20px 'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;line-height:1.2}
+.kpi .v small{font-size:12px;font-weight:600;color:var(--ink-soft);margin-left:2px}
+.kpi.hide .v{color:var(--line)}
+details.reveal{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:0;background:var(--panel)}
+details.reveal summary{cursor:pointer;padding:11px 14px;font:600 13.5px 'Space Grotesk',sans-serif;color:var(--cold)}
+details.reveal .rv{padding:0 16px 14px;font-size:14px}
+details.reveal .rv p,details.reveal .rv ul{margin:6px 0}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:wrap}
+.seg button{flex:1;font:500 13px 'Inter',sans-serif;padding:8px 10px;border:0;background:var(--panel);color:var(--ink-soft);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.measure{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin:12px 0}
+footer.note{margin-top:30px;font-size:12.5px;color:var(--ink-soft);max-width:78ch}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:8px}
+a.card{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:24px;transition:border-color .15s}
+a.card:hover{border-color:var(--ink-soft)}
+a.card h2{font-size:22px;margin:6px 0 8px}a.card p{margin:0 0 10px;font-size:14.5px;color:var(--ink-soft)}
+a.card .go{font:600 14px 'Space Grotesk',sans-serif;color:var(--cold)}
+
+.psy-host{position:relative}
+.psy-host svg.psy{width:100%;height:auto;display:block;font-family:'Inter',system-ui,sans-serif;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.psy-host .hit{fill:transparent}
+.psy-tools{position:absolute;right:12px;top:8px;display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:9px;padding:3px}
+.psy-tools button{font:600 15px 'Space Grotesk',sans-serif;width:30px;height:28px;border:0;background:transparent;border-radius:6px;color:var(--ink);cursor:pointer}
+.psy-tools button:hover{background:var(--bg)}
+.psy-tools .zl{font:600 12px 'Inter',sans-serif;color:var(--ink-soft);padding:0 6px 0 4px}
+.psy-tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font:12px/1.4 'Inter',sans-serif;padding:6px 9px;border-radius:8px;white-space:nowrap;z-index:5;font-variant-numeric:tabular-nums}
+.psy-tip b{font-family:'Space Grotesk',sans-serif;font-weight:600}
+svg.psy[data-focus="rh"] .fam:not(.fam-rh),svg.psy[data-focus="h"] .fam:not(.fam-h),svg.psy[data-focus="wb"] .fam:not(.fam-wb),svg.psy[data-focus="v"] .fam:not(.fam-v){opacity:.14}
+svg.psy[data-focus="rh"] .fam-rh path,svg.psy[data-focus="rh"] path.fam-rh{stroke-width:1.9}
+.fam-key{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.fam-key button{font:500 12.5px 'Inter',sans-serif;display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.fam-key button i{display:inline-block;width:18px;border-top:2.5px solid}
+.fam-key button[aria-pressed="false"]{opacity:.5;text-decoration:line-through}
+svg.psy[data-focus="none"] .fam{opacity:.14}
+.fam-key .psy-tools{position:static;margin-left:auto;align-self:center}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="page">
+    <div class="eyebrow">Psychrometric chart simulator · Applications</div>
+    <h1>Dew point, wet bulb and evaporative cooling</h1>
+    <p>Two short explorations with the chart. In each one, <b>predict first</b>, then try it, then check what you should have found. This part is for your own learning: nothing here is graded, recorded or sent to anyone.</p>
+  </header>
+  <nav class="stages" id="tabs" style="grid-template-columns:repeat(2,1fr);max-width:760px" aria-label="Sections"></nav>
+
+  <section id="secA" class="stage-pane">
+    <div class="board">
+      <div class="chartcol"><div class="panel"><div id="cA"></div><div class="fam-key" id="keyA"></div><p class="note-s">Click the chart to move the state, or use the sliders.</p></div></div>
+      <div class="panel">
+        <div class="sec-head"><span class="eyebrow">A · mini activity</span><h2>When does the cup fog, and how cold can wet tissue get?</h2></div>
+        <div class="predict"><div class="p-k">Predict first</div><div id="pA1"></div></div>
+        <div id="gateA" class="locked-note" style="margin-top:12px">Answer the prediction to unlock the chart tasks.</div>
+        <div id="bodyA" hidden>
+          <div class="ctrl-grid">
+            <div class="ctrl"><label for="aT">Room dry-bulb temperature, T <output id="aTo"></output></label><input id="aT" type="range" min="10" max="40" step="0.5" value="24"></div>
+            <div class="ctrl"><label for="aR">Relative humidity, φ <output id="aRo"></output></label><input id="aR" type="range" min="10" max="100" step="1" value="60"></div>
+          </div>
+          <div class="seg" id="aPre" role="group" aria-label="Presets"></div>
+          <div class="row" style="margin-top:12px"><button type="button" class="btn ghost" id="bDp">Show dew-point path</button><button type="button" class="btn ghost" id="bWb">Show wet-bulb line</button><button type="button" class="btn ghost" id="bAll">Show all properties</button></div>
+          <div class="kpis" id="kA"></div>
+          <div class="tryit"><div class="p-k">Try it</div><ol>
+            <li>Choose <b>Classroom</b> (24 °C, 60 %). Find the state on the chart.</li>
+            <li>With your eye, trace <b>left</b> at constant ω to the 100 % curve, then straight <b>down</b>. That is the dew point. Then press <b>Show dew-point path</b> to check.</li>
+            <li>Press <b>Show wet-bulb line</b>. The wet-tissue thermocouple in the mini activity should read close to this T_wb.</li>
+            <li>Now choose <b>Dry day</b> (same 24 °C, φ = 30 %). Answer the question below <i>before</i> pressing the dew-point button.</li>
+            <li>Choose <b>Singapore outdoors</b>. What is its dew point? What does that mean for a 24 °C glass of water?</li></ol></div>
+          <div class="predict" style="margin-top:14px"><div class="p-k">Quick prediction (step 4)</div><div id="pA2"></div></div>
+          <details class="reveal"><summary>Why does the cup fog at the dew point, not when it is merely colder than the room?</summary><div class="rv">
+            <p>Air always contains some water vapour, but at any given temperature there is a maximum amount of vapour it can hold. That maximum gets smaller as the air gets colder. The dew point is the temperature at which this maximum equals the amount of vapour the air actually contains.</p>
+            <p>The thin layer of air touching the cup is cooled to the cup's surface temperature. If the surface is <b>above</b> the dew point, the maximum at that temperature is still larger than the vapour actually present, so the vapour stays a gas and the cup stays dry. If the surface is <b>below</b> the dew point, the maximum has dropped below the vapour present, so the extra vapour turns into liquid droplets on the cup. That is the fog.</p>
+            <p>So the test is the cup's surface temperature compared with the <b>dew point</b>, not compared with the room temperature.</p></div></details>
+          <details class="reveal"><summary>What you should have found</summary><div class="rv" id="foundA"></div></details>
+          <div class="sec-head" style="margin-top:22px"><span class="eyebrow">After the mini activity</span><h3 style="font-size:17px">Compare the chart with your measurements</h3></div>
+          <p class="lede" style="margin-top:0">Enter what you measured in class. The chart's prediction appears next to it.</p>
+          <div class="measure">
+            <div class="ans"><label for="mT">Room T (hygrometer, °C)</label><input id="mT" inputmode="decimal"></div>
+            <div class="ans"><label for="mR">Room φ (hygrometer, %)</label><input id="mR" inputmode="decimal"></div>
+            <div class="ans"><label for="mD">Cup temperature when it first fogged (°C)</label><input id="mD" inputmode="decimal"></div>
+            <div class="ans"><label for="mW">Wet-tissue thermocouple (°C)</label><input id="mW" inputmode="decimal"></div>
+          </div>
+          <div id="measOut"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="secB" class="stage-pane" hidden>
+    <div class="board">
+      <div class="chartcol"><div class="panel"><div id="cB"></div><div class="fam-key" id="keyB"></div><p class="note-s">Evaporative cooling moves the state up and to the left along a constant wet-bulb line, as far as the saturation curve at most.</p></div></div>
+      <div class="panel">
+        <div class="sec-head"><span class="eyebrow">B · evaporative cooling</span><h2>How cold can an evaporative cooler make the air?</h2></div>
+        <div class="predict"><div class="p-k">Predict first</div><div id="pB1"></div></div>
+        <div id="gateB" class="locked-note" style="margin-top:12px">Answer the prediction to unlock the chart tasks.</div>
+        <div id="bodyB" hidden>
+          <div class="seg" id="bPre" role="group" aria-label="Presets"></div>
+          <div class="ctrl-grid">
+            <div class="ctrl"><label for="bT">Air entering, T₁ <output id="bTo"></output></label><input id="bT" type="range" min="20" max="50" step="0.5" value="40"></div>
+            <div class="ctrl"><label for="bR">Air entering, φ₁ <output id="bRo"></output></label><input id="bR" type="range" min="5" max="95" step="1" value="20"></div>
+          </div>
+          <div class="kpis" id="kB"></div>
+          <div class="tryit"><div class="p-k">Try it</div><ol>
+            <li>Choose <b>Desert</b> (40 °C, 20 %). What is the lowest temperature the air can reach, and does it match your prediction?</li>
+            <li>Choose <b>Singapore afternoon</b> (33 °C, 75 %). Compare the cooling ΔT and the final φ with the desert.</li>
+            <li>Look at the water added (g per kg of dry air) in each case.</li>
+            <li>Move the T₁ and φ₁ sliders to try your own air. Where is the cooling largest?</li></ol></div>
+          <details class="reveal"><summary>Why does an evaporative cooler barely help on a Singapore afternoon?</summary><div class="rv" id="whyB"></div></details>
+          <details class="reveal"><summary>What you should have found</summary><div class="rv" id="foundB"></div></details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="note">
+    Ungraded self-study. Chart values are calculated from the ideal-gas-mixture equations at 101.325 kPa and match Çengel Fig. A–31 to within reading accuracy. Evaporative cooling is modelled as adiabatic saturation (constant wet-bulb temperature).
+    <br><br>This simulation was built with Claude (Anthropic).
+  </footer>
+</div>
+
+<script>
+const PSY=(function(){
+  const P=101.325;               // kPa, Cengel Fig. A-31
+  function pws(T){ const K=T+273.15;
+    return Math.exp(-5.8002206e3/K+1.3914993-4.8640239e-2*K+4.1764768e-5*K*K-1.4452093e-8*K*K*K+6.5459673*Math.log(K))/1000; }
+  const F=1.0044;                // enhancement factor
+  function wFromPw(pw){ return 0.621945*pw/(P-pw); }
+  function wSat(T){ const p=F*pws(T); return wFromPw(p); }
+  function wRH(T,rh){ return wFromPw(rh*F*pws(T)); }
+  function rhFrom(T,w){ const pw=w*P/(0.621945+w); return pw/(F*pws(T)); }
+  function h(T,w){ return 1.005*T+w*(2501+1.82*T); }
+  function v(T,w){ return 0.287042*(T+273.15)*(1+1.607858*w)/P; }
+  function Tdp(w){ const pw=w*P/(0.621945+w)/F; let lo=-30,hi=80;
+    for(let i=0;i<60;i++){const m=(lo+hi)/2; if(pws(m)<pw) lo=m; else hi=m;} return (lo+hi)/2; }
+  function wFromTwb(T,Twb){ const ws=wSat(Twb);
+    return ((2501-2.326*Twb)*ws-1.006*(T-Twb))/(2501+1.86*T-4.186*Twb); }
+  function Twb(T,w){ let lo=-30,hi=T;
+    for(let i=0;i<60;i++){const m=(lo+hi)/2; if(wFromTwb(T,m)>w) hi=m; else lo=m;} return (lo+hi)/2; }
+  function wFromH(T,hh){ return (hh-1.005*T)/(2501+1.82*T); }
+  function state(T,w){ return {T,w,rh:rhFrom(T,w),h:h(T,w),v:v(T,w),Tdp:Tdp(w),Twb:Twb(T,w)}; }
+  function stateRH(T,rh){ return state(T,wRH(T,rh)); }
+  return {P,pws,wSat,wRH,rhFrom,h,v,Tdp,Twb,wFromTwb,wFromH,state,stateRH};
+})();
+
+
+</script>
+<script>
+/* Interactive psychrometric chart: redrawn after Cengel Fig. A-31 (ASHRAE chart No. 1), 101.325 kPa */
+const PsyChart=(function(){
+  const W=820,H=610,ML=58,MR=86,MT=48,MB=56,PW=W-ML-MR,PH=H-MT-MB;
+  const FT=50,FW=0.030;
+  const COL={rh:'#2A6F8E',h:'#B8731A',wb:'#3E7D5A',v:'#7A5C99',ink:'#14212A',soft:'#55636C'};
+  let UID=0;
+  const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const f=(x,d)=>Number(x).toFixed(d);
+  function bis(fn,lo,hi,n){ for(let i=0;i<(n||50);i++){ const m=(lo+hi)/2; if(fn(m)>0) hi=m; else lo=m; } return (lo+hi)/2; }
+
+  /* ---- geometry of each line family, in data coordinates ---- */
+  const G={
+    rh(rh){ const pts=[]; for(let T=0;T<=FT+1e-9;T+=0.5){ const w=PSY.wRH(T,rh); pts.push([T,w]); if(w>FW*1.02) break; } return pts; },
+    sat(){ return G.rh(1); },
+    h(h){ const Ts2=bis(T=>PSY.wSat(T)-PSY.wFromH(T,h),-5,60);
+          const Te=Math.min(FT,h/1.005), pts=[]; for(let T=Ts2;T<Te;T+=1) pts.push([T,PSY.wFromH(T,h)]); pts.push([Te,PSY.wFromH(Te,h)]); return pts; },
+    wb(tw){ const Te=Math.min(FT,bis(T=>-PSY.wFromTwb(T,tw),tw,80)); const pts=[]; for(let T=tw;T<Te;T+=1) pts.push([T,PSY.wFromTwb(T,tw)]); pts.push([Te,PSY.wFromTwb(Te,tw)]); return pts; },
+    v(v){ const wv=T=>(v*PSY.P/(0.287042*(T+273.15))-1)/1.607858; const T0=v*PSY.P/0.287042-273.15; const pts=[]; 
+          for(let T=Math.min(T0,FT);T>=-1;T-=0.25){ const w=wv(T); pts.push([T,Math.max(0,w)]); if(w>=PSY.wSat(T)||w>FW*1.02) break; } return pts; }
+  };
+  const cache={}; function geo(k,v){ const id=k+v; return cache[id]||(cache[id]=G[k](v)); }
+
+  function create(host,opt){
+    const uid=++UID; opt=opt||{};
+    const st={z:1,cx:25,cw:0.015,vis:{rh:true,h:true,wb:true,v:true},focus:null,plot:false,
+      ov:{points:[],traces:[],curves:[]},onPlot:null,tip:opt.tip||'basic',pt:null};
+    host.classList.add('psy-host');
+    host.innerHTML='<svg class="psy" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Psychrometric chart, 0 to 50 degrees Celsius, humidity ratio 0 to 0.030"><g class="base"></g><g class="ovl"></g><g class="xh"></g><rect class="hit" fill="transparent" x="'+ML+'" y="'+MT+'" width="'+PW+'" height="'+PH+'"></rect></svg>'+
+      '<div class="psy-tools"><button type="button" data-z="in" title="Zoom in" aria-label="Zoom in">+</button><button type="button" data-z="out" title="Zoom out" aria-label="Zoom out">−</button><button type="button" data-z="reset" title="Whole chart" aria-label="Whole chart">⟲</button><span class="zl">1×</span></div><div class="psy-tip" hidden></div>';
+    const svg=host.querySelector('svg'), base=svg.querySelector('.base'), ovl=svg.querySelector('.ovl'), xh=svg.querySelector('.xh'), hit=svg.querySelector('.hit'), tip=host.querySelector('.psy-tip'), zl=host.querySelector('.zl');
+    function view(){ const sT=FT/st.z, sW=FW/st.z; const T0=clamp(st.cx-sT/2,0,FT-sT), w0=clamp(st.cw-sW/2,0,FW-sW); return {T0,w0,sT,sW}; }
+    let V=view();
+    const X=T=>ML+(T-V.T0)/V.sT*PW, Y=w=>MT+PH*(1-(w-V.w0)/V.sW);
+    const inX=T=>T>=V.T0-1e-9&&T<=V.T0+V.sT+1e-9, inY=w=>w>=V.w0-1e-9&&w<=V.w0+V.sW+1e-9;
+    const path=(pts,close)=>pts.map((p,i)=>(i?'L':'M')+f(X(p[0]),1)+' '+f(Y(p[1]),1)).join(' ')+(close?'Z':'');
+    const cl='clip'+uid;
+
+    function drawBase(){
+      V=view(); const z=st.z; let s='';
+      s+='<defs><clipPath id="'+cl+'"><rect x="'+ML+'" y="'+MT+'" width="'+PW+'" height="'+PH+'"/></clipPath>'+
+         '<marker id="ar'+uid+'" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker></defs>';
+      s+='<rect x="'+ML+'" y="'+MT+'" width="'+PW+'" height="'+PH+'" fill="#fff"/>';
+      s+='<g clip-path="url(#'+cl+')">';
+      /* region beyond saturation */
+      const sat=geo('rh',1); const poly=[[0,FW*1.05]].concat(sat.filter(p=>p[1]<FW*1.05)); poly.push([poly[poly.length-1][0],FW*1.05]);
+      const last=sat.find(p=>p[1]>=FW*1.05); if(last) poly.splice(poly.length-1,1,[last[0],FW*1.05]);
+      s+='<path d="'+path(poly,true)+'" fill="#EDF1F3"/>';
+      /* grid */
+      let g='';
+      const stepT=z>=4?0.5:(z>=2?0.5:1), stepW=z>=2?0.0005:0.001;
+      for(let T=Math.ceil(V.T0/stepT)*stepT;T<=V.T0+V.sT+1e-9;T+=stepT){ const maj=Math.abs(T/5-Math.round(T/5))<1e-6, one=Math.abs(T-Math.round(T))<1e-6;
+        g+='<line x1="'+f(X(T),1)+'" x2="'+f(X(T),1)+'" y1="'+MT+'" y2="'+(MT+PH)+'" stroke="'+(maj?'#C9D2D8':(one?'#E3E9ED':'#EEF2F4'))+'" stroke-width="'+(maj?1.1:0.8)+'"/>'; }
+      for(let w=Math.ceil(V.w0/stepW)*stepW;w<=V.w0+V.sW+1e-9;w+=stepW){ const maj=Math.abs(w/0.005-Math.round(w/0.005))<1e-6, one=Math.abs(w/0.001-Math.round(w/0.001))<1e-6;
+        g+='<line x1="'+ML+'" x2="'+(ML+PW)+'" y1="'+f(Y(w),1)+'" y2="'+f(Y(w),1)+'" stroke="'+(maj?'#C9D2D8':(one?'#E3E9ED':'#EEF2F4'))+'" stroke-width="'+(maj?1.1:0.8)+'"/>'; }
+      s+=g;
+      let lab='',lab2='';
+      const halo=' paint-order="stroke" stroke="#fff" stroke-width="3" stroke-linejoin="round"';
+      /* specific volume (dashed) */
+      if(st.vis.v){ const dv=z>=2?0.005:0.01, lv=z>=2?0.01:0.05;
+        for(let v=0.78;v<=0.95+1e-9;v+=dv){ v=Math.round(v*1000)/1000; const pts=geo('v',v); if(pts.length<2) continue;
+          s+='<path class="fam fam-v" d="'+path(pts)+'" fill="none" stroke="'+COL.v+'" stroke-width="1" stroke-dasharray="5 3" opacity=".8"/>';
+          if(Math.abs(v/lv-Math.round(v/lv))<1e-6){ const p=pts[Math.max(0,pts.length-1)]; const q=pts[0];
+            const wl=0.0009; const T=bis(T=>wl-((v*PSY.P/(0.287042*(T+273.15))-1)/1.607858),-20,60); // position near the bottom
+            lab+='<text class="fam fam-v" x="'+f(X(T)+4,1)+'" y="'+f(Y(wl)-4,1)+'" font-size="12.5" font-weight="600" fill="'+COL.v+'"'+halo+'>'+f(v,2)+'</text>'; } } }
+      /* wet bulb */
+      if(st.vis.wb){ const dw=z>=2?1:2, lw=z>=2?1:4;
+        for(let tw=0;tw<=32+1e-9;tw+=dw){ const pts=geo('wb',tw);
+          s+='<path class="fam fam-wb" d="'+path(pts)+'" fill="none" stroke="'+COL.wb+'" stroke-width="1" opacity=".85"/>';
+          if(tw%lw===0){ const ws=PSY.wSat(tw);
+            if(ws<=0.0293) lab+='<text class="fam fam-wb" x="'+f(X(tw)-5,1)+'" y="'+f(Y(ws)-3,1)+'" text-anchor="end" font-size="12.5" font-weight="600" fill="'+COL.wb+'"'+halo+'>'+tw+'</text>';
+            else { const Tt=bis(T=>0.0299-PSY.wFromTwb(T,tw),tw,80); if(inX(Tt)) lab2+='<text class="fam fam-wb" x="'+f(X(Tt),1)+'" y="'+(MT-5)+'" text-anchor="middle" font-size="12.5" font-weight="600" fill="'+COL.wb+'">'+tw+'</text>'; } } } }
+      /* enthalpy */
+      if(st.vis.h){ const dh=z>=4?2:(z>=2?5:10), lh=z>=4?2:(z>=2?5:10);
+        for(let h=10;h<=135;h+=dh){ const pts=geo('h',h); if(pts.length<2) continue;
+          s+='<path class="fam fam-h" d="'+path(pts)+'" fill="none" stroke="'+COL.h+'" stroke-width="1" opacity=".85"/>';
+          if(h%lh===0){ const T0=pts[0][0], w0=pts[0][1];
+            if(w0<=0.0293){ const Tl=T0-1.5, wl=PSY.wFromH(Tl,h); s+='<path class="fam fam-h" d="M'+f(X(T0),1)+' '+f(Y(w0),1)+'L'+f(X(Tl),1)+' '+f(Y(wl),1)+'" stroke="'+COL.h+'" stroke-width="1"/>';
+              lab+='<text class="fam fam-h" x="'+f(X(Tl)-3,1)+'" y="'+f(Y(wl)-2,1)+'" text-anchor="end" font-size="12.5" font-weight="600" fill="'+COL.h+'"'+halo+'>'+h+'</text>'; }
+            else { const Tt=(h-75.03)/1.0596; if(Tt<=FT&&inX(Tt)) lab2+='<text class="fam fam-h" x="'+f(X(Tt),1)+'" y="'+(MT-19)+'" text-anchor="middle" font-size="12.5" font-weight="600" fill="'+COL.h+'">'+h+'</text>'; } } } }
+      /* relative humidity */
+      if(st.vis.rh){ const dr=z>=2?5:10;
+        for(let r=dr;r<=100;r+=dr){ const pts=geo('rh',r/100); const sw=r===100?2.4:(r%10===0?1.4:1);
+          s+='<path class="fam fam-rh'+(r===100?' sat':'')+'" d="'+path(pts)+'" fill="none" stroke="'+COL.rh+'" stroke-width="'+sw+'"/>';
+          if(r===100){ const T1=13,T2=16,p1=[X(T1),Y(PSY.wSat(T1))],p2=[X(T2),Y(PSY.wSat(T2))]; const ang=Math.atan2(p2[1]-p1[1],p2[0]-p1[0])*180/Math.PI; if(inX(T1)&&inY(PSY.wSat(T1))) lab+='<text class="fam fam-rh" transform="translate('+f(p1[0]+Math.sin(ang*Math.PI/180)*66,1)+' '+f(p1[1]-Math.cos(ang*Math.PI/180)*66,1)+') rotate('+f(ang,1)+')" font-size="12.5" font-weight="700" fill="'+COL.rh+'"'+halo+'>Saturation, φ = 100 %</text>'; }
+          else if(r%10===0||z>=2){ // label sits on the curve, rotated along it
+            const wl=Math.min(0.0275,PSY.wRH(48,r/100)); const Tl=bis(T=>PSY.wRH(T,r/100)-wl,0,50); const Ta=Tl-0.7,Tb=Tl+0.7;
+            const a1=[X(Ta),Y(PSY.wRH(Ta,r/100))],a2=[X(Tb),Y(PSY.wRH(Tb,r/100))]; const ang=Math.atan2(a2[1]-a1[1],a2[0]-a1[0])*180/Math.PI; const cx=X(Tl),cy=Y(wl);
+            if(inX(Tl)&&inY(wl)) lab+='<text class="fam fam-rh" transform="translate('+f(cx,1)+' '+f(cy,1)+') rotate('+f(ang,1)+')" text-anchor="middle" dy="4" font-size="12.5" font-weight="700" fill="'+COL.rh+'"'+halo.replace('stroke-width="3"','stroke-width="5"')+'>'+r+'%</text>'; } } }
+      s+=lab; s+='</g>'; s+=lab2;
+      /* frame and axes */
+      s+='<rect x="'+ML+'" y="'+MT+'" width="'+PW+'" height="'+PH+'" fill="none" stroke="#14212A" stroke-width="1.4"/>';
+      const lT=z>=4?0.5:(z>=2?1:5), lW=z>=4?0.0005:(z>=2?0.001:0.005);
+      for(let T=Math.ceil(V.T0/lT)*lT;T<=V.T0+V.sT+1e-9;T+=lT){ const t=Math.round(T*10)/10; s+='<line x1="'+f(X(t),1)+'" x2="'+f(X(t),1)+'" y1="'+(MT+PH)+'" y2="'+(MT+PH+5)+'" stroke="#14212A"/><text x="'+f(X(t),1)+'" y="'+(MT+PH+19)+'" text-anchor="middle" font-size="13" fill="#14212A">'+t+'</text>'; }
+      for(let w=Math.ceil(V.w0/lW)*lW;w<=V.w0+V.sW+1e-9;w+=lW){ const ww=Math.round(w*10000)/10000; s+='<line x1="'+(ML+PW)+'" x2="'+(ML+PW+5)+'" y1="'+f(Y(ww),1)+'" y2="'+f(Y(ww),1)+'" stroke="#14212A"/><text x="'+(ML+PW+9)+'" y="'+f(Y(ww)+4,1)+'" font-size="13" fill="#14212A">'+ww.toFixed(z>=4?4:3)+'</text>'; }
+      s+='<text x="'+(ML+PW/2)+'" y="'+(H-10)+'" text-anchor="middle" font-size="13" font-weight="600" fill="#14212A">Dry-bulb temperature, T (°C)</text>';
+      s+='<text transform="translate('+(W-28)+' '+(MT+PH/2)+') rotate(90)" text-anchor="middle" font-size="13" font-weight="600" fill="#14212A">Humidity ratio (specific humidity), ω</text><text transform="translate('+(W-11)+' '+(MT+PH/2)+') rotate(90)" text-anchor="middle" font-size="12" fill="#55636C">kg water vapour per kg dry air</text>';
+      s+= '<text x="'+ML+'" y="'+(MT-31)+'" font-size="12.5" fill="'+COL.h+'" font-weight="600">h, kJ/kg dry air</text><text x="'+ML+'" y="'+(MT-11)+'" font-size="12.5" fill="'+COL.wb+'" font-weight="600">T_wb, °C</text>';
+      s+='<text x="'+ML+'" y="'+(H-10)+'" font-size="12.5" fill="#55636C">After Çengel Fig. A–31</text>';
+      base.innerHTML=s; svg.setAttribute('data-focus',st.focus||''); zl.textContent=(Math.round(st.z*10)/10)+'×';
+      drawOverlay();
+    }
+
+    function curveFor(c){ const col=c.color||COL.ink;
+      let pts;
+      if(c.type==='T') pts=[[c.value,0],[c.value,FW*1.05]]; else if(c.type==='w') pts=[[0,c.value],[FT,c.value]];
+      else pts=geo(c.type,c.value);
+      return '<path d="'+path(pts)+'" fill="none" stroke="'+col+'" stroke-width="'+(c.width||3)+'" stroke-linecap="round" opacity=".9"/>'; }
+    function drawOverlay(){ let s='<g clip-path="url(#'+cl+')">';
+      st.ov.curves.forEach(c=>{ s+=curveFor(c); });
+      st.ov.traces.forEach(t=>{ s+='<path d="'+path(t.pts)+'" fill="none" stroke="'+(t.color||COL.ink)+'" stroke-width="'+(t.width||2.4)+'" '+(t.dash?'stroke-dasharray="6 4" ':'')+(t.arrow?'marker-end="url(#ar'+uid+')" ':'')+'stroke-linejoin="round" stroke-linecap="round"/>'; });
+      s+='</g>';
+      st.ov.points.forEach(p=>{ if(!inX(p.T)||!inY(p.w)) return; const x=X(p.T),y=Y(p.w);
+        s+='<circle cx="'+f(x,1)+'" cy="'+f(y,1)+'" r="6" fill="'+(p.hollow?'#fff':(p.color||COL.ink))+'" stroke="'+(p.color||COL.ink)+'" stroke-width="2.4"/>';
+        if(p.label) s+='<text x="'+f(x+9,1)+'" y="'+f(y-8,1)+'" font-size="14" font-weight="700" fill="'+(p.color||COL.ink)+'" paint-order="stroke" stroke="#fff" stroke-width="3.5" stroke-linejoin="round" font-family="Space Grotesk,sans-serif">'+p.label+'</text>'; });
+      st.ov.texts&&st.ov.texts.forEach(t=>{ if(!inX(t.T)||!inY(t.w)) return; s+='<text x="'+f(X(t.T)+(t.dx||0),1)+'" y="'+f(Y(t.w)+(t.dy||0),1)+'" font-size="12" font-weight="600" text-anchor="'+(t.anchor||'start')+'" fill="'+(t.color||COL.ink)+'" paint-order="stroke" stroke="#fff" stroke-width="3.5" stroke-linejoin="round">'+t.text+'</text>'; });
+      ovl.innerHTML=s; }
+
+    /* ---- pointer handling: hover reading, click to plot, drag to pan ---- */
+    function toData(e){ const r=svg.getBoundingClientRect(); const sx=(e.clientX-r.left)/r.width*W, sy=(e.clientY-r.top)/r.height*H;
+      return {sx,sy,T:V.T0+(sx-ML)/PW*V.sT, w:V.w0+(1-(sy-MT)/PH)*V.sW, inside:sx>=ML&&sx<=ML+PW&&sy>=MT&&sy<=MT+PH, px:e.clientX-r.left, py:e.clientY-r.top}; }
+    let drag=null;
+    hit.addEventListener('pointerdown',e=>{ hit.setPointerCapture(e.pointerId); drag={x:e.clientX,y:e.clientY,cx:st.cx,cw:st.cw,moved:false}; });
+    hit.addEventListener('pointermove',e=>{ const d=toData(e);
+      if(drag){ const dx=e.clientX-drag.x, dy=e.clientY-drag.y; if(Math.abs(dx)+Math.abs(dy)>6) drag.moved=true;
+        if(drag.moved&&st.z>1){ const r=svg.getBoundingClientRect(); st.cx=drag.cx-dx/r.width*W/PW*V.sT; st.cw=drag.cw+dy/r.height*H/PH*V.sW; drawBase(); } }
+      showHover(d); });
+    hit.addEventListener('pointerup',e=>{ if(drag&&!drag.moved&&st.plot&&st.onPlot){ const d=toData(e); st.onPlot({T:Math.round(d.T*100)/100,w:Math.round(d.w*100000)/100000}); } drag=null; });
+    hit.addEventListener('pointerleave',()=>{ xh.innerHTML=''; tip.hidden=true; });
+    hit.addEventListener('pointercancel',()=>{ drag=null; });
+    function showHover(d){ if(!d.inside){ xh.innerHTML=''; tip.hidden=true; return; }
+      const X0=d.sx,Y0=d.sy; xh.innerHTML='<line x1="'+X0+'" x2="'+X0+'" y1="'+MT+'" y2="'+(MT+PH)+'" stroke="#14212A" stroke-width=".8" stroke-dasharray="3 3" opacity=".55"/><line y1="'+Y0+'" y2="'+Y0+'" x1="'+ML+'" x2="'+(ML+PW)+'" stroke="#14212A" stroke-width=".8" stroke-dasharray="3 3" opacity=".55"/>';
+      let t='<b>T</b> '+f(d.T,1)+' °C &nbsp; <b>ω</b> '+f(d.w,4);
+      tip.innerHTML=t; tip.hidden=false; const hw=host.getBoundingClientRect(); const left=d.px>hw.width*0.62?d.px-tip.offsetWidth-14:d.px+14; tip.style.left=left+'px'; tip.style.top=Math.max(4,d.py-34)+'px'; }
+    host.querySelector('.psy-tools').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const k=b.dataset.z;
+      const Z=[1,2,3,4,6]; let i=Z.indexOf(st.z); if(i<0) i=0;
+      if(k==='in'){ if(st.z===1&&st.ov.points.length){ const q=st.ov.points[st.ov.points.length-1]; st.cx=q.T; st.cw=q.w; } st.z=Z[Math.min(Z.length-1,i+1)]; } else if(k==='out'){ st.z=Z[Math.max(0,i-1)]; } else { st.z=1; st.cx=25; st.cw=0.015; }
+      drawBase(); });
+    svg.style.cursor='default';
+    drawBase();
+    const api={
+      setOverlay(o){ st.ov={points:o.points||[],traces:o.traces||[],curves:o.curves||[],texts:o.texts||[]}; drawOverlay(); },
+      focus(f){ st.focus=f||null; svg.setAttribute('data-focus',st.focus||''); },
+      setVisible(v){ Object.assign(st.vis,v); drawBase(); },
+      getVisible(){ return Object.assign({},st.vis); },
+      setPlotMode(on,cb){ st.plot=!!on; st.onPlot=cb||null; hit.style.cursor=on?'crosshair':'default'; host.classList.toggle('plotting',!!on); },
+      zoomTo(z,T,w){ st.z=z; st.cx=T; st.cw=w; drawBase(); },
+      resetView(){ st.z=1; st.cx=25; st.cw=0.015; drawBase(); },
+      redraw:drawBase, tools:host.querySelector('.psy-tools')
+    };
+    return api;
+  }
+  return {create,COL,geo};
+})();
+
+</script>
+<script>
+"use strict";
+/* ---------- small helpers shared by Part 1 and Part 2 ---------- */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>Array.from((r||document).querySelectorAll(s));
+const fmt=(x,d)=>Number(x).toFixed(d);
+function parseNum(s){ s=String(s==null?'':s).trim().replace(',','.').replace(/[^0-9eE+\-.]/g,''); const v=parseFloat(s); return isFinite(v)?v:NaN; }
+const LET='ABCDEFG';
+
+/* ---------- a multiple-choice question ---------- */
+function mountMCQ(host,spec,state,hooks){
+  hooks=hooks||{};
+  function render(){
+    const done=state.done;
+    let h='<div class="g-q">'+spec.q+'</div><div class="quiz-opts">';
+    spec.opts.forEach((o,i)=>{ const L=LET[i]; const picked=state.picks.indexOf(L)>=0;
+      let cls='quiz-opt'; if(done&&o.ok) cls+=' correct'; else if(picked&&!o.ok) cls+=' wrong';
+      h+='<button type="button" class="'+cls+'" data-i="'+i+'"'+((done||picked)?' disabled':'')+'><span class="mark">'+(done&&o.ok?'✓':(picked&&!o.ok?'✕':L))+'</span><span>'+o.t+'</span></button>'; });
+    h+='</div>';
+    if(state.picks.length){ const last=state.picks[state.picks.length-1], o=spec.opts[LET.indexOf(last)];
+      if(o.ok) h+='<div class="quiz-feedback good"><strong>'+(state.picks.length===1?'Correct.':'Correct this time.')+'</strong>'+(spec.explain||'')+'</div>';
+      else if(done) h+='<div class="quiz-feedback bad"><strong>Not quite. The answer is '+LET[spec.opts.findIndex(x=>x.ok)]+'.</strong>'+(o.fb?o.fb+'<br>':'')+(spec.explain||'')+'</div>';
+      else h+='<div class="quiz-feedback bad"><strong>Not quite. Try another option.</strong>'+(o.fb||'')+'</div>'; }
+    host.innerHTML=h;
+    $$('.quiz-opt',host).forEach(b=>b.addEventListener('click',()=>pick(+b.dataset.i)));
+  }
+  function pick(i){ if(state.done) return; const o=spec.opts[i], L=LET[i]; state.picks.push(L);
+    if(o.ok){ state.done=true; state.status=state.picks.length===1?'First try':'After a retry'; }
+    else if(state.picks.length>=2){ state.done=true; state.status='Revealed the answer'; }
+    render(); hooks.onPick&&hooks.onPick(L,o.ok,state); if(state.done&&hooks.onDone) hooks.onDone(state); }
+  render();
+}
+
+/* ---------- results kept in the browser (Part 1 only) ---------- */
+function makeResults(KEY){
+  let r={}; try{ r=JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){}
+  const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(r)); }catch(e){} };
+  return { all:()=>r, set(k,v){ r[k]=v; save(); }, get(k){ return r[k]; }, once(k,v){ if(r[k]==null){ r[k]=v; save(); } }, clear(){ r={}; save(); } };
+}
+
+/* ---------- guided steps: plot / read / calculate / question ---------- */
+function Guide(cfg){
+  const host=cfg.host, S={cur:0,st:cfg.steps.map(()=>({done:false,tries:0,hadWrong:false,vals:{},revealed:false,mcq:{picks:[],done:false}})),pts:{},known:new Set(cfg.known0||[]),vals:{}};
+  const chart=cfg.chart, ref=cfg.ref;
+  const N=cfg.steps.length;
+  const statusOf=st=>st.revealed?'Revealed the answer':(st.hadWrong?'After a retry':'First try');
+  function givenHTML(){ return '<div class="given-box"><div class="gk">Given</div><ul>'+cfg.given.map(g=>'<li>'+g+'</li>').join('')+'</ul><div class="find"><b>Find:</b> '+cfg.find+'</div></div>'; }
+  function tableHTML(){ const t=cfg.table; let h='<div class="tbl-wrap"><table class="st"><tr><th></th>'+t.cols.map(c=>'<th><span class="sn">'+c+'</span>State</th>').join('')+'</tr>';
+    t.rows.forEach(r=>{ h+='<tr><td>'+r.label+'</td>'+t.cols.map(c=>{ const key=c+'.'+r.k; const has=S.known.has(key)&&ref[c]&&ref[c][r.k]!=null; return has?'<td>'+fmt(ref[c][r.k],r.d)+'</td>':'<td class="empty">–</td>'; }).join('')+'</tr>'; });
+    (t.extra||[]).forEach(x=>{ const has=S.known.has('x.'+x.k); h+='<tr><td>'+x.label+'</td>'+(has?'<td colspan="'+t.cols.length+'" style="text-align:center">'+fmt(x.val(),x.d)+'</td>':'<td colspan="'+t.cols.length+'" class="empty" style="text-align:center">–</td>')+'</tr>'; });
+    return h+'</table></div><p class="note-s">Values appear here after you have answered each step.</p>'; }
+  function overlay(){ const i=S.cur, step=cfg.steps[i], st=S.st[i];
+    const pts=[]; Object.keys(S.pts).forEach(k=>{ pts.push({T:S.pts[k].T,w:S.pts[k].w,label:k}); });
+    let o={points:pts,traces:[],curves:[],texts:[]};
+    if(st.done&&step.show){ const x=step.show(S); o.traces=x.traces||[]; o.curves=x.curves||[]; o.texts=x.texts||[]; if(x.points) o.points=o.points.concat(x.points); }
+    else if(step.preview){ const x=step.preview(S); o.traces=x.traces||[]; o.curves=x.curves||[]; o.texts=x.texts||[]; }
+    if(S.attempt) o.points=o.points.concat([{T:S.attempt.T,w:S.attempt.w,hollow:true,color:'#BC4A2B'}]);
+    chart.setOverlay(o); chart.focus(step.focus||null); }
+  function detail(i){ const st=S.st[i], task=cfg.steps[i].task;
+    if(task.kind==='plot'){ if(st.revealed||!st.click) return 'page showed the point'+(st.tries?' after '+st.tries+' misses':''); return 'clicked T = '+fmt(st.click.T,1)+' °C, φ = '+fmt(Math.min(PSY.rhFrom(st.click.T,st.click.w),1.2)*100,0)+' %'+(st.tries?' (after '+st.tries+' misses)':''); }
+    if(task.kind==='num') return task.fields.map(f=>f.label+' = '+(st.vals[f.id]!=null?st.vals[f.id]:'?')+' '+f.unit).join('; ')+(st.revealed?' (values shown by the page)':'');
+    if(task.kind==='mcq') return 'picked '+st.mcq.picks.join(' then ');
+    return ''; }
+  function finishStep(i){ const st=S.st[i], step=cfg.steps[i]; st.done=true; st.status=st.status||statusOf(st);
+    (step.know||[]).forEach(k=>S.known.add(k));
+    cfg.onStep&&cfg.onStep(i,st.status,S,detail(i)); }
+
+  function render(){ const i=S.cur, step=cfg.steps[i], st=S.st[i]; S.attempt=null;
+    const box=document.createElement('div');
+    let h=givenHTML()+'<div class="guide-step"><div class="g-top"><span class="g-count">Step '+(i+1)+' of '+N+'</span>'+(i>0?'<button type="button" class="btn ghost" data-act="back">← Back</button>':'')+'</div>'+
+      '<h3 class="g-title">'+step.title+'</h3><div class="g-body">'+step.body(S)+'</div><div class="g-task" id="g-task"></div><div id="g-after"></div><div class="g-nav"><span></span><button type="button" class="btn" data-act="next" disabled>'+(i===N-1?'Finish':'Next step →')+'</button></div></div>'+tableHTML();
+    host.innerHTML=h;
+    host.querySelector('[data-act=back]')&&host.querySelector('[data-act=back]').addEventListener('click',()=>{ S.cur--; render(); });
+    host.querySelector('[data-act=next]').addEventListener('click',()=>{ if(i===N-1){ cfg.onDone&&cfg.onDone(S); } else { S.cur++; render(); } });
+    renderTask(); overlay(); }
+
+  function enableNext(){ const b=host.querySelector('[data-act=next]'); if(b) b.disabled=!S.st[S.cur].done; const a=$('#g-after',host); if(a&&S.st[S.cur].done){ const step=cfg.steps[S.cur]; a.innerHTML=step.after?'<div class="g-after">'+step.after(S)+'</div>':''; } const t=host.querySelector('table.st'); if(t) t.parentNode.outerHTML=tableHTML().split('<p class="note-s">')[0]; }
+
+  function renderTask(){ const i=S.cur, step=cfg.steps[i], st=S.st[i], task=step.task, box=$('#g-task',host);
+    chart.setPlotMode(false);
+    if(task.kind==='plot') plotTask(box,step,st,task);
+    else if(task.kind==='num') numTask(box,step,st,task);
+    else if(task.kind==='mcq') { mountMCQ(box,task.spec,st.mcq,{ onDone:(m)=>{ st.status=m.status; st.revealed=(m.status==='Revealed the answer'); st.hadWrong=m.picks.length>1; finishStep(S.cur); enableNext(); overlay(); } }); }
+    enableNext(); }
+
+  /* ---- plot a point ---- */
+  function plotTask(box,step,st,task){
+    const t=task.target();
+    if(st.done){ box.innerHTML='<div class="plot-prompt">✓ State '+task.point+' is plotted.</div>'; return; }
+    box.innerHTML='<div class="plot-prompt"><span>👆</span><span>'+task.prompt+'</span></div><div id="plot-fb"></div><div id="plot-show"></div>';
+    chart.setPlotMode(true,c=>{ if(st.done) return;
+      const dT=c.T-t.T, dw=c.w-t.w;
+      if(Math.abs(dT)<=task.tolT&&Math.abs(dw)<=task.tolW){ S.pts[task.point]={T:t.T,w:t.w}; st.click={T:c.T,w:c.w}; S.attempt=null; st.hadWrong=st.tries>0; finishStep(S.cur); chart.setPlotMode(false); renderTask(); overlay(); return; }
+      st.tries++; st.hadWrong=true; S.attempt={T:c.T,w:c.w};
+      const rh=PSY.rhFrom(c.T,c.w), parts=[]; if(dT>task.tolT) parts.push('too far right'); if(dT<-task.tolT) parts.push('too far left'); if(dw>task.tolW) parts.push('too high'); if(dw<-task.tolW) parts.push('too low');
+      const wrongNote=rh>1.0?'That point is above the 100 % curve (not possible for real air). ':'';
+      $('#plot-fb',box).innerHTML='<div class="fb bad">'+wrongNote+'Your point is at about <b>T = '+fmt(c.T,1)+' °C</b> and <b>φ = '+fmt(Math.min(rh,1.2)*100,0)+' %</b> ('+parts.join(', ')+'). You need '+task.need+'.'+(task.hint?' <span class="g-hint">'+task.hint+'</span>':'')+'</div>';
+      if(st.tries>=2) $('#plot-show',box).innerHTML='<p><button type="button" class="btn ghost" id="show-pt">Show me where it goes</button></p>', $('#show-pt',box).addEventListener('click',()=>{ S.pts[task.point]={T:t.T,w:t.w}; S.attempt=null; st.revealed=true; finishStep(S.cur); chart.setPlotMode(false); renderTask(); overlay(); });
+      overlay(); }); }
+
+  /* ---- read or calculate numbers ---- */
+  function numTask(box,step,st,task){
+    let h='<div class="ans-grid">';
+    task.fields.forEach(f=>{ const v=st.vals[f.id]; const done=st.done;
+      h+='<div class="ans"><label for="f-'+f.id+'">'+f.label+'</label><div class="inrow"><input id="f-'+f.id+'" inputmode="decimal" autocomplete="off" value="'+(v!=null?v:'')+'" '+(done?'disabled':'')+' class="'+(done?(st.revealed?'rev':'ok'):'')+'"><span class="unit">'+f.unit+'</span></div><div class="fbf" id="fb-'+f.id+'"></div></div>'; });
+    h+='</div>'+(task.calc?'<div class="calc" style="margin-top:12px">'+task.calc+'</div>':'');
+    if(!st.done) h+='<div class="row" style="margin-top:12px"><button type="button" class="btn" id="chk">Check</button><span id="show-wrap"></span></div>';
+    box.innerHTML=h;
+    if(st.done){ task.fields.forEach(f=>{ const fb=$('#fb-'+f.id,box); fb.textContent='≈ '+fmt(f.ref(S),f.dec)+' '+f.unit; fb.style.color='#3E7D5A'; }); return; }
+    const inputs=task.fields.map(f=>$('#f-'+f.id,box));
+    inputs.forEach(inp=>inp.addEventListener('keydown',e=>{ if(e.key==='Enter') check(); }));
+    $('#chk',box).addEventListener('click',check);
+    function check(){ let all=true, anyWrong=false; st.tries++;
+      task.fields.forEach((f,k)=>{ const inp=inputs[k], fb=$('#fb-'+f.id,box); const v=parseNum(inp.value); const r=f.ref(S);
+        if(isNaN(v)){ inp.className='bad'; fb.style.color='#BC4A2B'; fb.textContent='Enter a number.'; all=false; return; }
+        let ok=false; const alt=f.alt?f.alt(S):null;
+        if(f.tolAbs!=null) ok=Math.abs(v-r)<=f.tolAbs; else ok=Math.abs(v-r)<=Math.abs(r)*f.tolRel;
+        if(!ok&&alt!=null&&f.altRel!=null) ok=Math.abs(v-alt)<=Math.abs(alt)*f.altRel;
+        if(ok){ inp.className='ok'; st.vals[f.id]=v; S.vals[f.id]=v; fb.style.color='#3E7D5A'; fb.textContent='✓ ok'; }
+        else { all=false; anyWrong=true; inp.className='bad'; fb.style.color='#BC4A2B';
+          let msg=f.hint||''; const unitMsg=(f.units||[]).find(u=>{ const t=r; return Math.abs(v*u.factor-t)<=(f.tolAbs!=null?f.tolAbs:Math.abs(t)*f.tolRel)*1.5; });
+          if(unitMsg) msg=unitMsg.msg; else if(st.tries>=1&&!isNaN(v)) msg=(v>r?'A bit high. ':'A bit low. ')+msg;
+          fb.textContent=msg;
+          if(RES_RECORD) RES_RECORD(cfg.stage,f.wrongKey||f.id,v); } });
+      if(anyWrong) st.hadWrong=true;
+      if(all){ finishStep(S.cur); renderTask(); overlay(); }
+      else if(st.tries>=2){ $('#show-wrap',box).innerHTML='<button type="button" class="btn ghost" id="show-ans">Show me the values</button>'; $('#show-ans',box).addEventListener('click',()=>{ task.fields.forEach(f=>{ const r=f.ref(S); st.vals[f.id]=Number(fmt(r,f.dec)); S.vals[f.id]=st.vals[f.id]; }); st.revealed=true; finishStep(S.cur); renderTask(); overlay(); }); } } }
+
+  const RES_RECORD=cfg.recordWrong;
+  render();
+  return {S,render,goto(i){ S.cur=i; render(); }};
+}
+
+</script>
+<script>
+const COLS=PsyChart.COL;
+/* ---------- tabs ---------- */
+const TABS=[{id:'A',name:'A · Dew point and wet bulb',lk:'Mini activity'},{id:'B',name:'B · Evaporative cooling',lk:''}];
+let curTab='A';
+function drawTabs(){ $('#tabs').innerHTML=TABS.map((t,i)=>'<button type="button" class="stage'+(curTab===t.id?' on':'')+'" data-id="'+t.id+'"><span class="num">'+t.id+'</span><span class="st-txt"><b>'+t.name.slice(4)+'</b><span class="lk">'+t.lk+'</span></span></button>').join('');
+  $$('#tabs .stage').forEach(b=>b.addEventListener('click',()=>{ curTab=b.dataset.id; $('#secA').hidden=curTab!=='A'; $('#secB').hidden=curTab!=='B'; drawTabs(); })); }
+drawTabs();
+function fillKey(host,chart){ const F=[['rh','φ curves','#2A6F8E'],['h','h lines','#B8731A'],['wb','T_wb lines','#3E7D5A'],['v','v lines (dashed)','#7A5C99']];
+  host.innerHTML='<span class="note-s" style="margin:6px 8px 0 0">Show lines:</span>'+F.map(f=>'<button type="button" data-k="'+f[0]+'" aria-pressed="true"><i style="border-color:'+f[2]+(f[0]==='v'?';border-top-style:dashed':'')+'"></i>'+f[1]+'</button>').join('');
+  $$('button',host).forEach(b=>b.addEventListener('click',()=>{ const on=b.getAttribute('aria-pressed')!=='true'; b.setAttribute('aria-pressed',on); chart.setVisible({[b.dataset.k]:on}); })); host.appendChild(chart.tools); }
+const kpi=(k,v,u,hide)=>'<div class="kpi'+(hide?' hide':'')+'"><div class="k">'+k+'</div><div class="v">'+v+'<small>'+u+'</small></div></div>';
+function presets(host,list,onPick){ host.innerHTML=list.map((p,i)=>'<button type="button" data-i="'+i+'" aria-pressed="false">'+p.name+'</button>').join(''); $$('button',host).forEach(b=>b.addEventListener('click',()=>{ $$('button',host).forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); onPick(list[+b.dataset.i]); })); }
+
+/* ============================================================
+   A: dew point and wet bulb
+============================================================ */
+const chA=PsyChart.create($('#cA')); fillKey($('#keyA'),chA);
+const A={T:24,rh:60,dp:false,wb:false,all:false};
+const PRE_A=[{name:'Classroom 24 °C, 60 %',T:24,rh:60},{name:'Dry day 24 °C, 30 %',T:24,rh:30},{name:'Singapore outdoors 32 °C, 75 %',T:32,rh:75},{name:'Aircon room 22 °C, 50 %',T:22,rh:50}];
+function drawA(){ const s=PSY.stateRH(A.T,A.rh/100);
+  $('#aTo').textContent=fmt(A.T,1)+' °C'; $('#aRo').textContent=A.rh+' %'; $('#aT').value=A.T; $('#aR').value=A.rh;
+  const o={points:[{T:A.T,w:s.w,label:'1'}],traces:[],curves:[],texts:[]};
+  if(A.dp){ o.traces.push({pts:[[A.T,s.w],[s.Tdp,s.w],[s.Tdp,0]],arrow:true,color:'#BC4A2B',width:2.6}); o.texts.push({T:s.Tdp,w:0.0012,text:'T_dp = '+fmt(s.Tdp,1)+' °C',dx:8,color:'#BC4A2B'}); }
+  if(A.wb){ o.curves.push({type:'wb',value:s.Twb,color:COLS.wb,width:3}); o.points.push({T:s.Twb,w:PSY.wSat(s.Twb),color:COLS.wb}); o.texts.push({T:s.Twb,w:PSY.wSat(s.Twb),text:'T_wb = '+fmt(s.Twb,1)+' °C',dx:-8,dy:-10,anchor:'end',color:COLS.wb}); }
+  chA.setOverlay(o); chA.focus(A.wb&&!A.dp?'wb':(A.dp?'rh':null));
+  $('#kA').innerHTML=kpi('T',fmt(A.T,1),'°C')+kpi('φ',A.rh,'%')+kpi('ω',A.all?fmt(s.w,4):'–','kg/kg',!A.all)+kpi('h',A.all?fmt(s.h,1):'–','kJ/kg',!A.all)+kpi('v',A.all?fmt(s.v,3):'–','m³/kg',!A.all)+kpi('T_dp',(A.dp||A.all)?fmt(s.Tdp,1):'–','°C',!(A.dp||A.all))+kpi('T_wb',(A.wb||A.all)?fmt(s.Twb,1):'–','°C',!(A.wb||A.all));
+  $('#bDp').textContent=A.dp?'Hide dew-point path':'Show dew-point path'; $('#bWb').textContent=A.wb?'Hide wet-bulb line':'Show wet-bulb line'; $('#bAll').textContent=A.all?'Hide properties':'Show all properties'; }
+$('#aT').addEventListener('input',e=>{ A.T=+e.target.value; drawA(); });
+$('#aR').addEventListener('input',e=>{ A.rh=+e.target.value; drawA(); });
+$('#bDp').addEventListener('click',()=>{ A.dp=!A.dp; drawA(); });
+$('#bWb').addEventListener('click',()=>{ A.wb=!A.wb; drawA(); });
+$('#bAll').addEventListener('click',()=>{ A.all=!A.all; drawA(); });
+presets($('#aPre'),PRE_A,p=>{ A.T=p.T; A.rh=p.rh; A.dp=false; A.wb=false; drawA(); });
+chA.setPlotMode(true,c=>{ if($('#bodyA').hidden) return; const T=Math.max(10,Math.min(40,Math.round(c.T*2)/2)); const rh=Math.round(PSY.rhFrom(T,c.w)*100); A.T=T; A.rh=Math.max(10,Math.min(100,rh)); $$('#aPre button').forEach(x=>x.setAttribute('aria-pressed','false')); drawA(); });
+function unlockA(){ $('#gateA').hidden=true; $('#bodyA').hidden=false; drawA(); }
+mountMCQ($('#pA1'),{q:'The classroom air is about 24 °C and 60 % relative humidity. How cold must the outside of a shiny metal cup get before it fogs up?',opts:[
+  {t:'24 °C: it fogs as soon as the cup is colder than the room.',ok:false,fb:'Being colder than the room is not enough. Fog needs the surface to be below the air\'s dew point.'},
+  {t:'About 16 °C: the dew point of this air.',ok:true},
+  {t:'About 5 °C: it has to be close to freezing.',ok:false,fb:'That is far colder than needed. Humid air at 24 °C is already saturated at a much higher temperature.'}],
+  explain:'The dew point of 24 °C, 60 % air is about 16 °C. You will find it on the chart in a moment.'},{picks:[],done:false},{onDone:unlockA});
+mountMCQ($('#pA2'),{q:'Same 24 °C room, but the air gets drier (φ falls from 60 % to 30 %). The dew point will…',opts:[
+  {t:'go up',ok:false,fb:'Drier air has less vapour (lower ω), so it has to be cooled <i>further</i> before water starts to condense. That means a lower dew point, not a higher one.'},
+  {t:'stay the same',ok:false,fb:'The dew point depends only on ω. Drier air has lower ω.'},
+  {t:'go down',ok:true}],explain:'Less vapour means the air has to be cooled further before water starts to condense, so the dew point is lower. Check it with the dew-point button.'},{picks:[],done:false});
+(function(){ const a=PSY.stateRH(24,.6), b=PSY.stateRH(24,.3), c=PSY.stateRH(32,.75), d=PSY.stateRH(22,.5);
+  $('#foundA').innerHTML='<ul><li><b>Classroom, 24 °C, 60 %:</b> T_dp ≈ '+fmt(a.Tdp,1)+' °C, T_wb ≈ '+fmt(a.Twb,1)+' °C, ω ≈ '+fmt(a.w,4)+' kg/kg. The cup fogs when its surface is below about '+fmt(a.Tdp,0)+' °C.</li>'+
+  '<li><b>Dry day, 24 °C, 30 %:</b> T_dp ≈ '+fmt(b.Tdp,1)+' °C (lower), T_wb ≈ '+fmt(b.Twb,1)+' °C. Drier air: the wet-bulb is further below the dry-bulb.</li>'+
+  '<li><b>Singapore outdoors, 32 °C, 75 %:</b> T_dp ≈ '+fmt(c.Tdp,1)+' °C. A glass of water at 24 °C is well below this, so it fogs immediately.</li>'+
+  '<li><b>Aircon room, 22 °C, 50 %:</b> T_dp ≈ '+fmt(d.Tdp,1)+' °C.</li></ul><p>In every case: T_dp ≤ T_wb ≤ T, with equality only at saturation.</p>'; })();
+function meas(){ const T=parseNum($('#mT').value), R=parseNum($('#mR').value), D=parseNum($('#mD').value), W=parseNum($('#mW').value); const out=$('#measOut');
+  if(isNaN(T)||isNaN(R)||R<=0||R>100){ out.innerHTML='<p class="note-s">Enter the room T and φ to see the chart prediction.</p>'; return; }
+  const s=PSY.stateRH(T,R/100); const row=(n,pred,m,hint)=>{ const has=!isNaN(m); const d=has?m-pred:null; return '<tr><td>'+n+'</td><td>'+fmt(pred,1)+' °C</td><td>'+(has?fmt(m,1)+' °C':'–')+'</td><td>'+(has?(d>=0?'+':'')+fmt(d,1)+' °C':'')+'</td></tr>'+(has&&Math.abs(d)>1.5?'<tr><td colspan="4" class="note-s" style="padding:2px 8px 10px">'+hint(d)+'</td></tr>':''); };
+  out.innerHTML='<table class="res"><tr><th></th><th>Chart predicts</th><th>You measured</th><th>Difference</th></tr>'+
+    row('Dew point (cup fogs)',s.Tdp,D,d=>d>0?'You read a higher temperature than predicted: the fog may have formed before you noticed it was the first fog, or the thermocouple lags behind the cup surface. Add ice more slowly and stir.':'You read a lower temperature than predicted: the cup was probably cooled quickly and the water temperature lags the shiny surface, or the hygrometer reads high.')+
+    row('Wet bulb (wet tissue)',s.Twb,W,d=>d>0?'The tissue may be drying out, the fan too weak, or the thermocouple not fully wrapped. It must stay wet and in moving air.':'Reading below the prediction can mean the hygrometer reads too dry or the tissue is in a strong draught; check the room reading.')+'</table><p class="note-s">A hygrometer is typically accurate to ±3 % RH, which already shifts the predicted dew point by about ±0.5 °C. Differences under about 1.5 °C are normal.</p>'; }
+['mT','mR','mD','mW'].forEach(id=>$('#'+id).addEventListener('input',meas)); meas();
+
+/* ============================================================
+   B: evaporative cooling
+============================================================ */
+const chB=PsyChart.create($('#cB')); fillKey($('#keyB'),chB);
+const B={T:40,rh:20,e:100}; /* best case: the air leaves saturated */
+const PRE_B=[{name:'Desert 40 °C, 20 %',T:40,rh:20},{name:'Singapore afternoon 33 °C, 75 %',T:33,rh:75},{name:'Hot dry office 30 °C, 30 %',T:30,rh:30}];
+function drawB(){ const s=PSY.stateRH(B.T,B.rh/100); const e=B.e/100; const T2=B.T-e*(B.T-s.Twb); const w2=PSY.wFromTwb(T2,s.Twb); const s2=PSY.state(T2,Math.min(w2,PSY.wSat(T2)));
+  $('#bTo').textContent=fmt(B.T,1)+' °C'; $('#bRo').textContent=B.rh+' %'; $('#bT').value=B.T; $('#bR').value=B.rh;
+  const o={points:[{T:B.T,w:s.w,label:'1'},{T:s2.T,w:s2.w,label:'2',color:COLS.rh}],curves:[{type:'wb',value:s.Twb,color:COLS.wb,width:2.5}],traces:[{pts:[[B.T,s.w],[s2.T,s2.w]],arrow:true,color:COLS.rh,width:3}],texts:[{T:s.Twb,w:PSY.wSat(s.Twb),text:'limit: T_wb = '+fmt(s.Twb,1)+' °C',dx:-8,dy:-10,anchor:'end',color:COLS.wb}]};
+  chB.setOverlay(o); chB.focus('wb');
+  $('#kB').innerHTML=kpi('Lowest T₂ (best case)',fmt(s2.T,1),'°C')+kpi('Cooling ΔT',fmt(B.T-s2.T,1),'°C')+kpi('Leaving φ₂',fmt(s2.rh*100,0),'%')+kpi('Water added',fmt((s2.w-s.w)*1000,1),'g/kg dry air')+kpi('Limit T_wb',fmt(s.Twb,1),'°C'); }
+$('#bT').addEventListener('input',e=>{ B.T=+e.target.value; drawB(); }); $('#bR').addEventListener('input',e=>{ B.rh=+e.target.value; drawB(); });
+presets($('#bPre'),PRE_B,p=>{ B.T=p.T; B.rh=p.rh; drawB(); });
+chB.setPlotMode(false);
+function unlockB(){ $('#gateB').hidden=true; $('#bodyB').hidden=false; drawB(); }
+(function(){ const d=PSY.stateRH(40,.2), sg=PSY.stateRH(33,.75), e7=(s,e)=>{ const T2=s.T-e*(s.T-s.Twb); const w2=PSY.wFromTwb(T2,s.Twb); return PSY.state(T2,w2); };
+  const d1=e7(d,1), g1=e7(sg,1);
+  mountMCQ($('#pB1'),{q:'Desert air at 40 °C and 20 % flows through a wet pad in an evaporative cooler. In the best case, how cold can the air get?',opts:[
+    {t:'About 13 °C: its dew point.',ok:false,fb:'The dew point is the limit for cooling with no moisture added. Here water is evaporating into the air, so ω rises and the limit is higher.'},
+    {t:'About 22 °C: its wet-bulb temperature.',ok:true},
+    {t:'As cold as you like, if the pad is wet enough.',ok:false,fb:'Once the air is saturated, no more water evaporates, so the cooling stops.'}],
+    explain:'Evaporation stops when the air is saturated. Moving along the wet-bulb line, that happens at T_wb. The chart shows this as the limit.'},{picks:[],done:false},{onDone:unlockB});
+  $('#whyB').innerHTML='<p>Evaporation can only cool the air down to its <b>wet-bulb temperature</b>. Desert air (40 °C, 20 %) has T_wb ≈ '+fmt(d.Twb,1)+' °C, so up to '+fmt(d.T-d.Twb,0)+' °C of cooling is available. Singapore afternoon air (33 °C, 75 %) already holds so much vapour that T_wb ≈ '+fmt(sg.Twb,1)+' °C: at most '+fmt(sg.T-sg.Twb,1)+' °C of cooling, and the air leaves nearly saturated (φ ≈ '+fmt(g1.rh*100,0)+' %), which feels muggy.</p>';
+  $('#foundB').innerHTML='<ul><li><b>Desert, 40 °C, 20 %:</b> T₂ ≈ '+fmt(d1.T,1)+' °C (ΔT ≈ '+fmt(d.T-d1.T,0)+' °C), φ₂ = 100 %.</li><li><b>Singapore afternoon, 33 °C, 75 %:</b> T₂ ≈ '+fmt(g1.T,1)+' °C (ΔT ≈ '+fmt(sg.T-g1.T,1)+' °C), φ₂ = 100 %.</li><li><b>Water added:</b> desert ≈ '+fmt((d1.w-d.w)*1000,1)+' g per kg of dry air, Singapore ≈ '+fmt((g1.w-sg.w)*1000,1)+' g per kg. The air moves along a constant wet-bulb line.</li></ul><p>These are best-case numbers: air leaving fully saturated. A real cooler usually reaches about 70 to 90 % of this cooling, so its air leaves a little warmer.</p><p><b>In short:</b> evaporation can cool the air only down to its wet-bulb temperature, and in humid Singapore that is already close to the air temperature.</p>'; })();
+drawA();
+
+</script>
+</body>
+</html>
