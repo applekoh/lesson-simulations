@@ -1,0 +1,1403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heat Sink Designer · Guided activity</title>
+<script>
+/* Paste the Microsoft Form pre-filled link between the quotes (see the set-up notes). */
+window.FORM_URL = "";
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cold:#2A6F8E; --hot:#BC4A2B; --warm:#DE9127; --bg:#EDF1F3;
+  --ink:#14232D; --ink2:#41525D; --muted:#6B7B86; --line:#D3DBE0;
+  --card:#FFFFFF; --soft:#F6F8F9; --ok:#2E7D5B; --okbg:#E6F2EC; --badbg:#F8E9E4; --warnbg:#FBF1E1;
+  --radius:12px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3,h4{font-family:"Space Grotesk",Inter,sans-serif;line-height:1.2;margin:0}
+sub{font-size:.72em}
+button{font:inherit;cursor:pointer}
+input,select{font:inherit}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+header.top{background:var(--ink);color:#fff;padding:22px 0 20px}
+.eyebrow{font:600 12px/1 "Space Grotesk",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#9CC3D5;margin-bottom:8px}
+header.top h1{font-size:30px;font-weight:700;letter-spacing:-.01em}
+header.top .sub{margin:6px 0 0;color:#C9D6DD;font-size:15px}
+nav.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0 0}
+nav.tabs button{background:rgba(255,255,255,.08);color:#DCE6EB;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:7px 14px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+nav.tabs button .n{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.14);font-size:12px}
+nav.tabs button.on{background:#fff;color:var(--ink);border-color:#fff}
+nav.tabs button.on .n{background:var(--cold);color:#fff}
+nav.tabs button.done .n{background:var(--ok);color:#fff}
+nav.tabs button:disabled{opacity:.45;cursor:not-allowed}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:20px;padding:20px 0 40px;align-items:start}
+.side{position:sticky;top:12px;display:flex;flex-direction:column;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
+.card h2{font-size:21px;margin-bottom:6px}
+.card h3{font-size:16px;margin-bottom:6px}
+.lead{color:var(--ink2);margin:6px 0 0}
+.panel-title{font:600 12px/1 "Space Grotesk",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.vis{padding:12px 14px}
+.sink-svg,.chart-svg,.net-svg{width:100%;height:auto;display:block}
+.chart-svg .grid{stroke:#E7ECEF}
+.chart-svg .axis{stroke:#9AA6AE}
+.chart-svg .tick{font-size:10px;fill:var(--muted)}
+.chart-svg .axlab{font-size:11px;fill:var(--ink2)}
+.chart-svg .curve{fill:none;stroke:var(--hot);stroke-width:2.4}
+.chart-svg .tinf{stroke:var(--cold);stroke-dasharray:5 4;stroke-width:1.4}
+.chart-svg .tinf-lab{font-size:10.5px;fill:var(--cold);font-weight:600}
+.chart-svg .tmax{stroke:var(--hot);stroke-dasharray:5 4;stroke-width:1.4}
+.chart-svg .tmax-lab{font-size:10.5px;fill:var(--hot);font-weight:600}
+.chart-svg .pt{fill:var(--hot)}
+.chart-svg .pt-lab{font-size:10.5px;fill:var(--ink2);font-weight:600}
+.chart-svg .hover-line{stroke:var(--ink);stroke-width:1;stroke-dasharray:3 3}
+.chart-svg .hover-pt{fill:#fff;stroke:var(--ink);stroke-width:2}
+.chart-svg .hover-lab{font-size:11px;fill:var(--ink);font-weight:600;paint-order:stroke;stroke:#fff;stroke-width:3px}
+.muted-txt{font-size:12px;fill:var(--muted)}
+.net-svg .wire{stroke:#9AA6AE;stroke-width:2}
+.net-svg .res{fill:#fff;stroke:var(--cold);stroke-width:1.6}
+.net-svg .res-q{stroke-dasharray:4 3;stroke:#9AA6AE}
+.net-svg .res-val{font-size:12px;font-weight:700;fill:var(--ink)}
+.net-svg .res-name{font-size:11px;font-weight:600;fill:var(--cold)}
+.net-svg .res-sub{font-size:9.5px;fill:var(--muted)}
+.net-svg .node{fill:var(--ink)}
+.net-svg .node-hot{fill:var(--hot)}
+.net-svg .node-name{font-size:11px;font-weight:600;fill:var(--ink2)}
+.net-svg .node-val{font-size:11px;fill:var(--ink)}
+.net-svg .hot-txt{fill:var(--hot);font-weight:700}
+.net-svg .q-lab{font-size:10.5px;fill:var(--muted)}
+.legend{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);margin-top:6px}
+.legend .bar{flex:1;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--cold),var(--warm),var(--hot))}
+.given{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--cold);border-radius:var(--radius);padding:12px 16px;font-size:13.5px}
+.given h4{font-size:14px;margin-bottom:6px;color:var(--cold)}
+.given dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0}
+.given dt{color:var(--muted)}
+.given dd{margin:0;font-weight:600}
+.given .assume{margin:8px 0 0;color:var(--ink2);font-size:12.5px}
+.btn{background:var(--cold);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-weight:600}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--cold);border:1.5px solid var(--cold)}
+.btn.small{padding:6px 12px;font-size:13.5px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.hint{border-radius:8px;padding:9px 12px;margin-top:10px;font-size:14px}
+.hint.bad{background:var(--badbg);border-left:3px solid var(--hot)}
+.hint.good{background:var(--okbg);border-left:3px solid var(--ok)}
+.hint.info{background:var(--warnbg);border-left:3px solid var(--warm)}
+.eq{font-family:"Cambria Math","STIX Two Math","Times New Roman",serif;font-size:16.5px;background:var(--soft);border-radius:8px;padding:8px 12px;margin:8px 0;overflow-x:auto;white-space:nowrap}
+.locked{opacity:.5;pointer-events:none;filter:grayscale(.3)}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.hidden{display:none !important}
+@media (max-width:980px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .side{position:static}
+}
+@media (max-width:520px){
+  .wrap{padding:0 16px}
+  header.top h1{font-size:25px}
+  .card{padding:15px 15px}
+}
+.sink-svg .ext{stroke:#41525D;stroke-width:.8}
+.sink-svg .dim{stroke:#41525D;stroke-width:1}
+.sink-svg .dimlab{font:italic 600 14px "Cambria Math","Times New Roman",serif;fill:var(--ink);paint-order:stroke;stroke:#fff;stroke-width:3px}
+.xs-svg{width:100%;height:auto;display:block}
+.xs-svg .xs-area{fill:var(--cold);fill-opacity:.22}
+.xs-svg .xs-perim{fill:none;stroke:var(--hot);stroke-width:2.2;stroke-dasharray:5 3}
+.xs-svg .xs-dim{font:italic 600 14px "Cambria Math","Times New Roman",serif;fill:var(--ink)}
+.xs-svg .xs-dimline{stroke:#41525D;stroke-width:1}
+.xs-svg .xs-lab{font:italic 13px "Cambria Math","Times New Roman",serif;fill:var(--ink)}
+.stack-svg{width:100%;height:auto;display:block}
+.stack-svg .air{fill:none;stroke:#2A6F8E;stroke-width:1.6;stroke-linecap:round;opacity:.7}
+.stack-svg .metal{fill:#C4CDD3;stroke:#8D99A1;stroke-width:.8}
+.stack-svg .tim{fill:#B9A6D6;stroke:#8C78AE;stroke-width:.8}
+.stack-svg .pkg{fill:#3B4650}
+.stack-svg .die{fill:#BC4A2B}
+.stack-svg .pcb{fill:#4F8A5B}
+.stack-svg .lay-lab{font-size:10.5px;fill:var(--ink2)}
+.stack-svg .pkg-lab{font-size:9.5px;fill:#fff}
+.stack-svg .qline{stroke:#BC4A2B;stroke-width:2.6;opacity:.85}
+.stack-svg .q-big{font:italic 700 14px "Cambria Math","Times New Roman",serif;fill:#BC4A2B;paint-order:stroke;stroke:#fff;stroke-width:3px}
+.stack-svg .wire{stroke:#9AA6AE;stroke-width:2}
+.stack-svg .res{fill:#fff;stroke:var(--cold);stroke-width:1.6}
+.stack-svg .res-q{stroke-dasharray:4 3;stroke:#9AA6AE}
+.stack-svg .res-val{font-size:11.5px;font-weight:700;fill:var(--ink)}
+.stack-svg .res-name{font-size:11.5px;font-weight:700;fill:var(--cold)}
+.stack-svg .res-sub{font-size:9px;fill:var(--muted)}
+.stack-svg .leader{stroke:#9AA6AE;stroke-width:.9;stroke-dasharray:3 3}
+.stack-svg .pin{fill:#41525D}
+.stack-svg .node{fill:var(--ink)}
+.stack-svg .node-hot{fill:var(--hot)}
+.stack-svg .node-val{font-size:11px;font-weight:600;fill:var(--ink);paint-order:stroke;stroke:#fff;stroke-width:3px}
+.stack-svg .hot-txt{fill:var(--hot)}
+.stack-svg .q-lab{font-size:9.5px;fill:var(--muted)}
+
+/* ---- guided page ---- */
+.story{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+.story .chip{width:44px;height:44px;border-radius:10px;background:var(--ink);display:grid;place-items:center;color:#fff;font:700 13px "Space Grotesk",Inter,system-ui,sans-serif}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.hcard{border:1px solid var(--line);border-radius:10px;background:var(--soft);overflow:hidden}
+.hcard>button{width:100%;text-align:left;background:none;border:0;padding:12px 14px;display:flex;align-items:center;gap:10px;font:600 15px "Space Grotesk",sans-serif;color:var(--ink)}
+.hcard>button .ic{width:26px;height:26px;border-radius:50%;background:#fff;border:1.5px solid var(--line);display:grid;place-items:center;font-size:13px;flex:none;color:var(--muted)}
+.hcard.seen>button .ic{background:var(--ok);border-color:var(--ok);color:#fff}
+.hcard>button .chev{margin-left:auto;color:var(--muted);transition:transform .2s}
+.hcard.open>button .chev{transform:rotate(90deg)}
+.hcard .body{display:none;padding:0 14px 14px;font-size:14.5px;color:var(--ink2)}
+.hcard.open{grid-column:1 / -1;background:#fff}
+.hcard.open .body{display:block}
+.progress-note{margin-top:12px;font-size:14px;color:var(--muted)}
+.quiz{margin-top:16px;display:flex;flex-direction:column;gap:12px}
+.q{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:#fff}
+.q .qt{font-weight:600;margin-bottom:10px}
+.opts{display:grid;gap:7px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;background:var(--soft);border:1.5px solid var(--line);border-radius:8px;padding:8px 12px;color:var(--ink)}
+.opt b{font-family:"Space Grotesk",Inter,system-ui,sans-serif;color:var(--cold);min-width:14px}
+.opt:hover:not(:disabled){border-color:var(--cold)}
+.opt.picked-bad{border-color:var(--hot);background:var(--badbg)}
+.opt.picked-good{border-color:var(--ok);background:var(--okbg)}
+.opt.is-answer{border-color:var(--ok)}
+.opt:disabled{cursor:default}
+.step{border:1px solid var(--line);border-radius:10px;background:#fff;padding:14px 16px;margin-top:12px}
+.step-h{display:flex;align-items:center;gap:10px}
+.step-h .num{width:26px;height:26px;border-radius:50%;background:var(--cold);color:#fff;display:grid;place-items:center;font:700 13px "Space Grotesk",Inter,system-ui,sans-serif;flex:none}
+.step-h h3{font-size:16px;margin:0}
+.step-h .status{margin-left:auto;font-size:12.5px;font-weight:600;border-radius:999px;padding:3px 10px}
+.status.first{background:var(--okbg);color:var(--ok)}
+.status.retry{background:var(--warnbg);color:#9A5F0E}
+.status.revealed{background:var(--badbg);color:var(--hot)}
+.step.done .step-h .num{background:var(--ok)}
+.step .why{margin:8px 0 0;color:var(--ink2);font-size:14.5px}
+.eq .lbl{font-family:Inter,sans-serif;font-size:12px;color:var(--muted);margin-right:8px;text-transform:uppercase;letter-spacing:.06em}
+.ans{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.ans label{font-weight:600}
+.ans input{width:150px;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:#fff}
+.ans input:focus{outline:none;border-color:var(--cold)}
+.ans .unit{color:var(--muted)}
+.result{margin-top:10px;font-weight:600}
+.result .ref{font-weight:400;color:var(--muted)}
+.sec-intro{margin-bottom:4px}
+.done-banner{margin-top:14px}
+.sum-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+.sum-table td,.sum-table th{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.sum-table th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.idrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.idrow input{width:160px;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px}
+footer.foot{padding:0 0 30px;font-size:13px;color:var(--muted)}
+footer.foot button{background:none;border:0;color:var(--muted);text-decoration:underline;padding:0}
+.lockmsg{background:var(--soft);border:1px dashed var(--line);border-radius:10px;padding:12px 14px;color:var(--muted);margin-top:14px;font-size:14px}
+.plan{margin-top:12px;padding:14px 16px}
+.plan h3{font-size:16px;margin-bottom:4px}
+.prow{margin-top:10px}
+.plab{display:block;font:600 12px/1.2 Inter,sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.pchain{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.pbox{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:13.5px;display:inline-block;line-height:1.35}
+.pbox small{display:block;font-size:11.5px;color:var(--muted)}
+.pbox.goal{background:#FBEDE8;border-color:#E7B9A9}
+.parr{font-size:11.5px;color:var(--muted)}
+.parr::before{content:'← '}
+.pstages{display:flex;flex-wrap:wrap;align-items:flex-end;gap:6px}
+.pstage>span{display:block;font-size:11px;color:var(--muted);margin-bottom:3px}
+.pstage>div{display:flex;gap:4px}
+.parr2{color:var(--muted);padding-bottom:6px}
+.pchip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:4px 10px;font-size:13px;color:var(--ink2)}
+.pchip.act{border-color:var(--cold);background:#E4EFF4;color:var(--ink);font-weight:600}
+.pchip.done{border-color:var(--ok);background:var(--okbg);color:var(--ok)}
+details.derive{margin-top:8px;border:1px dashed var(--line);border-radius:8px;padding:6px 12px;background:#FCFDFD;font-size:14px;color:var(--ink2)}
+details.derive summary{cursor:pointer;font-weight:600;color:var(--cold)}
+details.derive p{margin:6px 0}
+ol.recap{margin:8px 0;padding-left:22px}
+ol.recap li{margin:3px 0}
+table.cmp{width:100%;border-collapse:collapse;font-size:12.5px}
+table.cmp th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:right;padding:4px 5px;border-bottom:1px solid var(--line)}
+table.cmp td{padding:4px 5px;border-bottom:1px solid #EEF2F4;text-align:right;font-variant-numeric:tabular-nums}
+table.cmp td:first-child,table.cmp th:first-child{text-align:left}
+table.cmp .u{color:var(--muted);font-size:11px}
+table.cmp td.chg{color:var(--cold);font-weight:600}
+table.cmp .vrow td{border-bottom:0;padding-top:6px}
+.ok-txt{color:var(--ok)} .bad-txt{color:var(--hot)}
+.case-note{padding:0 0 18px}
+.case-note h3{font-size:16px;margin-bottom:6px}
+.case-note p{margin:6px 0 0;font-size:14px;color:var(--ink2)}
+.case-note .credit{margin-top:12px;font-size:13px;color:var(--muted)}
+@media (max-width:620px){ .cards{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">Thermal Systems</div>
+    <h1>Heat Sink Designer</h1>
+    <p class="sub">Guided activity · Will the robot's motor-driver chip survive?</p>
+    <nav class="tabs" id="tabs"></nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="layout">
+    <main id="main"></main>
+    <aside class="side">
+      <div class="given" id="given"></div>
+      <div class="card vis">
+        <p class="panel-title" id="sinkTitle">The heat sink</p>
+        <div id="sinkBox"></div>
+        <div class="legend" id="legend"><span id="legLo"></span><span class="bar"></span><span id="legHi"></span></div>
+        <p class="small muted" id="sinkNote" style="margin:6px 0 0"></p>
+        <p class="panel-title" style="margin-top:12px">Fin cross-section</p>
+        <div id="xsBox"></div>
+      </div>
+      <div class="card vis">
+        <p class="panel-title">Temperature along one fin</p>
+        <div id="profBox"></div>
+      </div>
+      <div class="card vis" id="cmpCard">
+        <p class="panel-title">Design A vs design B</p>
+        <div id="cmpBox"></div>
+      </div>
+      <div class="card vis">
+        <p class="panel-title">From chip to air: thermal resistance network</p>
+        <div id="netBox"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+<section class="case-note"><div class="wrap"><div class="card">
+  <h3>Why this simulator uses Case 2 (negligible heat loss from the fin tip)</h3>
+  <p>Case 2 treats the fin tip as insulated: no heat leaves the tip, so the tip area is not counted and <i>A</i><sub>fin</sub> = <i>pL</i>. This is reasonable here because the fins are thin: the tip is only a few per cent of each fin's surface, and very little heat is left by the time it reaches the tip. For the designs in this activity, Case 1 (convection from the fin tip) would give only about 3–4 % more heat per fin, so the answers barely change, while Case 2 gives a much simpler formula, η<sub>fin</sub> = tanh <i>mL</i> / <i>mL</i>. Case 1 matters more for short, thick fins, where the tip is a bigger share of the surface. Case 3 (infinitely long fin) does not apply, because these fins are short (<i>mL</i> is well below 1).</p>
+  <p class="credit">This simulation was built with Claude.</p>
+</div></div></section>
+<footer class="foot"><div class="wrap">Your answers are saved in this browser until you send them. <button id="resetBtn" type="button">Clear my answers and start again</button></div></footer>
+
+<script>
+/* ============================================================
+   Heat sink model (Çengel & Ghajar, Heat and Mass Transfer, 5th ed.)
+   Fins of uniform cross-section with an adiabatic tip (Case 2, as in the
+   Week 5 slides): m = sqrt(h p / (k A_c)), eta_fin = tanh(mL)/(mL),
+   A_fin (one fin) = pL (tip excluded, e.g. 2Lw + 2Lt for a rectangular fin).
+   Steady state, uniform base temperature, radiation neglected,
+   same h on fins and on the exposed base.
+   All internal units SI (m, W, K); geometry inputs in mm.
+============================================================ */
+const HS = (function(){
+  const MATERIALS = {
+    al: { name: 'Aluminium (pure)',          short: 'Aluminium',       k: 237,  rho: 2702 },
+    cu: { name: 'Copper (pure)',             short: 'Copper',          k: 401,  rho: 8933 },
+    cs: { name: 'Carbon steel (plain)',      short: 'Carbon steel',    k: 60.5, rho: 7854 },
+    ss: { name: 'Stainless steel (AISI 304)',short: 'Stainless steel', k: 14.9, rho: 7900 }
+  };
+  /* Air at 1 atm (Table A-15): T °C, k W/m·K, nu m²/s, Pr */
+  const AIR = [
+    [20,0.02514,1.516e-5,0.7309],[30,0.02588,1.608e-5,0.7282],[40,0.02662,1.702e-5,0.7255],
+    [50,0.02735,1.798e-5,0.7228],[60,0.02808,1.896e-5,0.7202],[70,0.02881,1.995e-5,0.7177],
+    [80,0.02953,2.097e-5,0.7154],[90,0.03024,2.201e-5,0.7132],[100,0.03095,2.306e-5,0.7111],
+    [120,0.03235,2.522e-5,0.7073],[140,0.03374,2.745e-5,0.7041],[160,0.03511,2.975e-5,0.7014],
+    [180,0.03646,3.212e-5,0.6992],[200,0.03779,3.455e-5,0.6974]];
+  function air(T){
+    if (T <= AIR[0][0]) T = AIR[0][0];
+    if (T >= AIR[AIR.length-1][0]) T = AIR[AIR.length-1][0];
+    for (let i=0;i<AIR.length-1;i++){
+      const a=AIR[i], b=AIR[i+1];
+      if (T>=a[0] && T<=b[0]){ const f=(T-a[0])/(b[0]-a[0]);
+        return { k:a[1]+f*(b[1]-a[1]), nu:a[2]+f*(b[2]-a[2]), Pr:a[3]+f*(b[3]-a[3]) }; }
+    }
+  }
+  const PIN_STILL_AIR_H = 8;   /* preset h for pin fins in still air */
+
+  /* d: {shape:'plate'|'square'|'circle', N, L, t, W, D, tb} (mm); pins form an N × N grid */
+  function geom(d){
+    const L=d.L/1000, t=d.t/1000, W=d.W/1000, D=d.D/1000;
+    let Ac, p, count, gap;
+    if (d.shape==='plate'){ Ac=t*D; p=2*(D+t); count=d.N; gap=(W-d.N*t)/(d.N-1); }
+    else if (d.shape==='square'){ Ac=t*t; p=4*t; count=d.N*d.N; gap=(W-d.N*t)/(d.N-1); }
+    else { Ac=Math.PI*t*t/4; p=Math.PI*t; count=d.N*d.N; gap=(W-d.N*t)/(d.N-1); }
+    const Afin1 = p*L;   /* strict Case 2: no heat (and no area) at the tip */
+    const Afin = count*Afin1;
+    const Abase = W*D;
+    const Aunfin = Abase - count*Ac;
+    return { L, t, W, D, Ac, p, count, gap, Afin, Afin1, Abase, Aunfin };
+  }
+
+  function sinkWithH(g, k, h){
+    const m = Math.sqrt(h*g.p/(k*g.Ac));
+    const mL = m*g.L;
+    const eta = Math.tanh(mL)/mL;
+    const eff = eta*g.Afin1/g.Ac;
+    const Rhs = 1/(h*(g.Aunfin + eta*g.Afin));
+    return { h, m, mL, eta, eff, Rhs };
+  }
+
+  /* dev: {Q, Tinf, Rjc, Rpad, Tmax}; cooling: 'still' or a number (preset h) */
+  function solve(d, matKey, dev, cooling){
+    const mat = MATERIALS[matKey];
+    const g = geom(d);
+    let s, hNote='';
+    if (cooling==='still'){
+      if (d.shape==='plate' && d.N>=2 && g.gap>0){
+        let h=8;
+        for (let i=0;i<80;i++){
+          const s0=sinkWithH(g,mat.k,h);
+          const Tb=dev.Tinf+dev.Q*s0.Rhs;
+          const ap=air((Tb+dev.Tinf)/2);
+          const beta=1/((Tb+dev.Tinf)/2+273.15);
+          const Ra=9.81*beta*Math.max(Tb-dev.Tinf,0.01)*Math.pow(g.gap,3)*ap.Pr/(ap.nu*ap.nu);
+          const x=Ra*g.gap/g.D;
+          const Nu=Math.pow(576/(x*x)+2.873/Math.sqrt(x),-0.5);
+          const hn=Nu*ap.k/g.gap;
+          h=0.5*h+0.5*hn;
+        }
+        s=sinkWithH(g,mat.k,h); hNote='from fin spacing (still air)';
+      } else { s=sinkWithH(g,mat.k,PIN_STILL_AIR_H); hNote='preset for pins in still air'; }
+    } else { s=sinkWithH(g,mat.k,cooling); hNote='preset (fan)'; }
+    const Tb = dev.Tinf + dev.Q*s.Rhs;
+    const Rtot = dev.Rjc + dev.Rpad + s.Rhs;
+    const Tj = dev.Tinf + dev.Q*Rtot;
+    const Tc = Tj - dev.Q*dev.Rjc;
+    const mass = mat.rho*(g.W*g.D*(d.tb/1000) + g.count*g.Ac*g.L)*1000; /* g */
+    const Qfin1 = s.eta*s.h*g.Afin1*(Tb-dev.Tinf);
+    return Object.assign({ g, mat, hNote, Tb, Tc, Tj, Rtot, mass, Qfin1, ok: Tj<=dev.Tmax }, s);
+  }
+
+  /* fin temperature at distance x (m) from the base */
+  function finT(r, Tinf, x){
+    return Tinf + (r.Tb-Tinf)*Math.cosh(r.m*(r.g.L-x))/Math.cosh(r.m*r.g.L);
+  }
+
+  /* temperature → colour, cold #2A6F8E → warm #DE9127 → hot #BC4A2B */
+  function tempColor(T, Tlo, Thi){
+    let f=(T-Tlo)/Math.max(Thi-Tlo,1e-6); f=Math.max(0,Math.min(1,f));
+    const c=[[0x2A,0x6F,0x8E],[0xDE,0x91,0x27],[0xBC,0x4A,0x2B]];
+    const seg=f<0.5?0:1, u=f<0.5?f*2:(f-0.5)*2;
+    const a=c[seg], b=c[seg+1];
+    return 'rgb('+a.map((v,i)=>Math.round(v+u*(b[i]-v))).join(',')+')';
+  }
+  return { MATERIALS, air, geom, sinkWithH, solve, finT, tempColor, PIN_STILL_AIR_H };
+})();
+
+/* ============================================================
+   Drawings shared by both pages: isometric heat sink, fin
+   temperature profile T(x), thermal resistance network, sweep chart.
+============================================================ */
+const VIS = (function(){
+  const NS='http://www.w3.org/2000/svg';
+  const C30=Math.cos(Math.PI/6);
+  let uid=0;
+  const el=(tag,attrs,parent)=>{ const e=document.createElementNS(NS,tag);
+    for (const k in attrs) e.setAttribute(k,attrs[k]); if (parent) parent.appendChild(e); return e; };
+  const fmt=(v,dp)=>Number(v).toFixed(dp);
+
+  /* ---------- isometric heat sink ----------
+     d: design (mm), r: solve() result or null, opts: {colour, Tinf, Tlo, Thi, frac, onHover} */
+  function sink(host, d, r, opts){
+    opts=opts||{};
+    host.innerHTML='';
+    const VW=380, VH=250;
+    const svg=el('svg',{viewBox:`0 0 ${VW} ${VH}`,class:'sink-svg',role:'img'},host);
+    svg.setAttribute('aria-label','Heat sink drawing');
+    const defs=el('defs',{},svg);
+    const W=d.W, D=d.D, L=d.L, tb=d.tb||3;
+    const lab=!!opts.labels;
+    const s=lab ? Math.min((VW-90)/((W+D)*C30), (VH-62)/((W+D)/2+tb+L)) : Math.min((VW-40)/((W+D)*C30), (VH-30)/((W+D)/2+tb+L));
+    const ox=VW/2-((W-D)*C30*s)/2-(lab?8:0), oy=(lab?26:15)+L*s;
+    const P=(x,y,z)=>[ox+(x-y)*C30*s, oy+(x+y)*0.5*s-z*s];
+    const poly=(pts,attrs,parent)=>el('polygon',Object.assign({points:pts.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')},attrs),parent||svg);
+    const colour = !!(opts.colour && r);
+    const Tinf=opts.Tinf;
+    const col=T=>HS.tempColor(T,opts.Tlo,opts.Thi);
+    const metal={x:'#C4CDD3',y:'#9AA6AE',top:'#DCE2E6'};
+    const stroke={stroke:'rgba(20,35,45,.35)','stroke-width':0.6,'stroke-linejoin':'round'};
+
+    /* gradient whose isotherms run along an edge direction; dirSign +1 for +x faces, -1 for +y faces */
+    function grad(P0,dirSign){
+      const id='g'+(++uid);
+      const n=[0.5*dirSign, C30], dlen=-L*s*C30;
+      const lg=el('linearGradient',{id,gradientUnits:'userSpaceOnUse',x1:P0[0],y1:P0[1],x2:P0[0]+n[0]*dlen,y2:P0[1]+n[1]*dlen},defs);
+      for (let i=0;i<=6;i++){ const f=i/6; el('stop',{offset:f,'stop-color':col(HS.finT(r,Tinf,f*r.g.L))},lg); }
+      return `url(#${id})`;
+    }
+    const baseCol = colour ? col(r.Tb) : null;
+    const tipCol = colour ? col(HS.finT(r,Tinf,r.g.L)) : null;
+
+    /* base block */
+    poly([P(0,D,0),P(W,D,0),P(W,D,-tb),P(0,D,-tb)],Object.assign({fill:colour?baseCol:metal.y},stroke));
+    poly([P(W,0,0),P(W,D,0),P(W,D,-tb),P(W,0,-tb)],Object.assign({fill:colour?baseCol:metal.x},stroke));
+    poly([P(0,0,0),P(W,0,0),P(W,D,0),P(0,D,0)],Object.assign({fill:colour?baseCol:metal.top},stroke));
+    if (colour){
+      poly([P(0,D,0),P(W,D,0),P(W,D,-tb),P(0,D,-tb)],{fill:'#000',opacity:.14});
+      poly([P(0,0,0),P(W,0,0),P(W,D,0),P(0,D,0)],{fill:'#fff',opacity:.18});
+    }
+
+    let front=null; /* front-most fin, for highlighting */
+    const t=d.t;
+    const HLF={fill:'#DE9127',opacity:.78};
+    /* highlight the exposed (unfinned) base before the fins are drawn, so the fins cover their footprints */
+    if (opts.hl==='base'){
+      if (d.shape==='plate'){
+        const gp=(W-d.N*t)/(d.N-1);
+        for (let i=0;i<d.N-1;i++){ const xa=i*(t+gp)+t, xb=(i+1)*(t+gp);
+          poly([P(xa,0,0),P(xb,0,0),P(xb,D,0),P(xa,D,0)],HLF); }
+      } else poly([P(0,0,0),P(W,0,0),P(W,D,0),P(0,D,0)],HLF);
+    }
+    if (d.shape==='plate'){
+      const gap=(W-d.N*t)/(d.N-1);
+      const tv=Math.max(t,0.35);
+      for (let i=0;i<d.N;i++){
+        const x0=i*(t+gap), x1=x0+tv;
+        const fx=[P(x1,0,0),P(x1,D,0),P(x1,D,L),P(x1,0,L)];
+        const fy=[P(x0,D,0),P(x1,D,0),P(x1,D,L),P(x0,D,L)];
+        const ft=[P(x0,0,L),P(x1,0,L),P(x1,D,L),P(x0,D,L)];
+        poly(fx,Object.assign({fill:colour?grad(P(x1,0,0),+1):metal.x},stroke));
+        poly(fy,Object.assign({fill:colour?grad(P(x0,D,0),-1):metal.y},stroke));
+        if (colour) poly(fy,{fill:'#000',opacity:.14});
+        poly(ft,Object.assign({fill:colour?tipCol:metal.top},stroke));
+        front={kind:'plate',x0,x1,D,fx,fy,ft};
+      }
+    } else {
+      const N=d.N, gap=(W-N*t)/(N-1);
+      const cells=[];
+      for (let i=0;i<N;i++) for (let j=0;j<N;j++) cells.push([i*(t+gap)+t/2, j*(t+gap)+t/2]);
+      cells.sort((a,b)=>(a[0]+a[1])-(b[0]+b[1]));
+      const rr=t/2;
+      const rc=cells.reduce((m,c)=>(c[0]-c[1])>(m[0]-m[1])?c:m,cells[0]); /* right-most pin on screen, used for labels */
+      for (const [cx,cy] of cells){
+        if (d.shape==='square'){
+          const x0=cx-rr,x1=cx+rr,y0=cy-rr,y1=cy+rr;
+          const fx=[P(x1,y0,0),P(x1,y1,0),P(x1,y1,L),P(x1,y0,L)];
+          const fy=[P(x0,y1,0),P(x1,y1,0),P(x1,y1,L),P(x0,y1,L)];
+          poly(fx,Object.assign({fill:colour?grad(P(x1,y0,0),+1):metal.x},stroke));
+          poly(fy,Object.assign({fill:colour?grad(P(x0,y1,0),-1):metal.y},stroke));
+          if (colour) poly(fy,{fill:'#000',opacity:.14});
+          poly([P(x0,y0,L),P(x1,y0,L),P(x1,y1,L),P(x0,y1,L)],Object.assign({fill:colour?tipCol:metal.top},stroke));
+          front={kind:'pin',cx,cy,rr,fx,fy};
+          continue;
+        } else {
+          const c0=P(cx,cy,0), c1=P(cx,cy,L);
+          const rx=1.2247*rr*s, ry=0.7071*rr*s;
+          let fill=metal.x;
+          if (colour){
+            const id='g'+(++uid);
+            const lg=el('linearGradient',{id,gradientUnits:'userSpaceOnUse',x1:c0[0],y1:c0[1],x2:c1[0],y2:c1[1]},defs);
+            for (let i=0;i<=6;i++){ const f=i/6; el('stop',{offset:f,'stop-color':col(HS.finT(r,Tinf,f*r.g.L))},lg); }
+            fill=`url(#${id})`;
+          }
+          el('path',Object.assign({d:`M${c0[0]-rx},${c0[1]} L${c1[0]-rx},${c1[1]} L${c1[0]+rx},${c1[1]} L${c0[0]+rx},${c0[1]} A${rx},${ry} 0 0 1 ${c0[0]-rx},${c0[1]} Z`,fill},stroke),svg);
+          el('ellipse',Object.assign({cx:c1[0],cy:c1[1],rx,ry,fill:colour?tipCol:metal.top},stroke),svg);
+        }
+        front={kind:'pin',cx,cy,rr};
+      }
+      front.lx=rc[0]; front.ly=rc[1];
+    }
+    /* highlight the surface of one fin (its tip is not counted in Case 2) */
+    if (opts.hl==='fin' && front){
+      if (front.fx){ poly(front.fx,HLF); poly(front.fy,HLF); }
+      else { const c0=P(front.cx,front.cy,0), c1=P(front.cx,front.cy,L), rx=1.2247*front.rr*s, ry=0.7071*front.rr*s;
+        el('path',Object.assign({d:`M${c0[0]-rx},${c0[1]} L${c1[0]-rx},${c1[1]} L${c1[0]+rx},${c1[1]} L${c0[0]+rx},${c0[1]} A${rx},${ry} 0 0 1 ${c0[0]-rx},${c0[1]} Z`},HLF),svg); }
+    }
+    /* dimension labels: symbols only */
+    if (lab){
+      const g=el('g',{class:'dims'},svg);
+      const mid='m'+(++uid);
+      const mk=el('marker',{id:mid,viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto-start-reverse'},defs);
+      el('path',{d:'M0,1 L9,5 L0,9 Z',fill:'#41525D'},mk);
+      const add=(a,b)=>[a[0]+b[0],a[1]+b[1]];
+      function dim(a,b,off,text,toff){
+        const a2=add(a,off), b2=add(b,off);
+        el('line',{x1:a[0],y1:a[1],x2:a2[0]+off[0]*0.25,y2:a2[1]+off[1]*0.25,class:'ext'},g);
+        el('line',{x1:b[0],y1:b[1],x2:b2[0]+off[0]*0.25,y2:b2[1]+off[1]*0.25,class:'ext'},g);
+        el('line',{x1:a2[0],y1:a2[1],x2:b2[0],y2:b2[1],class:'dim','marker-start':`url(#${mid})`,'marker-end':`url(#${mid})`},g);
+        const m=[(a2[0]+b2[0])/2+toff[0],(a2[1]+b2[1])/2+toff[1]];
+        const tx=el('text',{x:m[0],y:m[1],class:'dimlab','text-anchor':'middle','dominant-baseline':'middle'},g); tx.textContent=text;
+      }
+      function call(pt,lp,text){
+        el('line',{x1:pt[0],y1:pt[1],x2:lp[0],y2:lp[1]+4,class:'ext'},g);
+        el('circle',{cx:pt[0],cy:pt[1],r:1.8,fill:'#41525D'},g);
+        const tx=el('text',{x:lp[0],y:lp[1],class:'dimlab','text-anchor':'middle'},g); tx.textContent=text;
+      }
+      const n1=[-0.5*14,C30*14], n2=[0.5*14,C30*14];
+      dim(P(0,D,-tb),P(W,D,-tb),n1,'H',[-7,7]);
+      if (front.kind==='plate'){
+        dim(P(W,0,-tb),P(W,D,-tb),n2,'w',[7,7]);
+        dim(P(front.x1,0,0),P(front.x1,0,L),[16,0],'L',[9,0]);
+        const xm=(front.x0+front.x1)/2;
+        call(P(xm,0,L),add(P(xm,0,L),[-16,-14]),'t');
+      } else {
+        const c0=P(front.lx,front.ly,0), c1=P(front.lx,front.ly,L), rx=1.2247*front.rr*s;
+        dim([c0[0]+rx,c0[1]],[c1[0]+rx,c1[1]],[16,0],'L',[9,0]);
+        call(c1,add(c1,[-4,-18]),d.shape==='square'?'a':'D');
+      }
+    }
+    /* highlight band at fraction f of the fin length on the front-most fin */
+    const hl=el('g',{class:'hl'},svg);
+    function highlight(f){
+      hl.innerHTML='';
+      if (f==null || !front) return;
+      const z=f*L;
+      const st={stroke:'#14232D','stroke-width':1.8,fill:'none','stroke-linecap':'round'};
+      if (front.kind==='plate'){
+        const a=P(front.x1,0,z), b=P(front.x1,front.D,z), c=P(front.x0,front.D,z);
+        el('polyline',Object.assign({points:`${a} ${b} ${c}`},st),hl);
+      } else {
+        const a=P(front.cx,front.cy,z), rx=1.2247*front.rr*s+2, ry=0.7071*front.rr*s+1.5;
+        el('ellipse',Object.assign({cx:a[0],cy:a[1],rx,ry},st),hl);
+      }
+    }
+    highlight(opts.frac);
+    if (opts.onHover && r){
+      const ref=front.kind==='plate'?P(front.x1,front.D,0):P(front.cx,front.cy,0);
+      svg.addEventListener('mousemove',e=>{
+        const pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
+        const q=pt.matrixTransform(svg.getScreenCTM().inverse());
+        const z=(ref[1]-q.y)/s;
+        opts.onHover(z>=0&&z<=L ? z/L : null);
+      });
+      svg.addEventListener('mouseleave',()=>opts.onHover(null));
+    }
+    return { highlight };
+  }
+
+  /* ---------- fin temperature profile ---------- */
+  function profile(host, r, Tinf, opts){
+    opts=opts||{};
+    host.innerHTML='';
+    const VW=380, VH=210, m={l:46,r:14,t:14,b:38};
+    const svg=el('svg',{viewBox:`0 0 ${VW} ${VH}`,class:'chart-svg',role:'img'},host);
+    svg.setAttribute('aria-label','Temperature along the fin');
+    const pw=VW-m.l-m.r, ph=VH-m.t-m.b;
+    if (!r){
+      el('rect',{x:m.l,y:m.t,width:pw,height:ph,fill:'none',stroke:'var(--line)'},svg);
+      const tx=el('text',{x:m.l+pw/2,y:m.t+ph/2,'text-anchor':'middle',class:'muted-txt'},svg);
+      tx.textContent=opts.empty||'Not shown yet';
+      return { highlight(){} };
+    }
+    const L=r.g.L*1000;
+    const Tb=r.Tb, Ttip=HS.finT(r,Tinf,r.g.L);
+    const span=Math.max(Tb-Tinf,1);
+    const yLo=Tinf - span*0.08, yHi=Tb + span*0.12;
+    const X=x=>m.l+x/L*pw, Y=T=>m.t+(1-(T-yLo)/(yHi-yLo))*ph;
+    /* grid + axes */
+    const ticks=niceTicks(yLo,yHi,4);
+    ticks.forEach(T=>{ el('line',{x1:m.l,x2:m.l+pw,y1:Y(T),y2:Y(T),class:'grid'},svg);
+      const t=el('text',{x:m.l-6,y:Y(T)+4,'text-anchor':'end',class:'tick'},svg); t.textContent=fmtTick(T); });
+    niceTicks(0,L,5).forEach(x=>{ const t=el('text',{x:X(x),y:m.t+ph+15,'text-anchor':'middle',class:'tick'},svg); t.textContent=fmtTick(x); });
+    el('line',{x1:m.l,x2:m.l+pw,y1:m.t+ph,y2:m.t+ph,class:'axis'},svg);
+    el('line',{x1:m.l,x2:m.l,y1:m.t,y2:m.t+ph,class:'axis'},svg);
+    const xl=el('text',{x:m.l+pw/2,y:VH-4,'text-anchor':'middle',class:'axlab'},svg); xl.textContent='Distance from the base, x (mm)';
+    const yl=el('text',{x:12,y:m.t+ph/2,'text-anchor':'middle',class:'axlab',transform:`rotate(-90 12 ${m.t+ph/2})`},svg); yl.textContent='T (°C)';
+    /* T_inf line */
+    el('line',{x1:m.l,x2:m.l+pw,y1:Y(Tinf),y2:Y(Tinf),class:'tinf'},svg);
+    const ti=el('text',{x:m.l+pw-4,y:Y(Tinf)-5,'text-anchor':'end',class:'tinf-lab'},svg); ti.textContent=`T∞ = ${fmt(Tinf,0)} °C`;
+    /* curve */
+    let dpath='';
+    for (let i=0;i<=60;i++){ const x=i/60*L; dpath+=(i?'L':'M')+X(x).toFixed(1)+','+Y(HS.finT(r,Tinf,x/1000)).toFixed(1); }
+    el('path',{d:dpath,class:'curve'},svg);
+    const bl=el('text',{x:m.l+6,y:Y(Tb)-7,class:'pt-lab'},svg); bl.textContent=`base ${fmt(Tb,1)} °C`;
+    const tl=el('text',{x:m.l+pw-4,y:Y(Ttip)-7,'text-anchor':'end',class:'pt-lab'},svg); tl.textContent=`tip ${fmt(Ttip,1)} °C`;
+    el('circle',{cx:X(0),cy:Y(Tb),r:3.5,class:'pt'},svg);
+    el('circle',{cx:X(L),cy:Y(Ttip),r:3.5,class:'pt'},svg);
+    /* hover */
+    const hg=el('g',{},svg);
+    function highlight(f){
+      hg.innerHTML=''; if (f==null) return;
+      const x=f*L, T=HS.finT(r,Tinf,x/1000);
+      el('line',{x1:X(x),x2:X(x),y1:m.t,y2:m.t+ph,class:'hover-line'},hg);
+      el('circle',{cx:X(x),cy:Y(T),r:4.5,class:'hover-pt'},hg);
+      const right=X(x)>m.l+pw*0.62;
+      const tx=el('text',{x:X(x)+(right?-8:8),y:m.t+14,'text-anchor':right?'end':'start',class:'hover-lab'},hg);
+      tx.textContent=`x = ${fmt(x,1)} mm, T = ${fmt(T,1)} °C`;
+    }
+    const hit=el('rect',{x:m.l,y:m.t,width:pw,height:ph,fill:'transparent'},svg);
+    if (opts.onHover){
+      hit.addEventListener('mousemove',e=>{
+        const pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
+        const q=pt.matrixTransform(svg.getScreenCTM().inverse());
+        opts.onHover(Math.max(0,Math.min(1,(q.x-m.l)/pw)));
+      });
+      hit.addEventListener('mouseleave',()=>opts.onHover(null));
+    }
+    highlight(opts.frac);
+    return { highlight };
+  }
+
+  /* ---------- fin cross-section inset: A_c and p ---------- */
+  function crossSection(host, shape){
+    host.innerHTML='';
+    const VW=380, VH=92;
+    const svg=el('svg',{viewBox:`0 0 ${VW} ${VH}`,class:'xs-svg',role:'img'},host);
+    svg.setAttribute('aria-label','Fin cross-section');
+    const sub=(x,y,parts,cls)=>{ const t=el('text',{x,y,class:cls||'xs-lab'},svg);
+      parts.forEach(p=>{ const ts=el('tspan',p[1]?{'baseline-shift':'sub','font-size':'9'}:{},t); ts.textContent=p[0]; }); return t; };
+    let ac, pp;
+    if (shape==='plate'){
+      el('rect',{x:20,y:34,width:170,height:16,class:'xs-area'},svg);
+      el('rect',{x:20,y:34,width:170,height:16,class:'xs-perim'},svg);
+      const t1=el('text',{x:105,y:72,class:'xs-dim','text-anchor':'middle'},svg); t1.textContent='w';
+      el('line',{x1:20,y1:62,x2:190,y2:62,class:'xs-dimline'},svg);
+      const t2=el('text',{x:200,y:46,class:'xs-dim'},svg); t2.textContent='t';
+      ac=[['A',0],['c',1],[' = wt',0]]; pp=[['p = 2(w + t)',0]];
+    } else if (shape==='square'){
+      el('rect',{x:80,y:18,width:52,height:52,class:'xs-area'},svg);
+      el('rect',{x:80,y:18,width:52,height:52,class:'xs-perim'},svg);
+      const t1=el('text',{x:106,y:86,class:'xs-dim','text-anchor':'middle'},svg); t1.textContent='a';
+      ac=[['A',0],['c',1],[' = a²',0]]; pp=[['p = 4a',0]];
+    } else {
+      el('circle',{cx:106,cy:44,r:27,class:'xs-area'},svg);
+      el('circle',{cx:106,cy:44,r:27,class:'xs-perim'},svg);
+      el('line',{x1:79,y1:44,x2:133,y2:44,class:'xs-dimline'},svg);
+      const t1=el('text',{x:106,y:39,class:'xs-dim','text-anchor':'middle'},svg); t1.textContent='D';
+      ac=[['A',0],['c',1],[' = πD²/4',0]]; pp=[['p = πD',0]];
+    }
+    el('rect',{x:236,y:24,width:14,height:12,class:'xs-area'},svg);
+    sub(256,34,ac.concat([['  (shaded)',0]]));
+    el('line',{x1:236,y1:56,x2:250,y2:56,class:'xs-perim'},svg);
+    sub(256,60,pp.concat([['  (outline)',0]]));
+  }
+
+  /* ---------- thermal resistance network ----------
+     v: {Q, Tj, Tc, Tb, Tinf, Rjc, Rpad, Rhs, Tmax}; null values show "?" */
+  function network(host, v){
+    host.innerHTML='';
+    const VW=380, VH=136;
+    const svg=el('svg',{viewBox:`0 0 ${VW} ${VH}`,class:'net-svg',role:'img'},host);
+    svg.setAttribute('aria-label','Thermal resistance network');
+    const y=56, xs=[26,136,250,354];
+    const show=(x,dp,u)=>x==null?'?':fmt(x,dp)+u;
+    el('line',{x1:xs[0],x2:xs[3],y1:y,y2:y,class:'wire'},svg);
+    const res=[['R_jc',v.Rjc,'junction→case'],['R_cs',v.Rpad,'case→sink (TIM)'],['R_sa',v.Rhs,'sink→ambient']];
+    res.forEach((rr,i)=>{
+      const cx=(xs[i]+xs[i+1])/2;
+      const known=rr[1]!=null;
+      el('rect',{x:cx-30,y:y-11,width:60,height:22,rx:4,class:'res'+(known?'':' res-q')},svg);
+      const t=el('text',{x:cx,y:y+4,'text-anchor':'middle',class:'res-val'},svg); t.textContent=show(rr[1],2,'');
+      const n=el('text',{x:cx,y:y-18,'text-anchor':'middle',class:'res-name'},svg);
+      n.innerHTML=rr[0].replace(/_(\w+)/,'<tspan baseline-shift="sub" font-size="8">$1</tspan>');
+      const sub=el('text',{x:cx,y:y+27,'text-anchor':'middle',class:'res-sub'},svg); sub.textContent=rr[2];
+    });
+    const nodes=[['T_j',v.Tj],['T_c',v.Tc],['T_b',v.Tb],['T∞',v.Tinf]];
+    nodes.forEach((nd,i)=>{
+      const hot = i===0 && v.Tj!=null && v.Tmax!=null && v.Tj>v.Tmax;
+      el('circle',{cx:xs[i],cy:y,r:5,class:'node'+(hot?' node-hot':'')},svg);
+      const nm=el('text',{x:xs[i],y:y+42,'text-anchor':'middle',class:'node-name'},svg);
+      nm.innerHTML=nd[0].replace(/_(\w+)/,'<tspan baseline-shift="sub" font-size="8">$1</tspan>');
+      const tv=el('text',{x:xs[i],y:y+66,'text-anchor':'middle',class:'node-val'+(hot?' hot-txt':'')},svg);
+      tv.textContent=show(nd[1],1,' °C');
+    });
+    const q=el('text',{x:xs[0],y:16,class:'q-lab'},svg); q.textContent=`Q̇ = ${fmt(v.Q,0)} W  →  flows from the chip to the air (°C/W)`;
+  }
+
+  /* ---------- physical stack (chip → TIM → heat sink → air) beside a vertical resistance network ----------
+     v: {Q, Tj, Tc, Tb, Tinf, Rjc, Rpad, Rhs, Tmax}; null values show "?" */
+  function stack(host, v){
+    host.innerHTML='';
+    const VW=400, VH=300;
+    const svg=el('svg',{viewBox:`0 0 ${VW} ${VH}`,class:'stack-svg',role:'img'},host);
+    svg.setAttribute('aria-label','Chip, thermal interface material, heat sink and air, with the thermal resistance network beside them');
+    const defs=el('defs',{},svg);
+    const mid='sa'+(++uid);
+    const mk=el('marker',{id:mid,viewBox:'0 0 10 10',refX:8,refY:5,markerWidth:6,markerHeight:6,orient:'auto'},defs);
+    el('path',{d:'M0,0 L10,5 L0,10 Z',fill:'#BC4A2B'},mk);
+    const T=(x,y,txt,cls,anchor)=>{ const t=el('text',{x,y,class:cls,'text-anchor':anchor||'start'},svg); t.innerHTML=txt; return t; };
+    const subT=(a,b)=>`${a}<tspan baseline-shift="sub" font-size="8">${b}</tspan>`;
+    /* air */
+    for (let i=0;i<5;i++){ const x=52+i*28;
+      el('path',{d:`M${x},58 q-5,-8 0,-16 q5,-8 0,-16`,class:'air'},svg); }
+    T(104,14,'ambient air','lay-lab','middle');
+    T(30,110,'fins','lay-lab','end');
+    /* fins + base */
+    for (let i=0;i<6;i++) el("rect",{x:34+i*28,y:64,width:6,height:84,class:"metal"},svg);
+    el('rect',{x:34,y:148,width:146,height:16,class:'metal'},svg);
+    T(84,160,'heat sink base','lay-lab','middle');
+    /* TIM */
+    el('rect',{x:64,y:164,width:86,height:8,class:'tim'},svg);
+    T(60,172,'TIM','lay-lab','end');
+    /* chip package with die */
+    el('rect',{x:68,y:172,width:78,height:52,rx:3,class:'pkg'},svg);
+    el('rect',{x:90,y:192,width:34,height:12,rx:1.5,class:'die'},svg);
+    T(107,218,'junction','pkg-lab','middle');
+    T(64,200,'chip','lay-lab','end');
+    /* circuit board */
+    el('rect',{x:16,y:224,width:182,height:12,class:'pcb'},svg);
+    T(107,252,'circuit board','lay-lab','middle');
+    /* heat flow arrow */
+    el('line',{x1:134,y1:198,x2:134,y2:52,class:'qline','marker-end':`url(#${mid})`},svg);
+    T(140,110,'Q̇','q-big');
+    /* network column */
+    const nx=300, ny={inf:40,b:118,c:184,j:258};
+    el('line',{x1:nx,y1:ny.inf,x2:nx,y2:ny.j,class:'wire'},svg);
+    const show=(x,dp,u)=>x==null?'?':Number(x).toFixed(dp)+u;
+    const res=[[subT('R','sa'),v.Rhs,(ny.inf+ny.b)/2,'sink → air'],[subT('R','cs'),v.Rpad,(ny.b+ny.c)/2,'TIM'],[subT('R','jc'),v.Rjc,(ny.c+ny.j)/2,'junction → case']];
+    res.forEach(r=>{
+      el('rect',{x:nx-26,y:r[2]-11,width:52,height:22,rx:4,class:'res'+(r[1]==null?' res-q':'')},svg);
+      T(nx,r[2]+4,show(r[1],2,''),'res-val','middle');
+      T(nx+32,r[2]+1,r[0],'res-name');
+      T(nx+32,r[2]+12,r[3],'res-sub');
+    });
+    const hot=v.Tj!=null&&v.Tmax!=null&&v.Tj>v.Tmax;
+    const nodes=[[subT('T','∞'),v.Tinf,ny.inf,[186,40]],[subT('T','b'),v.Tb,ny.b,[180,156]],[subT('T','c'),v.Tc,ny.c,[146,172]],[subT('T','j'),v.Tj,ny.j,[124,198]]];
+    nodes.forEach((n,i)=>{
+      el('line',{x1:n[3][0],y1:n[3][1],x2:nx-6,y2:n[2],class:'leader'},svg);
+      el('circle',{cx:n[3][0],cy:n[3][1],r:2.2,class:'pin'},svg);
+      el('circle',{cx:nx,cy:n[2],r:5,class:'node'+(i===3&&hot?' node-hot':'')},svg);
+      const tt=T(nx-12,n[2]-8,`${n[0]} = ${show(n[1],1,' °C')}`,'node-val'+(i===3&&hot?' hot-txt':''),'end');
+    });
+    T(nx,VH-14,`Q̇ = ${Number(v.Q).toFixed(0)} W flows up through every layer`,'q-lab','middle');
+    T(nx,VH-2,'resistances in °C/W, added in series','q-lab','middle');
+  }
+
+  /* ---------- sweep chart: T_j against one design variable ---------- */
+  function sweep(host, pts, cur, opts){
+    host.innerHTML='';
+    const VW=380, VH=200, m={l:46,r:14,t:14,b:38};
+    const svg=el('svg',{viewBox:`0 0 ${VW} ${VH}`,class:'chart-svg',role:'img'},host);
+    svg.setAttribute('aria-label','Junction temperature against '+opts.xlab);
+    const pw=VW-m.l-m.r, ph=VH-m.t-m.b;
+    const xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]).concat([opts.Tmax]);
+    const xLo=Math.min(...xs), xHi=Math.max(...xs);
+    let yLo=Math.min(...ys,opts.Tinf), yHi=Math.min(Math.max(...ys), opts.Tmax*2.2);
+    const pad=(yHi-yLo)*0.08; yLo-=pad; yHi+=pad;
+    const X=x=>m.l+(x-xLo)/Math.max(xHi-xLo,1e-9)*pw, Y=T=>m.t+(1-(Math.min(T,yHi)-yLo)/(yHi-yLo))*ph;
+    niceTicks(yLo,yHi,4).forEach(T=>{ el('line',{x1:m.l,x2:m.l+pw,y1:Y(T),y2:Y(T),class:'grid'},svg);
+      const t=el('text',{x:m.l-6,y:Y(T)+4,'text-anchor':'end',class:'tick'},svg); t.textContent=fmtTick(T); });
+    niceTicks(xLo,xHi,6).filter(x=>x>=xLo-1e-9&&x<=xHi+1e-9&&(!opts.intX||Number.isInteger(x))).forEach(x=>{ const t=el('text',{x:X(x),y:m.t+ph+15,'text-anchor':'middle',class:'tick'},svg); t.textContent=fmtTick(x); });
+    el('line',{x1:m.l,x2:m.l+pw,y1:m.t+ph,y2:m.t+ph,class:'axis'},svg);
+    el('line',{x1:m.l,x2:m.l,y1:m.t,y2:m.t+ph,class:'axis'},svg);
+    const xl=el('text',{x:m.l+pw/2,y:VH-4,'text-anchor':'middle',class:'axlab'},svg); xl.textContent=opts.xlab;
+    const yl=el('text',{x:12,y:m.t+ph/2,'text-anchor':'middle',class:'axlab',transform:`rotate(-90 12 ${m.t+ph/2})`},svg); yl.textContent='T_j (°C)';
+    el('line',{x1:m.l,x2:m.l+pw,y1:Y(opts.Tmax),y2:Y(opts.Tmax),class:'tmax'},svg);
+    const tl=el('text',{x:m.l+pw-4,y:Y(opts.Tmax)-5,'text-anchor':'end',class:'tmax-lab'},svg); tl.textContent=`limit ${opts.Tmax} °C`;
+    let d=''; pts.forEach((p,i)=>{ d+=(i?'L':'M')+X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1); });
+    el('path',{d,class:'curve'},svg);
+    if (cur){
+      el('circle',{cx:X(cur[0]),cy:Y(cur[1]),r:5,class:'hover-pt'},svg);
+      const right=X(cur[0])>m.l+pw*0.6;
+      const t=el('text',{x:X(cur[0])+(right?-9:9),y:Y(cur[1])+(Y(cur[1])<m.t+20?16:-8),'text-anchor':right?'end':'start',class:'hover-lab'},svg);
+      t.textContent=`now: ${fmt(cur[1],1)} °C`;
+    }
+  }
+
+  function niceTicks(lo,hi,n){
+    const span=hi-lo; if (span<=0) return [lo];
+    const raw=span/n, p=Math.pow(10,Math.floor(Math.log10(raw)));
+    const step=[1,2,2.5,5,10].map(k=>k*p).find(st=>st>=raw)||10*p;
+    const out=[]; for (let v=Math.ceil(lo/step)*step; v<=hi+1e-9; v+=step) out.push(+v.toFixed(10));
+    return out;
+  }
+  function fmtTick(v){ return Math.abs(v)>=100||Number.isInteger(+v.toFixed(6))?String(Math.round(v)):String(+v.toFixed(2)); }
+  return { sink, profile, network, sweep, crossSection, stack };
+})();
+
+
+/* ============================================================
+   Guided activity
+============================================================ */
+const UNLOCK = new URLSearchParams(location.search).has('unlock');
+const KEY = 'hssim-guided-v3';
+const DEV = { name:'Motor-driver chip', where:'robot arm controller', Q:8, Tinf:40, Rjc:2.0, Rpad:1.0, Tmax:125 };
+const MAT = HS.MATERIALS.al;
+/* W = base dimension across the fins (H on the slides), D = fin width w */
+const DESIGNS = {
+  W: { label:'Design A · still air', shape:'plate', W:40, D:40, tb:3, N:6, L:20, t:1.5, h:10, hText:'still air' },
+  Y: { label:'Design B · small fan',  shape:'plate', W:40, D:40, tb:3, N:8, L:15, t:1.0, h:30, hText:'small fan' }
+};
+const STATUS = { first:'First try', retry:'After a retry', revealed:'Revealed the answer' };
+
+let S = load() || fresh();
+function fresh(){ return { tab:0, cards:[], quiz:{}, steps:{W:{},Y:{}}, wrong:{}, ytStart:null, ytEnd:null, sid:'' }; }
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ return null; } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+
+/* ---------- number helpers ---------- */
+function parseNum(str){
+  if (str==null) return NaN;
+  let s=String(str).trim().replace(/\s+/g,'').replace(/−/g,'-').replace(/,/g,'.');
+  s=s.replace(/[×x\*]10\^?\(?(-?\d+)\)?/i,'e$1');
+  if (!/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(s)) return NaN;
+  return parseFloat(s);
+}
+const subs=s=>String(s).replace(/([A-Za-zηεθ∞])_([a-z][a-z,]*)/g,'$1<sub>$2</sub>');
+const near=(v,x,rel)=>Math.abs(v-x)<=Math.abs(x)*rel;
+function sig(v,n){ if (!isFinite(v)) return String(v); if (v===0) return '0';
+  const a=Math.abs(v); if (a<1e-4||a>=1e5) { const e=v.toExponential(n-1).replace('e','×10^'); return e.replace(/\^\+?(-?\d+)/,'<sup>$1</sup>'); }
+  return String(+v.toPrecision(n)); }
+function plain(v,n){ if (!isFinite(v)) return String(v); const a=Math.abs(v); if (a!==0&&(a<1e-4||a>=1e5)) return v.toExponential(n-1); return String(+v.toPrecision(n)); }
+
+/* ---------- the steps for one design (method of the Week 5 slides) ---------- */
+function stepsFor(sec){
+  const d=DESIGNS[sec], k=MAT.k, h=d.h;
+  const tm=d.t/1000, Lm=d.L/1000, wm=d.D/1000, Hm=d.W/1000;
+  const Rcj=DEV.Rjc+DEV.Rpad;
+  const ref={};
+  ref.m   = Math.sqrt(h*2*(wm+tm)/(k*wm*tm));
+  ref.eta = Math.tanh(ref.m*Lm)/(ref.m*Lm);
+  ref.Afin= 2*Lm*wm + 2*Lm*tm;   /* = pL, tip excluded (Case 2) */
+  ref.Aun = wm*Hm - d.N*tm*wm;
+  ref.R   = 1/(h*(ref.Aun + ref.eta*d.N*ref.Afin));
+  ref.Tb  = DEV.Tinf + DEV.Q*ref.R;
+  ref.Tj  = ref.Tb + DEV.Q*Rcj;
+  const val=key=>{ const st=S.steps[sec][key]; return st&&st.status ? st.value : ref[key]; };
+  const W = sec==='W';
+  const f4=v=>(+v.toPrecision(4));
+  const plan = { key:'plan', type:'mc', pre:true, title:'Plan before you calculate',
+      q:'The goal is to decide whether T_j stays below 125 °C, using T_j = T∞ + Q̇(R_jc + R_cs + R_sa). Q̇, T∞, R_jc and R_cs are given. Which quantity do you have to work out from the heat sink before you can find T_j?',
+      opts:{A:'T_j,max, the junction limit', B:'R_sa, the sink-to-ambient resistance', C:'Q̇, the heat from the chip', D:'h, the convection coefficient'},
+      answer:'B',
+      fb:{A:'T_j,max is the limit you compare against at the end. It is given, not calculated.', C:'Q̇ = 8 W is given.', D:'h is given: 10 W/m²·K in still air.'},
+      explain:'Everything in the T_j equation is given except R_sa, so the whole calculation is really about R_sa. R_sa needs h, A_unfin, A_fin and η_fin, and η_fin needs m and L. Think backwards to plan, then calculate forwards. The big picture above now shows the plan.' };
+  return { ref, list:(W?[plan]:[]).concat([
+    { key:'m', plain:'m', html:'<i>m</i>', unit:'m⁻¹', title:'Fin parameter',
+      why:'m tells you how quickly the fin cools down along its length. For a rectangular fin of width w and thickness t, the perimeter is p = 2(w + t) and the cross-sectional area is A_c = wt.',
+      eq:'<i>m</i> = √(<i>hp</i> / <i>kA</i><sub>c</sub>) &nbsp;&nbsp; with <i>p</i> = 2(<i>w</i> + <i>t</i>), <i>A</i><sub>c</sub> = <i>wt</i>',
+      sub:()=>`<i>m</i> = √( ${h} × 2(${wm} + ${tm}) / (${k} × ${wm} × ${tm}) )`,
+      ok:v=>near(v,ref.m,0.02),
+      hints:[ [v=>near(v,ref.m*Math.sqrt(1000),0.03)||near(v,ref.m/Math.sqrt(1000),0.03),'Check your units: w and t must both be in metres.'],
+              [v=>near(v,ref.m*ref.m,0.03),'Remember to take the square root.'],
+              [v=>near(v,ref.m/Math.SQRT2,0.03),'The perimeter goes all the way round the fin: p = 2(w + t).'] ],
+      generic:'Work out p = 2(w + t) and A_c = wt in metres, then hp/(kA_c), then take the square root.', dp:3 },
+    { key:'eta', plain:'η_fin', html:'η<sub>fin</sub>', unit:'', title:'Fin efficiency',
+      why:'Treat the tip as adiabatic (Case 2: negligible heat loss from the fin tip). Work out mL first, with L in metres.',
+      eq:'η<sub>fin</sub> = tanh(<i>mL</i>) / (<i>mL</i>)',
+      sub:()=>`<i>mL</i> = ${f4(val('m'))} × ${Lm} = ${f4(val('m')*Lm)}`,
+      ok:v=>{ const x=val('m')*Lm, own=Math.tanh(x)/x; return Math.abs(v-ref.eta)<=0.005||Math.abs(v-own)<=0.005; },
+      hints:[ [v=>v>1,'Fin efficiency can never be more than 1.'],
+              [v=>{const x=val('m')*d.L; return Math.abs(v-Math.tanh(x)/x)<0.01;},'It looks like L was in mm. Use metres.'],
+              [v=>Math.abs(v-Math.tanh(val('m')*Lm))<0.003,'That is tanh(mL). Now divide it by mL.'] ],
+      derive:'<p>Case 2 (adiabatic tip) gives the heat from one fin: <i>Q̇</i><sub>fin</sub> = √(<i>hpkA</i><sub>c</sub>)(<i>T</i><sub>b</sub> − <i>T</i><sub>∞</sub>) tanh <i>mL</i>.</p><p>If the whole fin were at <i>T</i><sub>b</sub>: <i>Q̇</i><sub>fin,max</sub> = <i>hA</i><sub>fin</sub>(<i>T</i><sub>b</sub> − <i>T</i><sub>∞</sub>), with <i>A</i><sub>fin</sub> = <i>pL</i>.</p><p>Divide: η<sub>fin</sub> = √(<i>hpkA</i><sub>c</sub>) tanh <i>mL</i> / (<i>hpL</i>) = tanh <i>mL</i> / (<i>L</i>√(<i>hp</i>/<i>kA</i><sub>c</sub>)) = tanh <i>mL</i> / <i>mL</i>.</p>',
+      generic:'Find mL (L in metres), then divide tanh(mL) by mL. Check that your calculator has a tanh key (often hyp → tan).', dp:4 },
+    { key:'Afin', plain:'A_fin', html:'<i>A</i><sub>fin</sub>', unit:'m²', title:'Surface area of one fin',
+      why:'One rectangular fin has two large faces (L × w) and two thin side edges (L × t). In Case 2 no heat leaves the tip, so the tip area (t × w) is not counted. This is the same as A_fin = pL.',
+      eq:'<i>A</i><sub>fin</sub> (for 1 fin) = 2 × <i>L</i> × <i>w</i> + 2 × <i>L</i> × <i>t</i> &nbsp;&nbsp; (= <i>pL</i>)',
+      sub:()=>`<i>A</i><sub>fin</sub> = 2 × ${Lm} × ${wm} + 2 × ${Lm} × ${tm}`,
+      ok:v=>near(v,ref.Afin,0.01),
+      hints:[ [v=>near(v,ref.Afin*d.N,0.02),'This step is for one fin only. N comes in later.'],
+              [v=>near(v,2*Lm*wm+2*Lm*tm+tm*wm,0.005),'In Case 2 the tip loses no heat, so leave out the tip area t × w.'],
+              [v=>near(v,2*Lm*wm+tm*wm,0.005),'Leave out the tip (t × w) and include the two side edges, 2 × L × t.'],
+              [v=>near(v,2*Lm*wm,0.005),'That is only the two large faces. Add the two side edges, 2 × L × t.'],
+              [v=>near(v,ref.Afin*1e6,0.03)||near(v,ref.Afin*1e4,0.03),'Convert to m² (1 mm² = 10⁻⁶ m²).'] ],
+      generic:'A_fin = 2Lw + 2Lt (no tip area in Case 2), with every length in metres. The answer is in m², e.g. 0.00166 or 1.66e-3.', dp:4 },
+    { key:'Aun', plain:'A_unfin', html:'<i>A</i><sub>unfin</sub>', unit:'m²', title:'Exposed (unfinned) base area',
+      why:'The base between the fins also loses heat. Take the whole base area w × H and subtract the footprints of the N fins.',
+      eq:'<i>A</i><sub>unfin</sub> = <i>w</i> × <i>H</i> − <i>N</i> × <i>t</i> × <i>w</i>',
+      sub:()=>`<i>A</i><sub>unfin</sub> = ${wm} × ${Hm} − ${d.N} × ${tm} × ${wm}`,
+      ok:v=>near(v,ref.Aun,0.02),
+      hints:[ [v=>near(v,wm*Hm,0.01),'That is the whole base. Subtract the area covered by the fins, N × t × w.'],
+              [v=>near(v,d.N*tm*wm,0.02),'That is the area under the fins. Subtract it from the base area instead.'],
+              [v=>near(v,ref.Aun*1e6,0.03),'Convert to m² (1 mm² = 10⁻⁶ m²).'] ],
+      generic:'Base area w × H minus the N fin footprints t × w. Use metres.', dp:4 },
+    { key:'R', plain:'R_sa', html:'<i>R</i><sub>sa</sub>', unit:'°C/W', title:'Sink-to-ambient resistance',
+      why:'The fins and the exposed base together act as one resistance between the heat sink base and the ambient air. Each fin counts only η_fin as much as bare surface.',
+      eq:'<i>R</i><sub>sa</sub> = 1 / [<i>h</i>(<i>A</i><sub>unfin</sub> + η<sub>fin</sub><i>NA</i><sub>fin</sub>)]',
+      sub:()=>`<i>R</i><sub>sa</sub> = 1 / [${h} × (${sig(val('Aun'),4)} + ${f4(val('eta'))} × ${d.N} × ${sig(val('Afin'),4)})]`,
+      ok:v=>near(v,ref.R,0.03)||near(v,1/(h*(val('Aun')+val('eta')*d.N*val('Afin'))),0.02),
+      hints:[ [v=>near(v,1/(h*(val('Aun')+val('eta')*val('Afin'))),0.03),'Multiply the one-fin area by N, the number of fins.'],
+              [v=>near(v,1/(h*val('eta')*d.N*val('Afin')),0.02),'Include the exposed base area A_unfin as well as the fins.'],
+              [v=>near(v,h*(val('Aun')+val('eta')*d.N*val('Afin')),0.03),'That is h(A_unfin + η_fin N A_fin). The resistance is 1 divided by it.'],
+              [v=>near(v,1/(val('Aun')+val('eta')*d.N*val('Afin')),0.03),'Remember to multiply by h before taking 1/…'] ],
+      derive:'<p>Heat leaves the heat sink in two ways, both at the base temperature <i>T</i><sub>b</sub>:</p><p>• the exposed base: <i>Q̇</i><sub>unfin</sub> = <i>hA</i><sub>unfin</sub>(<i>T</i><sub>b</sub> − <i>T</i><sub>∞</sub>)<br>• the <i>N</i> fins: <i>Q̇</i><sub>fins</sub> = <i>N</i>η<sub>fin</sub><i>hA</i><sub>fin</sub>(<i>T</i><sub>b</sub> − <i>T</i><sub>∞</sub>)</p><p>Add them: <i>Q̇</i> = <i>h</i>(<i>A</i><sub>unfin</sub> + η<sub>fin</sub><i>NA</i><sub>fin</sub>)(<i>T</i><sub>b</sub> − <i>T</i><sub>∞</sub>).</p><p>A thermal resistance is temperature difference ÷ heat rate (like <i>R</i> = <i>V</i>/<i>I</i>): <i>R</i><sub>sa</sub> = (<i>T</i><sub>b</sub> − <i>T</i><sub>∞</sub>)/<i>Q̇</i> = 1/[<i>h</i>(<i>A</i><sub>unfin</sub> + η<sub>fin</sub><i>NA</i><sub>fin</sub>)]. Rearranged, this also gives the next step: <i>T</i><sub>b</sub> = <i>T</i><sub>∞</sub> + <i>Q̇R</i><sub>sa</sub>.</p>',
+      generic:'R_sa = 1 / [h (A_unfin + η_fin N A_fin)]. Multiply N A_fin by η_fin before adding A_unfin.', dp:3 },
+    { key:'Tb', plain:'T_b', html:'<i>T</i><sub>b</sub>', unit:'°C', title:'Heat sink base temperature',
+      why:'All the chip’s heat leaves through the heat sink, so the base sits above the ambient air by Q̇R_sa.',
+      eq:'<i>T</i><sub>b</sub> = <i>T</i><sub>∞</sub> + <i>Q̇R</i><sub>sa</sub>',
+      sub:()=>`<i>T</i><sub>b</sub> = ${DEV.Tinf} + ${DEV.Q} × ${f4(val('R'))}`,
+      ok:v=>Math.abs(v-ref.Tb)<=1.5||Math.abs(v-(DEV.Tinf+DEV.Q*val('R')))<=0.5,
+      hints:[ [v=>Math.abs(v-DEV.Q*val('R'))<1,'That is the temperature rise. Add the ambient temperature T∞.'],
+              [v=>Math.abs(v-(DEV.Tinf+val('R')))<1,'Multiply R_sa by the heat rate Q̇.'] ],
+      generic:'T_b = T∞ + Q̇ R_sa.', dp:1 },
+    { key:'Tj', plain:'T_j', html:'<i>T</i><sub>j</sub>', unit:'°C', title:'Chip junction temperature',
+      why:'From the base, the heat came through the thermal interface material (R_cs) and the chip package (R_jc), in series.',
+      eq:'<i>T</i><sub>j</sub> = <i>T</i><sub>b</sub> + <i>Q̇</i>(<i>R</i><sub>jc</sub> + <i>R</i><sub>cs</sub>) &nbsp;&nbsp; [= <i>T</i><sub>∞</sub> + <i>Q̇</i>(<i>R</i><sub>jc</sub> + <i>R</i><sub>cs</sub> + <i>R</i><sub>sa</sub>)]',
+      sub:()=>`<i>T</i><sub>j</sub> = ${f4(val('Tb'))} + ${DEV.Q} × (${DEV.Rjc.toFixed(1)} + ${DEV.Rpad.toFixed(1)})`,
+      ok:v=>Math.abs(v-ref.Tj)<=1.5||Math.abs(v-(val('Tb')+DEV.Q*Rcj))<=0.5,
+      hints:[ [v=>Math.abs(v-(val('Tb')+DEV.Q*DEV.Rjc))<1||Math.abs(v-(val('Tb')+DEV.Q*DEV.Rpad))<1,'Include both R_jc and R_cs. The resistances are in series.'],
+              [v=>Math.abs(v-DEV.Q*Rcj)<1,'Add this rise to the base temperature T_b.'] ],
+      derive:'<p>At steady state the same <i>Q̇</i> flows through every layer, like one current through resistors in series. Each layer has a temperature drop of <i>Q̇R</i>:</p><p><i>T</i><sub>j</sub> − <i>T</i><sub>c</sub> = <i>Q̇R</i><sub>jc</sub> &nbsp; and &nbsp; <i>T</i><sub>c</sub> − <i>T</i><sub>b</sub> = <i>Q̇R</i><sub>cs</sub></p><p>Add them: <i>T</i><sub>j</sub> = <i>T</i><sub>b</sub> + <i>Q̇</i>(<i>R</i><sub>jc</sub> + <i>R</i><sub>cs</sub>). Adding the sink drop <i>T</i><sub>b</sub> − <i>T</i><sub>∞</sub> = <i>Q̇R</i><sub>sa</sub> gives the whole chain: <i>T</i><sub>j</sub> = <i>T</i><sub>∞</sub> + <i>Q̇</i>(<i>R</i><sub>jc</sub> + <i>R</i><sub>cs</sub> + <i>R</i><sub>sa</sub>).</p>',
+      generic:'T_j = T_b + Q̇ (R_jc + R_cs).', dp:1 },
+    W ? { key:'q', type:'mc', title:'What would help most?',
+      q:'T_j is about 136 °C, above the 125 °C limit, and η_fin ≈ 0.99. Which single change would lower T_j the most?',
+      opts:{A:'Make the fins from copper (k = 401 W/m·K)', B:'Make the fins thicker (2 mm instead of 1.5 mm)', C:'Add a small fan so h rises from 10 to 30 W/m²·K', D:'Remove two fins so air can flow more freely'},
+      answer:'C',
+      fb:{A:'Copper only raises η_fin from 0.992 to 0.995, so T_j hardly changes (about 135.7 °C).', B:'Thicker fins add a tiny amount of area, so T_j only drops to about 135.8 °C.', D:'Fewer fins means less area. T_j goes up to about 165 °C.'},
+      explain:'η_fin is already about 0.99, so the fins are almost at the base temperature everywhere. A better conductor or thicker fins cannot push η_fin above 1. The bottleneck is convection: R_sa = 1/[h(…)], so tripling h cuts R_sa to about one third and T_j drops to about 88 °C.' }
+    : { key:'q', type:'mc', title:'Which design is better, and why?',
+      q:'Use the "Design A vs design B" table in the side panel. Which design is better, and why?',
+      opts:{A:'Design A, because its fins are longer and thicker, so it has more fin area', B:'Design B, because the fan tripled h, which cut R_sa to about a third, while η_fin and the total fin area hardly changed', C:'Design B, because its fin efficiency is much higher', D:'Neither: they have about the same total fin area, so they perform the same'},
+      answer:'B',
+      fb:{A:'Check the T_j row: design A is above the 125 °C limit. Also compare the N·A_fin row.', C:'Compare the η_fin row: design B\'s is slightly lower.', D:'The areas are similar, but compare the h, R_sa and T_j rows.'},
+      explain:'Design B: T_j ≈ 88 °C, about 37 °C below the limit, while design A overheats at about 136 °C. The table shows why: the total fin area NA_fin is almost the same, and η_fin even fell slightly (0.992 → 0.981). The big change is h, from 10 to 30 W/m²·K, which cuts R_sa from about 9.0 to about 3.0 °C/W. A fan lets you use a smaller, lighter heat sink.' }
+  ])};
+}
+
+/* ---------- tabs ---------- */
+const TABS=['How it works','Worked example','Your turn','Finish'];
+function quizDone(){ for (let i=0;i<6;i++){ const q=S.quiz[i]; if (!q||!q.done) return false; } return true; }
+function secDone(sec){ return stepsFor(sec).list.every(st=>S.steps[sec][st.key]&&S.steps[sec][st.key].status); }
+function tabOpen(i){ if (UNLOCK||i===0) return true; if (i===1) return quizDone(); if (i===2) return quizDone()&&secDone('W'); return quizDone()&&secDone('W')&&secDone('Y'); }
+function tabDone(i){ return [quizDone(), secDone('W'), secDone('Y'), false][i]; }
+function renderTabs(){
+  const nav=document.getElementById('tabs'); nav.innerHTML='';
+  TABS.forEach((t,i)=>{
+    const b=document.createElement('button'); b.type='button';
+    b.className=(S.tab===i?'on ':'')+(tabDone(i)?'done':'');
+    b.innerHTML=`<span class="n">${tabDone(i)?'✓':i+1}</span>${t}`;
+    b.disabled=!tabOpen(i);
+    b.onclick=()=>goTab(i);
+    nav.appendChild(b);
+  });
+}
+function goTab(i){
+  if (!tabOpen(i)) return;
+  S.tab=i;
+  if (i===2 && !S.ytStart){ S.ytStart=Date.now(); }
+  save(); render(); window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------- side panel ---------- */
+let hover=null, sinkApi=null, profApi=null;
+function sideSec(){ return S.tab>=2 ? 'Y' : 'W'; }
+function renderSide(){
+  const sec=sideSec(), d=DESIGNS[sec];
+  document.getElementById('given').innerHTML=`
+    <h4>Given · ${d.label}</h4>
+    <dl>
+      <dt>Chip</dt><dd>${DEV.name}, ${DEV.where}</dd>
+      <dt>Heat from chip</dt><dd><i>Q̇</i> = ${DEV.Q} W</dd>
+      <dt>Air in enclosure</dt><dd><i>T</i><sub>∞</sub> = ${DEV.Tinf} °C</dd>
+      <dt>Junction limit</dt><dd><i>T</i><sub>j,max</sub> = ${DEV.Tmax} °C</dd>
+      <dt>Chip + TIM</dt><dd><i>R</i><sub>jc</sub> = ${DEV.Rjc.toFixed(1)} °C/W (junction–case), <i>R</i><sub>cs</sub> = ${DEV.Rpad.toFixed(1)} °C/W (case–sink, thermal interface material)</dd>
+      <dt>Heat sink</dt><dd>Aluminium, <i>k</i> = ${MAT.k} W/m·K (Table A-3)</dd>
+      <dt>Base</dt><dd><i>w</i> × <i>H</i> = ${d.D} mm × ${d.W} mm</dd>
+      <dt>Fins</dt><dd><i>N</i> = ${d.N} rectangular fins, length <i>L</i> = ${d.L} mm, thickness <i>t</i> = ${d.t} mm, width <i>w</i> = ${d.D} mm</dd>
+      <dt>Cooling</dt><dd>${d.hText}, <i>h</i> = ${d.h} W/m²·K</dd>
+    </dl>
+    <p class="assume">Assume steady state, a uniform base temperature <i>T</i><sub>b</sub>, negligible heat loss from the fin tips (adiabatic tip, Case 2), the same <i>h</i> on the fins and the exposed base, and no radiation.</p>`;
+  const st=S.steps[sec];
+  const Rknown = st.R&&st.R.status ? st.R.value : null;
+  const Tbknown = st.Tb&&st.Tb.status ? st.Tb.value : null;
+  const Tjknown = st.Tj&&st.Tj.status ? st.Tj.value : null;
+  const r = HS.solve(d,'al',DEV,d.h);
+  const showCol = S.tab>0 && Tbknown!=null;
+  document.getElementById('sinkTitle').textContent = 'The heat sink · '+d.label;
+  let active=null;
+  if (S.tab===1||S.tab===2){ const lst=stepsFor(sec).list; const nx=lst.find(x=>!(st[x.key]&&st[x.key].status)); active=nx?nx.key:null; }
+  const hlMode = active==='Afin' ? 'fin' : active==='Aun' ? 'base' : null;
+  sinkApi = VIS.sink(document.getElementById('sinkBox'), d, r, { colour:showCol, Tinf:DEV.Tinf, Tlo:DEV.Tinf, Thi:DEV.Tmax, frac:hover, onHover:setHover, labels:true, hl:hlMode });
+  VIS.crossSection(document.getElementById('xsBox'), 'plate');
+  document.getElementById('legend').classList.toggle('hidden',!showCol);
+  document.getElementById('legLo').textContent=DEV.Tinf+' °C'; document.getElementById('legHi').textContent=DEV.Tmax+' °C';
+  document.getElementById('sinkNote').innerHTML = subs((hlMode==='fin' ? '<b style="color:#B26B0C">Orange: the surface of one fin, A_fin (two faces and two side edges; the tip is not counted).</b> ' : hlMode==='base' ? '<b style="color:#B26B0C">Orange: the exposed base between the fins, A_unfin.</b> ' : '') + (showCol ? 'Colours show temperature. Hover over the front fin or the graph to link the two.' : 'Temperature colours appear once you have found T_b.'));
+  profApi = VIS.profile(document.getElementById('profBox'), showCol?r:null, DEV.Tinf, { frac:hover, onHover:setHover, empty:'Appears once you have found T_b' });
+  VIS.stack(document.getElementById('netBox'), { Q:DEV.Q, Rjc:DEV.Rjc, Rpad:DEV.Rpad, Rhs:S.tab>0?Rknown:null, Tinf:DEV.Tinf,
+    Tb:S.tab>0?Tbknown:null, Tj:S.tab>0?Tjknown:null, Tc:(S.tab>0&&Tjknown!=null)?Tjknown-DEV.Q*DEV.Rjc:null, Tmax:DEV.Tmax });
+  document.getElementById('cmpCard').classList.toggle('hidden', S.tab===0);
+  document.getElementById('cmpBox').innerHTML = compareTable();
+}
+
+/* ---------- design A vs design B table (values appear once the student has answered) ---------- */
+function compareTable(){
+  const v=(sec,key)=>{ const r=S.steps[sec][key]; return r&&r.status ? r.value : null; };
+  const rows=[
+    ['<i>h</i>','W/m²·K', s=>DESIGNS[s].h, 0],
+    ['<i>N</i>','', s=>DESIGNS[s].N, 0],
+    ['<i>L</i>','mm', s=>DESIGNS[s].L, 0],
+    ['<i>t</i>','mm', s=>DESIGNS[s].t, 1],
+    ['<i>m</i>','m⁻¹', s=>v(s,'m'), 2],
+    ['η<sub>fin</sub>','', s=>v(s,'eta'), 3],
+    ['<i>A</i><sub>fin</sub> (1 fin)','m²', s=>v(s,'Afin'), 'a'],
+    ['<i>N</i>·<i>A</i><sub>fin</sub>','m²', s=>v(s,'Afin')==null?null:DESIGNS[s].N*v(s,'Afin'), 'a'],
+    ['<i>A</i><sub>unfin</sub>','m²', s=>v(s,'Aun'), 'a'],
+    ['<i>R</i><sub>sa</sub>','°C/W', s=>v(s,'R'), 2],
+    ['<i>T</i><sub>b</sub>','°C', s=>v(s,'Tb'), 1],
+    ['<i>T</i><sub>j</sub>','°C', s=>v(s,'Tj'), 1]];
+  const fmt=(x,dp)=>x==null?'<span class="muted">–</span>':dp==='a'?plain(x,3):(+x).toFixed(dp);
+  const change=(a,b)=>{ if (a==null||b==null||a===0) return ''; const rr=b/a;
+    if (rr>=1.5||rr<=0.67) return '×'+(rr>=1?rr.toFixed(1):rr.toFixed(2));
+    const pc=(rr-1)*100; return (Math.abs(pc)<0.5?'≈ same':(pc>0?'+':'−')+Math.abs(pc).toFixed(Math.abs(pc)<10?1:0)+' %'); };
+  let h='<table class="cmp"><thead><tr><th></th><th>A · still air</th><th>B · fan</th><th>B vs A</th></tr></thead><tbody>';
+  rows.forEach(r=>{ const a=r[2]('W'), b=r[2]('Y');
+    h+=`<tr><td>${r[0]}${r[1]?' <span class="u">('+r[1]+')</span>':''}</td><td>${fmt(a,r[3])}</td><td>${fmt(b,r[3])}</td><td class="chg">${change(a,b)}</td></tr>`; });
+  const verdict=s=>{ const tj=v(s,'Tj'); return tj==null?'<span class="muted">–</span>':tj<=DEV.Tmax?'<b class="ok-txt">Survives</b>':'<b class="bad-txt">Overheats</b>'; };
+  h+=`<tr class="vrow"><td>Below ${DEV.Tmax} °C?</td><td>${verdict('W')}</td><td>${verdict('Y')}</td><td></td></tr></tbody></table>`;
+  h+='<p class="small muted" style="margin:6px 0 0">Your own answers fill in as you complete each step.</p>';
+  return h;
+}
+function setHover(f){ hover=f; if (sinkApi) sinkApi.highlight(f); if (profApi) profApi.highlight(f); }
+
+/* ---------- How it works ---------- */
+const CARDS=[
+  {t:'Conduction', b:`<p>Heat flows through a solid from hot to cold. Fourier's law:</p><div class="eq"><i>Q̇</i><sub>cond</sub> = −<i>kA</i> d<i>T</i>/d<i>x</i></div>
+    <p><i>k</i> is the thermal conductivity in W/m·K (Table A-3): aluminium 237, copper 401, carbon steel 60.5. The higher <i>k</i>, the smaller the temperature drop needed to push heat along the fin.</p>`},
+  {t:'Convection', b:`<p>Heat leaves a surface into the surrounding air. Newton's law of cooling:</p><div class="eq"><i>Q̇</i><sub>conv</sub> = <i>hA</i><sub>s</sub>(<i>T</i><sub>s</sub> − <i>T</i><sub>∞</sub>)</div>
+    <p><i>h</i> is the convection heat transfer coefficient in W/m²·K. In still air it is roughly 5–10; a small fan raises it to roughly 25–60. Without a fan, the easy way to remove more heat is to increase the surface area <i>A</i><sub>s</sub>, which is what fins do.</p>`},
+  {t:'What a fin does', b:`<p>A fin is an extended surface: it adds area for convection. Here the fins have a <b>uniform cross-sectional area</b>, so <i>A</i><sub>c</sub> and the perimeter <i>p</i> are the same all along the fin. For a rectangular fin of width <i>w</i> and thickness <i>t</i>:</p>
+    <div class="eq"><i>A</i><sub>c</sub> = <i>wt</i> &nbsp;&nbsp; <i>p</i> = 2(<i>w</i> + <i>t</i>) &nbsp;&nbsp; <i>m</i> = √(<i>hp</i> / <i>kA</i><sub>c</sub>)</div>
+    <p>We use <b>Case 2: negligible heat loss from the fin tip</b> (adiabatic tip). The temperature along the fin is then</p>
+    <div class="eq">(<i>T</i>(<i>x</i>) − <i>T</i><sub>∞</sub>) / (<i>T</i><sub>b</sub> − <i>T</i><sub>∞</sub>) = cosh <i>m</i>(<i>L</i> − <i>x</i>) / cosh <i>mL</i></div>
+    <p>This is the curve in the "Temperature along one fin" graph. Fins pay off most when <i>h</i> is small, as in air.</p>`},
+  {t:'Fin efficiency', b:`<p>The fin gets cooler further from the base, so it removes less heat than an ideal fin whose whole surface is at the base temperature <i>T</i><sub>b</sub>:</p>
+    <div class="eq"><i>Q̇</i><sub>fin,max</sub> = <i>hA</i><sub>fin</sub>(<i>T</i><sub>b</sub> − <i>T</i><sub>∞</sub>) &nbsp;&nbsp; η<sub>fin</sub> = <i>Q̇</i><sub>fin</sub> / <i>Q̇</i><sub>fin,max</sub> = tanh <i>mL</i> / <i>mL</i></div>
+    <p>For one rectangular fin, <i>A</i><sub>fin</sub> = <i>pL</i> = 2 × <i>L</i> × <i>w</i> + 2 × <i>L</i> × <i>t</i> (two faces and two side edges). In Case 2 the tip loses no heat, so its area is not counted. η<sub>fin</sub> is close to 1 for short fins made of a good conductor.</p>`},
+  {t:'Fin effectiveness', b:`<p>Effectiveness compares the heat from the fin with the heat from the bare base area <i>A</i><sub>b</sub> it covers, with no fin:</p>
+    <div class="eq">ε<sub>fin</sub> = <i>Q̇</i><sub>fin</sub> / <i>Q̇</i><sub>no fin</sub> = <i>Q̇</i><sub>fin</sub> / [<i>hA</i><sub>b</sub>(<i>T</i><sub>b</sub> − <i>T</i><sub>∞</sub>)] = (<i>A</i><sub>fin</sub> / <i>A</i><sub>b</sub>) η<sub>fin</sub></div>
+    <p>A fin is effective only when ε<sub>fin</sub> &gt; 1. If ε<sub>fin</sub> &lt; 1, the fin actually acts as insulation.</p>`},
+  {t:'Thermal resistance in series', b:`<p>At steady state, all the chip's heat flows in series: junction → case → thermal interface material → heat sink → ambient air. Each part has a resistance in °C/W, and the resistances add up:</p>
+    <div class="eq"><i>T</i><sub>j</sub> − <i>T</i><sub>∞</sub> = <i>Q̇</i>(<i>R</i><sub>jc</sub> + <i>R</i><sub>cs</sub> + <i>R</i><sub>sa</sub>)</div>
+    <p>For a heat sink with <i>N</i> fins, the sink-to-ambient resistance is</p>
+    <div class="eq"><i>R</i><sub>sa</sub> = 1 / [<i>h</i>(<i>A</i><sub>unfin</sub> + η<sub>fin</sub><i>NA</i><sub>fin</sub>)] &nbsp;&nbsp; <i>A</i><sub>unfin</sub> = <i>w</i> × <i>H</i> − <i>N</i> × <i>t</i> × <i>w</i></div>
+    <p>If <i>T</i><sub>j</sub> goes above the chip's limit, the chip shuts down or fails.</p>`}
+];
+const QUIZ=[
+  {q:'Two fins have the same shape. Fin X is copper (k = 401 W/m·K), fin Y is carbon steel (k = 60.5 W/m·K). With the same base temperature, which fin has the smaller temperature drop from base to tip?',
+   o:{A:'Fin X (copper)',B:'Fin Y (carbon steel)',C:'They are the same',D:'It depends only on h'}, a:'A',
+   e:'A higher k conducts heat with a smaller temperature gradient, so the copper fin stays closer to the base temperature along its length.'},
+  {q:'Switching on a fan mainly increases which quantity?',
+   o:{A:'The thermal conductivity k',B:'The convection coefficient h',C:'The surface area A_s',D:'The air temperature T∞'}, a:'B',
+   e:'Moving air carries heat away from the surface faster, so h goes up. k, A_s and T∞ do not change.'},
+  {q:'Fins are most worthwhile when the convection coefficient h is…',
+   o:{A:'high, for example with a strong fan',B:'low, for example in still air',C:'any value; fins help equally',D:'fins only work in liquids'}, a:'B',
+   e:'When h is small (gases such as air), each square metre removes little heat, so adding area pays off most. That is why fins are common on air-cooled electronics.'},
+  {q:'A fin has η_fin = 0.6. This means…',
+   o:{A:'60 % of the chip\'s heat goes through this fin',B:'the fin removes 60 % of the heat it would if its whole surface were at the base temperature',C:'the tip temperature is 60 % of the base temperature',D:'40 % of the heat is lost by radiation'}, a:'B',
+   e:'Fin efficiency compares the actual fin with an ideal fin at the base temperature everywhere.'},
+  {q:'A fin has an effectiveness ε_fin = 0.9. Adding this fin to a surface will…',
+   o:{A:'increase the heat transfer slightly',B:'decrease the heat transfer',C:'roughly double the heat transfer',D:'make no difference at all'}, a:'B',
+   e:'ε_fin < 1 means the fin transfers less heat than the bare base it covers, so it acts as insulation. A fin is effective only when ε_fin > 1.'},
+  {q:'R_jc = 2 °C/W, R_cs = 1 °C/W, R_sa = 5 °C/W, Q̇ = 8 W and T∞ = 40 °C. What is T_j?',
+   o:{A:'56 °C',B:'64 °C',C:'104 °C',D:'80 °C'}, a:'C',
+   e:'T_j = 40 + 8 × (2 + 1 + 5) = 104 °C. The resistances are in series, so they add.'}
+];
+function renderHow(main){
+  const opened=S.cards.length;
+  main.innerHTML=`
+    <div class="card">
+      <div class="story"><div class="chip">8 W</div><div>
+        <h2>Will the chip survive?</h2>
+        <p class="lead">A robot arm's controller board has a motor-driver chip that turns ${DEV.Q} W of electrical power into heat. If its junction gets hotter than ${DEV.Tmax} °C, the chip shuts down or fails. An aluminium heat sink is fixed on top of it. You will work out whether that heat sink is enough.</p>
+      </div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h2>How it works</h2>
+      <p class="lead">Open all six cards. The self-check unlocks once you have read them.</p>
+      <div class="cards" id="cards"></div>
+      <p class="progress-note" id="cardNote"></p>
+    </div>
+    <div class="card" style="margin-top:14px" id="quizCard">
+      <h2>Self-check</h2>
+      <p class="lead">Six quick questions. If your first answer is wrong, you get a second try.</p>
+      <div id="quizBox"></div>
+    </div>`;
+  const cards=document.getElementById('cards');
+  CARDS.forEach((c,i)=>{
+    const div=document.createElement('div');
+    div.className='hcard'+(S.cards.includes(i)?' seen':'');
+    div.innerHTML=`<button type="button"><span class="ic">${S.cards.includes(i)?'✓':i+1}</span>${c.t}<span class="chev">›</span></button><div class="body">${c.b}</div>`;
+    div.querySelector('button').onclick=()=>{
+      const wasOpen=div.classList.contains('open');
+      cards.querySelectorAll('.hcard.open').forEach(x=>x.classList.remove('open'));
+      if (!wasOpen) div.classList.add('open');
+      if (!S.cards.includes(i)){ S.cards.push(i); save(); div.classList.add('seen'); div.querySelector('.ic').textContent='✓'; updateQuizLock(); }
+    };
+    cards.appendChild(div);
+  });
+  updateQuizLock();
+}
+function updateQuizLock(){
+  const n=S.cards.length, all=n>=6||UNLOCK;
+  document.getElementById('cardNote').textContent = n>=6 ? 'All six cards opened.' : `Opened ${n} of 6 cards.`;
+  const box=document.getElementById('quizBox');
+  if (!all){ box.innerHTML=`<div class="lockmsg">Open all six cards above to unlock the self-check.</div>`; return; }
+  if (!box.dataset.built){ box.dataset.built='1'; box.innerHTML='<div class="quiz" id="quiz"></div>'; QUIZ.forEach((q,i)=>renderQ(i)); }
+}
+function renderQ(i){
+  const q=QUIZ[i], st=S.quiz[i]||{picks:[]};
+  let div=document.getElementById('q'+i);
+  if (!div){ div=document.createElement('div'); div.className='q'; div.id='q'+i; document.getElementById('quiz').appendChild(div); }
+  div.innerHTML=`<div class="qt">${i+1}. ${subs(q.q)}</div><div class="opts"></div><div class="fb"></div>`;
+  const opts=div.querySelector('.opts');
+  Object.keys(q.o).forEach(L=>{
+    const b=document.createElement('button'); b.type='button'; b.className='opt';
+    b.innerHTML=`<b>${L}</b><span>${subs(q.o[L])}</span>`;
+    if (st.picks.includes(L)) b.classList.add(L===q.a?'picked-good':'picked-bad');
+    if (st.done && L===q.a) b.classList.add('is-answer');
+    b.disabled=!!st.done || st.picks.includes(L);
+    b.onclick=()=>{ pickQ(i,L); };
+    opts.appendChild(b);
+  });
+  const fb=div.querySelector('.fb');
+  if (st.done){
+    const ok=st.picks[st.picks.length-1]===q.a;
+    fb.innerHTML=`<div class="hint ${ok?'good':'info'}">${ok?'Correct. ':'The answer is '+q.a+'. '}${subs(q.e)}</div>`;
+  } else if (st.picks.length===1){
+    fb.innerHTML=`<div class="hint bad">Not quite. Have another look at the card and try again.</div>`;
+  }
+}
+function pickQ(i,L){
+  const q=QUIZ[i]; const st=S.quiz[i]||(S.quiz[i]={picks:[]});
+  if (st.done) return;
+  st.picks.push(L);
+  if (L===q.a || st.picks.length>=2) st.done=true;
+  st.ok = L===q.a;
+  save(); renderQ(i); renderTabs();
+  if (quizDone()) showQuizDone();
+}
+function showQuizDone(){
+  if (document.getElementById('quizDone')) return;
+  const c=document.getElementById('quizCard');
+  const div=document.createElement('div'); div.id='quizDone'; div.className='hint good done-banner';
+  div.innerHTML=`Self-check finished. <button class="btn small" type="button" style="margin-left:8px">Go to the worked example →</button>`;
+  div.querySelector('button').onclick=()=>goTab(1);
+  c.appendChild(div);
+}
+
+/* ---------- Worked example / Your turn ---------- */
+function renderSec(main, sec){
+  const W=sec==='W', d=DESIGNS[sec];
+  main.innerHTML=`
+    <div class="card sec-intro">
+      <h2>${W?'Worked example':'Your turn'} · ${d.label}</h2>
+      <p class="lead">${W
+        ? 'The first design uses the heat sink in still air. Each step shows the formula with the numbers already substituted: you do the arithmetic and enter the result. Give your answers to 3 or 4 significant figures.'
+        : 'The engineer adds a small fan and swaps to a lighter heat sink with more, but shorter and thinner, fins. This time only the formula is shown: substitute the values from the Given box and your earlier answers yourself.'}</p>
+    </div>
+    <div class="card plan" id="planCard"></div>
+    <div id="steps"></div>
+    <div id="secEnd"></div>`;
+  renderPlan(sec);
+  const {list}=stepsFor(sec);
+  list.forEach((st,i)=>renderStep(sec,i));
+  renderSecEnd(sec);
+}
+function numOf(sec,i){ const l=stepsFor(sec).list; if (l[i].pre) return 'P'; return l.slice(0,i).filter(x=>!x.pre).length+1; }
+const OPEN_DERIVE=new Set();
+const PLAN_STAGES=[['Fin',[['m','<i>m</i>'],['eta','η<sub>fin</sub>']]],['Areas',[['Afin','<i>A</i><sub>fin</sub>'],['Aun','<i>A</i><sub>unfin</sub>']]],['Heat sink',[['R','<i>R</i><sub>sa</sub>']]],['Temperatures',[['Tb','<i>T</i><sub>b</sub>'],['Tj','<i>T</i><sub>j</sub>']]],['Decide',[['q','?']]]];
+function renderPlan(sec){
+  const box=document.getElementById('planCard'); if (!box) return;
+  const st=S.steps[sec], W=sec==='W';
+  const planned = !W || (st.plan&&st.plan.status) || UNLOCK;
+  const list=stepsFor(sec).list, nx=list.find(x=>!(st[x.key]&&st[x.key].status));
+  const chip=(key,lab)=>{ const done=st[key]&&st[key].status, act=nx&&nx.key===key;
+    return `<button type="button" class="pchip ${done?'done':act?'act':''}" data-k="${key}">${done?'✓ ':''}${lab}</button>`; };
+  box.innerHTML=`<h3>The big picture</h3>
+    ${planned ? `<div class="prow"><span class="plab">1 · Think backwards (plan)</span>
+      <div class="pchain">
+        <span class="pbox goal">Is <i>T</i><sub>j</sub> &lt; ${DEV.Tmax} °C?</span><span class="parr">needs</span>
+        <span class="pbox"><i>T</i><sub>j</sub> = <i>T</i><sub>∞</sub> + <i>Q̇</i>(<i>R</i><sub>jc</sub> + <i>R</i><sub>cs</sub> + <i>R</i><sub>sa</sub>)<small>only <i>R</i><sub>sa</sub> is unknown</small></span><span class="parr">needs</span>
+        <span class="pbox"><i>R</i><sub>sa</sub> = 1/[<i>h</i>(<i>A</i><sub>unfin</sub> + η<sub>fin</sub><i>NA</i><sub>fin</sub>)]<small><i>h</i>, <i>N</i> given</small></span><span class="parr">needs</span>
+        <span class="pbox">η<sub>fin</sub> (from <i>m</i>, <i>L</i>), <i>A</i><sub>fin</sub>, <i>A</i><sub>unfin</sub><small>from the fin geometry</small></span>
+      </div></div>`
+    : `<p class="small muted" style="margin:6px 0 0">Answer the planning question below first. The plan then appears here.</p>`}
+    <div class="prow"><span class="plab">2 · Calculate forwards (the steps below)</span>
+      <div class="pstages">${PLAN_STAGES.map(([name,ks])=>`<div class="pstage"><span>${name}</span><div>${ks.map(k=>chip(k[0],k[1])).join('')}</div></div>`).join('<span class="parr2">→</span>')}</div></div>`;
+  box.querySelectorAll('.pchip').forEach(b=>b.onclick=()=>{ const el=document.getElementById(sec+'-'+b.dataset.k); if (el) el.scrollIntoView({behavior:'smooth',block:'center'}); });
+}
+function stepUnlocked(sec,i){
+  if (UNLOCK) return true;
+  const list=stepsFor(sec).list;
+  for (let j=0;j<i;j++){ const s=S.steps[sec][list[j].key]; if (!s||!s.status) return false; }
+  return true;
+}
+function renderStep(sec,i){
+  const {list,ref}=stepsFor(sec), st=list[i], W=sec==='W';
+  const rec=S.steps[sec][st.key]||{tries:0};
+  let div=document.getElementById(sec+'-'+st.key);
+  if (!div){ div=document.createElement('div'); div.id=sec+'-'+st.key; document.getElementById('steps').appendChild(div); }
+  div.className='step'+(rec.status?' done':'')+(stepUnlocked(sec,i)?'':' locked');
+  const statusHtml = rec.status ? `<span class="status ${rec.status}">${STATUS[rec.status]}</span>` : '';
+  if (st.type==='mc'){
+    div.innerHTML=`<div class="step-h"><span class="num">${numOf(sec,i)}</span><h3>${st.title}</h3>${statusHtml}</div>
+      <p class="why">${subs(st.q)}</p><div class="opts" style="margin-top:10px"></div><div class="fb"></div>`;
+    const opts=div.querySelector('.opts'), picks=rec.picks||[];
+    Object.keys(st.opts).forEach(L=>{
+      const b=document.createElement('button'); b.type='button'; b.className='opt';
+      b.innerHTML=`<b>${L}</b><span>${subs(st.opts[L])}</span>`;
+      if (picks.includes(L)) b.classList.add(L===st.answer?'picked-good':'picked-bad');
+      if (rec.status && L===st.answer) b.classList.add('is-answer');
+      b.disabled=!!rec.status||picks.includes(L);
+      b.onclick=()=>pickMC(sec,i,L);
+      opts.appendChild(b);
+    });
+    const fb=div.querySelector('.fb');
+    if (rec.status) fb.innerHTML=`<div class="hint ${rec.status==='first'||rec.status==='retry'?'good':'info'}">${rec.status==='revealed'?'The answer is '+st.answer+'. ':'Correct. '}${subs(st.explain)}</div>`;
+    else if (picks.length) fb.innerHTML=`<div class="hint bad">${subs(st.fb[picks[picks.length-1]]||'Not quite.')} Try again.</div>`;
+    return;
+  }
+  const refShow = st.key==='Afin'||st.key==='Aun' ? sig(ref[st.key],4) : String(+ref[st.key].toFixed(st.dp));
+  const dkey=sec+'-'+st.key;
+  div.innerHTML=`<div class="step-h"><span class="num">${numOf(sec,i)}</span><h3>${st.title}</h3>${statusHtml}</div>
+    <p class="why">${subs(st.why)}</p>
+    <div class="eq">${st.eq}</div>
+    ${st.derive?`<details class="derive" ${OPEN_DERIVE.has(dkey)?'open':''}><summary>Where does this come from?</summary>${st.derive}</details>`:''}
+    ${W && stepUnlocked(sec,i) ? `<div class="eq"><span class="lbl">Substitute</span>${st.sub()}</div>`:''}
+    ${rec.status ? `<div class="result">${st.html} = ${st.key==='Afin'||st.key==='Aun'?sig(rec.value,4):(+rec.value.toFixed(st.dp))} ${st.unit}
+        ${rec.status!=='revealed' && Math.abs(rec.value-ref[st.key])>Math.abs(ref[st.key])*0.002 ? `<span class="ref"> · reference value ${refShow} ${st.unit}</span>`:''}</div>`
+      : `<div class="ans"><label>${st.html} =</label><input type="text" inputmode="decimal" autocomplete="off" aria-label="${st.plain}"><span class="unit">${st.unit}</span>
+          <button class="btn small chk" type="button">Check</button>${rec.tries>=2?'<button class="btn small ghost rev" type="button">Show the answer</button>':''}</div>`}
+    <div class="fb">${rec.hint&&!rec.status?`<div class="hint bad">${subs(rec.hint)}</div>`:''}</div>`;
+  const det=div.querySelector('details.derive');
+  if (det) det.addEventListener('toggle',()=>{ if (det.open) OPEN_DERIVE.add(dkey); else OPEN_DERIVE.delete(dkey); });
+  if (!rec.status){
+    const inp=div.querySelector('input');
+    div.querySelector('.chk').onclick=()=>checkStep(sec,i,inp.value);
+    inp.addEventListener('keydown',e=>{ if (e.key==='Enter') checkStep(sec,i,inp.value); });
+    const rv=div.querySelector('.rev'); if (rv) rv.onclick=()=>revealStep(sec,i);
+  }
+}
+function checkStep(sec,i,raw){
+  const {list,ref}=stepsFor(sec), st=list[i];
+  const v=parseNum(raw);
+  const rec=S.steps[sec][st.key]||(S.steps[sec][st.key]={tries:0});
+  if (!isFinite(v)){ rec.hint='Enter a number, for example 0.0124 or 1.24e-2.'; save(); renderStep(sec,i); return; }
+  rec.tries++; rec.last=v;
+  if (st.ok(v)){
+    rec.status = rec.tries===1?'first':'retry'; rec.value=v; delete rec.hint;
+  } else {
+    const wkey=sec+'|'+st.key; if (S.wrong[wkey]==null) S.wrong[wkey]=raw.trim();
+    const h=st.hints.find(x=>{ try{ return x[0](v); }catch(e){ return false; } });
+    rec.hint=(h?h[1]:st.generic)+(rec.tries>=2?' You can keep trying, or show the answer.':' Try again.');
+  }
+  afterStep(sec,i);
+}
+function revealStep(sec,i){
+  const {list,ref}=stepsFor(sec), st=list[i];
+  const rec=S.steps[sec][st.key];
+  rec.status='revealed'; rec.value=ref[st.key]; delete rec.hint;
+  afterStep(sec,i);
+}
+function pickMC(sec,i,L){
+  const st=stepsFor(sec).list[i];
+  const rec=S.steps[sec][st.key]||(S.steps[sec][st.key]={tries:0,picks:[]});
+  rec.picks=rec.picks||[]; rec.picks.push(L); rec.tries=rec.picks.length;
+  if (L===st.answer) rec.status = rec.picks.length===1?'first':'retry';
+  else { const wkey=sec+'|'+st.key; if (S.wrong[wkey]==null) S.wrong[wkey]=L; if (rec.picks.length>=2) rec.status='revealed'; }
+  if (rec.status) rec.value=L;
+  afterStep(sec,i);
+}
+function afterStep(sec,i){
+  if (sec==='Y' && secDone('Y') && !S.ytEnd) S.ytEnd=Date.now();
+  save();
+  const list=stepsFor(sec).list;
+  list.forEach((_,j)=>{ if (j>=i) renderStep(sec,j); });
+  renderSecEnd(sec); renderTabs(); renderSide(); renderPlan(sec);
+  const next=list[i+1]; const rec=S.steps[sec][list[i].key];
+  if (rec.status && next){ const el=document.getElementById(sec+'-'+next.key); const inp=el&&el.querySelector('input'); if (inp) inp.focus({preventScroll:true}); el&&el.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+}
+function renderSecEnd(sec){
+  const box=document.getElementById('secEnd'); if (!box) return;
+  if (!secDone(sec)){ box.innerHTML=''; return; }
+  box.innerHTML = sec==='W'
+    ? `<div class="hint good done-banner"><b>Worked example finished: design A overheats.</b> The method in five stages:
+        <ol class="recap"><li><b>Fin:</b> <i>m</i>, then η<sub>fin</sub></li><li><b>Areas:</b> <i>A</i><sub>fin</sub> for one fin, then <i>A</i><sub>unfin</sub></li><li><b>Heat sink:</b> <i>R</i><sub>sa</sub></li><li><b>Temperatures:</b> <i>T</i><sub>b</sub> = <i>T</i><sub>∞</sub> + <i>Q̇R</i><sub>sa</sub>, then <i>T</i><sub>j</sub> = <i>T</i><sub>b</sub> + <i>Q̇</i>(<i>R</i><sub>jc</sub> + <i>R</i><sub>cs</sub>)</li><li><b>Decide:</b> compare <i>T</i><sub>j</sub> with <i>T</i><sub>j,max</sub></li></ol>
+        Your turn uses exactly the same plan. <button class="btn small" type="button" style="margin-left:8px">Go to your turn →</button></div>`
+    : `<div class="hint good done-banner">Your turn finished. <button class="btn small" type="button" style="margin-left:8px">Finish and send →</button></div>`;
+  box.querySelector('button').onclick=()=>goTab(sec==='W'?2:3);
+}
+
+/* ---------- Finish ---------- */
+function renderFinish(main){
+  const {list}=stepsFor('Y');
+  const rows=list.map((st,i)=>{ const r=S.steps.Y[st.key]; return `<tr><td>${i+1}. ${st.title}</td><td>${r&&r.status?STATUS[r.status]:'<span class="muted">Not done</span>'}</td><td>${stepEntry('Y',st)||''}</td></tr>`; }).join('');
+  main.innerHTML=`
+    <div class="card">
+      <h2>Finish</h2>
+      <p class="lead">Check your results, then send them to your instructor.</p>
+      <table class="sum-table"><thead><tr><th>Your turn step</th><th>Result</th><th>You entered</th></tr></thead><tbody>${rows}</tbody></table>
+      <p class="small muted" style="margin-top:10px">Self-check: ${selfFirstCorrect()} of 6 correct on the first try · Time on Your turn: ${minutes()||'–'} min</p>
+      <div id="sendBox"></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3>Design A vs design B</h3>
+      <div style="margin-top:8px">${compareTable()}</div>
+      <h3 style="margin-top:16px">Take-away</h3>
+      <p class="lead" style="margin-top:4px">When the fins are already close to 100 % efficient, more metal barely helps; raising <i>h</i> does. Try other devices, fin shapes and materials in the self-study page, Heat Sink Designer: Explore.</p>
+    </div>`;
+  const box=document.getElementById('sendBox');
+  if (!FORM_ON){
+    box.innerHTML=`<div class="hint info">The results form has not been connected yet, so there is nothing to send. Tell your instructor.</div>`;
+    return;
+  }
+  box.innerHTML=`<div class="idrow"><label for="sid"><b>Student ID</b></label><input id="sid" inputmode="numeric" maxlength="7" placeholder="7 digits" value="${S.sid||''}">
+    <button class="btn" id="sendBtn" type="button">Send to instructor</button></div>
+    <p class="small muted" id="sendNote">This opens a Microsoft Form with your results filled in. Nothing is sent until you press Submit on the form.</p>`;
+  const sid=document.getElementById('sid');
+  sid.oninput=()=>{ S.sid=sid.value.replace(/\D/g,'').slice(0,7); sid.value=S.sid; save(); };
+  document.getElementById('sendBtn').onclick=()=>{
+    if (!/^\d{7}$/.test(S.sid||'')){ document.getElementById('sendNote').innerHTML='<span style="color:var(--hot)">Enter your 7-digit student ID first.</span>'; sid.focus(); return; }
+    const url=formLink(S.sid);
+    if (url) window.open(url,'_blank','noopener');
+  };
+}
+function selfFirstCorrect(){ let n=0; for (let i=0;i<6;i++){ const q=S.quiz[i]; if (q&&q.picks[0]===QUIZ[i].a) n++; } return n; }
+function minutes(){ return S.ytStart&&S.ytEnd ? String(Math.max(1,Math.round((S.ytEnd-S.ytStart)/60000))) : ''; }
+
+/* ---------- results for the form ---------- */
+const FORM = String(window.FORM_URL||'').trim();
+const FORM_ON = /^https:\/\/forms\.(office\.com|microsoft\.com|cloud\.microsoft)\//.test(FORM);
+function stepEntry(sec,st){
+  const r=S.steps[sec][st.key]; if (!r||!r.status) return '';
+  if (st.type==='mc') return 'picked '+(r.picks||[]).join(', then ');
+  const v = st.key==='Afin'||st.key==='Aun' ? plain(r.value,4) : String(+r.value.toFixed(st.dp));
+  return r.status==='revealed' ? `${st.plain} shown = ${v} ${st.unit}`.trim()+(r.last!=null?` (last tried ${plain(r.last,4)})`:'') : `${st.plain} = ${v} ${st.unit}`.trim();
+}
+function stepValue(sec,i){
+  const st=stepsFor(sec).list[i], r=S.steps[sec][st.key];
+  if (!r||!r.status) return '';
+  return STATUS[r.status]+' · '+stepEntry(sec,st);
+}
+function workedSummary(){
+  const {list}=stepsFor('W');
+  const out=list.map((st,i)=>{ const r=S.steps.W[st.key]; const lab=st.pre?'plan':numOf('W',i)+' '+(st.type==='mc'?'question':st.plain); return `${lab}: ${r&&r.status?STATUS[r.status]+(st.type==='mc'?' (picked '+r.picks.join(', then ')+')':''):'not done'}`; });
+  return out.join('; ');
+}
+function quiz2(){
+  const out=[];
+  for (let i=0;i<6;i++){ const q=S.quiz[i]; if (q&&q.picks.length>1) out.push(`Q${i+1}: ${q.picks.join(' then ')}${q.picks[1]===QUIZ[i].a?'':' (still wrong)'}`); }
+  return out.length?out.join('; '):'None';
+}
+function wrongList(){
+  const out=[];
+  ['W','Y'].forEach(sec=>stepsFor(sec).list.forEach(st=>{ const w=S.wrong[sec+'|'+st.key]; if (w!=null) out.push(`${sec==='W'?'W':'Y'} ${st.pre?'plan':st.type==='mc'?'question':st.plain}: ${w}`); }));
+  return out.length?out.join('; '):'None';
+}
+/* The 19 form questions, in order */
+function formValues(sid){
+  const v=[sid];
+  for (let i=0;i<6;i++){ const q=S.quiz[i]; v.push(q&&q.picks[0]?q.picks[0]:''); }
+  v.push(quiz2());
+  v.push(workedSummary());
+  for (let i=0;i<8;i++) v.push(stepValue('Y',i));
+  v.push(wrongList());
+  v.push(minutes());
+  return v;
+}
+function formLink(sid){
+  let u; try{ u=new URL(FORM); }catch(e){ return null; }
+  const pairs=[...u.searchParams.entries()];
+  const keys=pairs.map(p=>p[0]).filter(k=>/^r[0-9a-f]{4,}$/i.test(k));
+  const out=new Map(pairs);
+  const vals=formValues(sid);
+  vals.forEach((val,i)=>{
+    const k=keys[i]; if (!k) return;
+    const quoted=/^".*"$/.test(out.get(k)||'');
+    if (!val){ out.delete(k); return; }
+    out.set(k, quoted?`"${val}"`:val);
+  });
+  return u.origin+u.pathname+'?'+[...out.entries()].map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+}
+
+/* ---------- main render ---------- */
+function render(){
+  if (!tabOpen(S.tab)) S.tab=0;
+  renderTabs();
+  const main=document.getElementById('main');
+  [renderHow, m=>renderSec(m,'W'), m=>renderSec(m,'Y'), renderFinish][S.tab](main);
+  if (S.tab===0 && quizDone()) showQuizDone();
+  renderSide();
+}
+document.getElementById('resetBtn').onclick=()=>{
+  if (confirm('Clear all your answers on this page and start again?')){ S=fresh(); save(); hover=null; render(); window.scrollTo(0,0); }
+};
+render();
+</script>
+</body>
+</html>
