@@ -473,7 +473,7 @@ const SK=(function(){
       return {ok:false,msg:'The piston is pinned, so the volume cannot change. Which direction on a P-V diagram keeps V the same?'}; },
     'pv-isobaric':F=>{ const d=dirOf(F);
       if (d==='right'){ if (Math.abs(F.b.x-V2X)>0.07) return {ok:false,msg:'Right direction. Now end your path on the V₂ = 2V₁ line.'};
-        return {ok:true,msg:'Correct. The weight keeps the pressure fixed, so the path is horizontal, and the air expands to the right. The area under it, P(V₂ − V₁), is the size of the work: W = −P(V₂ − V₁) < 0, a net work output.'}; }
+        return {ok:true,msg:'Correct. The weight keeps the pressure fixed, so the path is horizontal, and the air expands to the right. The area under it is W: W = −P(V₂ − V₁) < 0, a net work output.'}; }
       if (d==='left') return {ok:false,msg:'Horizontal is right, but this is an expansion: V gets bigger, so move to the right.'};
       if (d==='up'||d==='down') return {ok:false,msg:'The volume changes in this process. The weight on the piston keeps the pressure the same: which direction keeps P fixed?'};
       return {ok:false,msg:'The weight on the piston keeps the pressure the same all the way, so P should not change as V increases.'}; },
@@ -586,7 +586,7 @@ const SK=(function(){
    Guided activity
 ============================================================ */
 const UNLOCK = new URLSearchParams(location.search).has('unlock');
-const KEY='polysim-guided-v1';
+const KEY='polysim-guided-v2';
 const STATUS={ first:'First try', retry:'After a retry', revealed:'Revealed the answer' };
 let S=load()||fresh();
 function fresh(){ return { tab:0, cards:[], quiz:{}, steps:{isochoric:{},isobaric:{},isothermal:{},adiabatic:{},final:{}}, wrong:{}, t0:null, t1:null, sid:'' }; }
@@ -684,10 +684,10 @@ const STEPS={
     { key:'ts', type:'sketch', title:'Sketch it on a T-S diagram', q:'Draw the path from state 1. No heat flows, and the process is reversible.' }
   ],
   final:[
-    { key:'f1', type:'mc', title:'Which expansion does the most work?', q:'The isobaric, isothermal and adiabatic expansions all start at state 1 and end at V₂ = 2V₁. All three have W < 0 (net work output). Rank the size of W, the area under each path.',
+    { key:'f1', type:'mc', title:'Which expansion does the most work?', q:'The isobaric, isothermal and adiabatic expansions all start at state 1 and end at V₂ = 2V₁. All three have W < 0 (net work output). Rank them by the area under each path.',
       opts:{A:'Isobaric > isothermal > adiabatic', B:'Isothermal > isobaric > adiabatic', C:'Adiabatic > isothermal > isobaric', D:'All the same, because ΔV is the same'}, answer:'A',
       fb:{B:'Compare the areas under the three paths on the P-V diagram: which path stays highest?', C:'The adiabatic path is the steepest, so it has the least area under it.', D:'Work is the area under the path, not just ΔV, and the paths are at different heights.'},
-      explain:'The size of W is the area under each path. The isobaric path stays at 100 kPa (W = −86.1 kJ), the isothermal one falls to 50 kPa (W = −59.7 kJ), and the adiabatic one falls fastest, to about 38 kPa (W = −52.1 kJ).' },
+      explain:'W is the area under each path. The isobaric path stays at 100 kPa (W = −86.1 kJ), the isothermal one falls to 50 kPa (W = −59.7 kJ), and the adiabatic one falls fastest, to about 38 kPa (W = −52.1 kJ).' },
     { key:'f2', type:'mc', title:'Same heat, two boxes', q:'The same net heat input Q > 0 is added to two identical cylinders of air. In one the piston is pinned (constant volume); in the other it carries a weight (constant pressure). Which ends up hotter?',
       opts:{A:'The constant-volume one', B:'The constant-pressure one', C:'They end up at the same temperature', D:'It depends on the amount of heat'}, answer:'A',
       fb:{B:'At constant pressure some of the heat leaves again as work on the piston.', C:'Compare ΔU = Q + W: W = 0 in one case and W < 0 in the other.', D:'For any amount of heat the comparison is the same.'},
@@ -754,7 +754,7 @@ function drawState(){
     const pts=pathPts(a);
     pv.series.push({pts:pts.map(q=>[q.V,q.P]),cls:'p-'+p}); ts.series.push({pts:pts.map(q=>[q.S,q.T]),cls:'p-'+p});
     const sub=t=>`<tspan baseline-shift="sub" font-size="8">${t}</tspan>`;
-    if (isFinite(a)){ pv.area=pts.map(q=>[q.V,q.P]).concat([[2*V1,0],[V1,0]]); pv.areaLab=[1.29,22,'area = size of W']; }
+    if (isFinite(a)){ pv.area=pts.map(q=>[q.V,q.P]).concat([[2*V1,0],[V1,0]]); pv.areaLab=[1.29,22,'area = W']; }
     else pv.areaLab=[1.35,60,'vertical line: no area, W = 0','#6B7B86'];
     const Send=pts[pts.length-1].S;
     if (Math.abs(Send)>1e-6){ ts.area=pts.map(q=>[q.S,q.T]).concat([[Send,0],[0,0]]); ts.areaCls='area-q'; ts.areaLab=[Send/2,40,'area = Q','#2A6F8E']; }
@@ -812,7 +812,7 @@ const MINI_WORK=`<svg class="mini-svg" viewBox="0 0 340 150" role="img" aria-lab
   <path d="M90,30 C130,70 200,95 290,105" fill="none" stroke="#BC4A2B" stroke-width="2.4"/>
   <circle cx="90" cy="30" r="4" fill="#14232D"/><circle cx="290" cy="105" r="4" fill="#14232D"/>
   <text x="80" y="24" font-size="12" font-weight="700" fill="#14232D">1</text><text x="296" y="100" font-size="12" font-weight="700" fill="#14232D">2</text>
-  <text x="175" y="118" text-anchor="middle" font-size="12" font-weight="700" fill="#8A5A0B">area = work</text>
+  <text x="175" y="118" text-anchor="middle" font-size="12" font-weight="700" fill="#8A5A0B">area = W</text>
   <text x="190" y="143" text-anchor="middle" font-size="11" fill="#41525D" font-style="italic">V</text><text x="26" y="70" font-size="11" fill="#41525D" font-style="italic">P</text>
   <text x="196" y="60" font-size="11" fill="#41525D">expansion 1 → 2: W<tspan baseline-shift="sub" font-size="8">out</tspan></text></svg>`;
 const MINI_FDX=`<svg class="mini-svg" viewBox="0 0 340 150" role="img" aria-label="Gas pushing a piston of area A through a small distance dx">
@@ -841,19 +841,19 @@ const CARDS=[
   {t:'The gas is the system', b:`<p><b>The system is the gas</b> (here, air) inside the cylinder. The cylinder walls and the piston form its boundary, and everything outside is the surroundings. No gas gets in or out, so it is a <b>closed system</b>: only heat and work cross its boundary. Its state is set by pressure <i>P</i>, volume <i>V</i> and temperature <i>T</i>, linked by the ideal gas law:</p>
     <div class="eq"><i>PV</i> = <i>mRT</i> &nbsp;&nbsp; (the same as <i>PV</i> = <i>nrT</i>, because <i>mR</i> = <i>nr</i>)</div>
     <p>For air, <i>R</i> = 0.287 kJ/kg·K. Use <i>T</i> in kelvin. Upper-case symbols are for the whole mass (<i>V</i>, <i>U</i>, <i>Q</i>, <i>W</i>, <i>C</i><sub>v</sub>); lower-case ones are per kilogram, the <b>specific form</b> (<i>v</i> = <i>V</i>/<i>m</i>, <i>u</i> = <i>U</i>/<i>m</i>, <i>c</i><sub>v</sub> = <i>C</i><sub>v</sub>/<i>m</i>).</p>`},
-  {t:'Work = area under the P-V path', b:`<p>The gas pushes on the piston (area <i>A</i>) with a force <i>F</i> = <i>PA</i>. If the piston moves out a small distance d<i>x</i>, the gas does work <i>F</i> d<i>x</i> on it, and the gas volume grows by d<i>V</i> = <i>A</i> d<i>x</i>:</p>${MINI_FDX}
-    <div class="eq"><i>F</i> d<i>x</i> = <i>PA</i> d<i>x</i> = <i>P</i> d<i>V</i> &nbsp;(work done <b>by</b> the gas)</div>
-    <p>We count work done <b>on</b> the gas as positive, so the work done on the gas is the opposite. Adding up all the small steps:</p>
-    <div class="eq"><i>W</i> = −∫ <i>P</i> d<i>V</i></div>${MINI_WORK}
-    <p>The <b>area under the path</b> on a P-V diagram is the size of <i>W</i>.<br><b>Expansion</b> (d<i>V</i> &gt; 0): <i>W</i> &lt; 0, net work output (the gas pushes the piston out).<br><b>Compression</b> (d<i>V</i> &lt; 0): <i>W</i> &gt; 0, net work input (the piston pushes the gas in).<br>If the piston does not move, <i>W</i> = 0.</p>`},
   {t:'The first law (sign convention)', b:`<div class="eq">Δ<i>U</i> = <i>Q</i> + <i>W</i></div>
     <p><i>Q</i> = <i>Q</i><sub>in</sub> − <i>Q</i><sub>out</sub>: if <i>Q</i> &gt; 0 there is a <b>net heat input</b>; if <i>Q</i> &lt; 0, a <b>net heat output</b>.<br>
     <i>W</i> = <i>W</i><sub>in</sub> − <i>W</i><sub>out</sub>: if <i>W</i> &gt; 0 there is <b>net work done on</b> the system (the gas); if <i>W</i> &lt; 0, <b>net work done by</b> the system.</p>
-    <p>So work out <i>Q</i> and <i>W</i> with their signs, then read the sign to say which way the energy went. Example: a gas does 50 kJ of work while 80 kJ of heat flows in: <i>Q</i> = +80 kJ, <i>W</i> = −50 kJ, Δ<i>U</i> = 80 + (−50) = 30 kJ.</p>
+    <p>So determine <i>Q</i> and <i>W</i> with their signs, then read the sign to say which way the energy went. Example: a gas does 50 kJ of work while 80 kJ of heat flows in: <i>Q</i> = +80 kJ, <i>W</i> = −50 kJ, Δ<i>U</i> = 80 + (−50) = 30 kJ.</p>
     <p class="small muted">Some textbooks write the first law with a different sign convention. On this page, always use the form above.</p>`},
   {t:'Internal energy of an ideal gas', b:`<p>For an ideal gas, internal energy depends on <b>temperature only</b>. So, for <b>any</b> process:</p>
     <div class="eq">Δ<i>U</i> = <i>C</i><sub>v</sub>(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>) &nbsp;&nbsp; with <i>C</i><sub>v</sub> = <i>mc</i><sub>v</sub></div>
     <p>Always <i>c</i><sub>v</sub>, even at constant pressure. For air, <i>c</i><sub>v</sub> = 0.718 and <i>c</i><sub>p</sub> = <i>c</i><sub>v</sub> + <i>R</i> = 1.005 kJ/kg·K, and γ = <i>c</i><sub>p</sub>/<i>c</i><sub>v</sub> = 1.4. If <i>T</i> does not change, Δ<i>U</i> = 0.</p>`},
+  {t:'Work = area under the P-V path', b:`<p>The gas pushes on the piston (area <i>A</i>) with a force <i>F</i> = <i>PA</i>. If the piston moves out a small distance d<i>x</i>, the gas does work <i>F</i> d<i>x</i> on it, and the gas volume grows by d<i>V</i> = <i>A</i> d<i>x</i>:</p>${MINI_FDX}
+    <div class="eq"><i>F</i> d<i>x</i> = <i>PA</i> d<i>x</i> = <i>P</i> d<i>V</i> &nbsp;(work done <b>by</b> the gas)</div>
+    <p>We count work done <b>on</b> the gas as positive, so the work done on the gas is the opposite. Adding up all the small steps:</p>
+    <div class="eq"><i>W</i> = −∫ <i>P</i> d<i>V</i></div>${MINI_WORK}
+    <p>The <b>area under the path</b> on a P-V diagram is <i>W</i>.<br><b>Expansion</b> (d<i>V</i> &gt; 0): <i>W</i> &lt; 0, net work output (the gas pushes the piston out).<br><b>Compression</b> (d<i>V</i> &lt; 0): <i>W</i> &gt; 0, net work input (the piston pushes the gas in).<br>If the piston does not move, <i>W</i> = 0.</p>`},
   {t:'Polytropic processes', b:`<p>Many processes follow</p><div class="eq"><i>PV</i><sup><i>a</i></sup> = constant &nbsp;&nbsp; so &nbsp;&nbsp; <i>P</i><sub>1</sub><i>V</i><sub>1</sub><sup><i>a</i></sup> = <i>P</i><sub>2</sub><i>V</i><sub>2</sub><sup><i>a</i></sup></div>
     <table class="atab"><thead><tr><th class="nocase"><i>a</i></th><th>Process</th><th>What stays fixed</th></tr></thead><tbody>
       <tr><td>0</td><td>isobaric</td><td>pressure</td></tr><tr><td>1</td><td>isothermal</td><td>temperature</td></tr>
@@ -862,7 +862,7 @@ const CARDS=[
     <p>Negative in an expansion (net work output), positive in a compression (net work input). In this activity you take each process in turn and work out Δ<i>U</i>, <i>Q</i> and <i>W</i>, with their signs.</p>`},
   {t:'Reading a T-S diagram', b:`<p><i>S</i> is <b>entropy</b>. You do not need to calculate it here; just read the diagram like this, for a reversible process:</p>
     <p>• Heat flows <b>in</b> → <i>S</i> increases: the path moves to the <b>right</b>.<br>• Heat flows <b>out</b> → the path moves to the <b>left</b>.<br>• <b>No heat</b> → <i>S</i> stays the same: a <b>vertical</b> line.<br>• Constant temperature → a <b>horizontal</b> line.</p>
-    <p>For a reversible process, the <b>area under the path</b> on a T-S diagram is the size of the heat transfer, just as the area under a P-V path is the size of the work:</p>
+    <p>For a reversible process, the <b>area under the path</b> on a T-S diagram is the heat transfer <i>Q</i>, just as the area under a P-V path is the work <i>W</i>:</p>
     <div class="eq"><i>Q</i> = ∫ <i>T</i> d<i>S</i></div>${MINI_TS}
     <p>Moving right (<i>S</i> increases): <i>Q</i> &gt; 0, net heat input. Moving left: <i>Q</i> &lt; 0, net heat output.</p>
     <p>So the T-S diagram shows heat at a glance, the way the P-V diagram shows work.</p>`}
