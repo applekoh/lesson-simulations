@@ -110,6 +110,15 @@ nav.tabs button:disabled{opacity:.45;cursor:not-allowed}
 .ebar.zero .eval,.ebar.zero .elab{color:var(--muted);font-weight:400}
 .ebar.unk .eval{color:var(--muted)}
 .esep{border-top:1px solid var(--line);margin:8px 0 4px}
+.ebar2{display:grid;grid-template-columns:40px 1fr 70px;align-items:center;gap:8px;font-size:14px;margin:6px 0 0}
+.ebar2 .elab{color:var(--ink2);font-weight:600}
+.etrack2{position:relative;height:14px;border-radius:7px;background:var(--soft);border:1px solid #E3E9EC;overflow:hidden}
+.etrack2 .efill{border-radius:0}
+.emid{position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:#9AA6AE}
+.ebar2 .eval{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.ebar2.zero .eval{color:var(--muted);font-weight:400}
+.ebar2.unk .eval{color:var(--muted)}
+.emean{margin:0 0 0 48px;font-size:12px;color:var(--muted);min-height:16px}
 .eeq{font-family:"Cambria Math","STIX Two Math","Times New Roman",serif;font-size:14.5px;background:var(--soft);border-radius:8px;padding:7px 10px;margin-top:8px;overflow-x:auto;white-space:nowrap}
 
 /* guided */
@@ -242,7 +251,7 @@ footer.foot button{background:none;border:0;color:var(--muted);text-decoration:u
 <section class="case-note"><div class="wrap"><div class="card">
   <h3>About this simulator</h3>
   <p>The system is the gas in the cylinder: 1 kg of air, treated as an ideal gas with constant specific heats: <i>R</i> = 0.287 kJ/kg·K, <i>c</i><sub>v</sub> = 0.718 kJ/kg·K, <i>c</i><sub>p</sub> = 1.005 kJ/kg·K and γ = <i>c</i><sub>p</sub>/<i>c</i><sub>v</sub> = 1.4. Each process is quasi-equilibrium and reversible, and kinetic and potential energy changes are neglected. <i>PV</i> = <i>mRT</i> is the same as <i>PV</i> = <i>nrT</i>, because <i>mR</i> = <i>nr</i>. Lower-case symbols are per kilogram (specific form, for example <i>c</i><sub>v</sub> in kJ/kg·K); upper-case symbols are for the whole mass (for example <i>C</i><sub>v</sub> = <i>mc</i><sub>v</sub> in kJ/K). Entropy <i>S</i> is measured from state 1 (<i>S</i><sub>1</sub> = 0).</p>
-  <p>Sign convention: Δ<i>U</i> = (<i>Q</i><sub>in</sub> − <i>Q</i><sub>out</sub>) + (<i>W</i><sub>in</sub> − <i>W</i><sub>out</sub>). Every <i>Q</i><sub>in</sub>, <i>Q</i><sub>out</sub>, <i>W</i><sub>in</sub> and <i>W</i><sub>out</sub> is a positive number; the signs are in the equation. The boundary work done by the gas is ∫ <i>P</i> d<i>V</i> (the area under the P-V path): <i>W</i><sub>out</sub> in an expansion, and its size is <i>W</i><sub>in</sub> in a compression. Some textbooks use other sign conventions, so check which one a formula assumes before you use it.</p>
+  <p>Sign convention: Δ<i>U</i> = <i>Q</i> + <i>W</i>, with <i>Q</i> = <i>Q</i><sub>in</sub> − <i>Q</i><sub>out</sub> (<i>Q</i> &gt; 0: net heat input; <i>Q</i> &lt; 0: net heat output) and <i>W</i> = <i>W</i><sub>in</sub> − <i>W</i><sub>out</sub> = −∫ <i>P</i> d<i>V</i> (<i>W</i> &gt; 0: net work done on the gas; <i>W</i> &lt; 0: net work done by the gas). Some textbooks use a different sign convention, so check which one a formula assumes before you use it.</p>
   <p class="credit">This simulation was built with Claude.</p>
 </div></div></section>
 <footer class="foot"><div class="wrap">Your answers are saved in this browser until you send them. <button id="resetBtn" type="button">Clear my answers and start again</button></div></footer>
@@ -464,7 +473,7 @@ const SK=(function(){
       return {ok:false,msg:'The piston is pinned, so the volume cannot change. Which direction on a P-V diagram keeps V the same?'}; },
     'pv-isobaric':F=>{ const d=dirOf(F);
       if (d==='right'){ if (Math.abs(F.b.x-V2X)>0.07) return {ok:false,msg:'Right direction. Now end your path on the V₂ = 2V₁ line.'};
-        return {ok:true,msg:'Correct. The weight keeps the pressure fixed, so the path is horizontal, and the air expands to the right. The area under it, P(V₂ − V₁), is the work done by the air, W_out.'}; }
+        return {ok:true,msg:'Correct. The weight keeps the pressure fixed, so the path is horizontal, and the air expands to the right. The area under it, P(V₂ − V₁), is the size of the work: W = −P(V₂ − V₁) < 0, a net work output.'}; }
       if (d==='left') return {ok:false,msg:'Horizontal is right, but this is an expansion: V gets bigger, so move to the right.'};
       if (d==='up'||d==='down') return {ok:false,msg:'The volume changes in this process. The weight on the piston keeps the pressure the same: which direction keeps P fixed?'};
       return {ok:false,msg:'The weight on the piston keeps the pressure the same all the way, so P should not change as V increases.'}; },
@@ -586,9 +595,9 @@ function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} 
 
 /* ---------- the steps for each process ---------- */
 const DERIVE={
-  W_isothermal:'<p>The work done by the air is ∫ <i>P</i> d<i>V</i>. At constant <i>T</i>, <i>P</i> = <i>mRT</i>/<i>V</i>, so</p><p><i>W</i><sub>out</sub> = ∫<sub>1</sub><sup>2</sup> (<i>mRT</i>/<i>V</i>) d<i>V</i> = <i>mRT</i> ln(<i>V</i><sub>2</sub>/<i>V</i><sub>1</sub>) = <i>mRT</i> ln(<i>P</i><sub>1</sub>/<i>P</i><sub>2</sub>),</p><p>using <i>P</i><sub>1</sub><i>V</i><sub>1</sub> = <i>P</i><sub>2</sub><i>V</i><sub>2</sub>. It is positive because <i>V</i><sub>2</sub> &gt; <i>V</i><sub>1</sub>: the air does work, so this is <i>W</i><sub>out</sub>.</p>',
-  W_adiabatic:'<p>With <i>PV</i><sup>γ</sup> = <i>C</i>, the work done by the air is ∫ <i>CV</i><sup>−γ</sup> d<i>V</i> = (<i>CV</i><sub>1</sub><sup>1−γ</sup> − <i>CV</i><sub>2</sub><sup>1−γ</sup>)/(γ − 1) = (<i>P</i><sub>1</sub><i>V</i><sub>1</sub> − <i>P</i><sub>2</sub><i>V</i><sub>2</sub>)/(γ − 1).</p><p>In an expansion this is positive, so it is <i>W</i><sub>out</sub>. Because <i>PV</i> = <i>mRT</i> and <i>R</i>/(γ − 1) = <i>c</i><sub>v</sub>, <i>W</i><sub>out</sub> = <i>mc</i><sub>v</sub>(<i>T</i><sub>1</sub> − <i>T</i><sub>2</sub>): exactly the drop in internal energy, as the first law says it must be when there is no heat.</p>',
-  Q_isobaric:'<p>Δ<i>U</i> = (<i>Q</i><sub>in</sub> − 0) + (0 − <i>W</i><sub>out</sub>), so <i>Q</i><sub>in</sub> = Δ<i>U</i> + <i>W</i><sub>out</sub> = <i>mc</i><sub>v</sub>(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>) + <i>P</i>(<i>V</i><sub>2</sub> − <i>V</i><sub>1</sub>).</p><p>At constant <i>P</i>, <i>P</i>(<i>V</i><sub>2</sub> − <i>V</i><sub>1</sub>) = <i>mR</i>(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>), so <i>Q</i><sub>in</sub> = <i>m</i>(<i>c</i><sub>v</sub> + <i>R</i>)(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>) = <i>mc</i><sub>p</sub>(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>), because <i>c</i><sub>p</sub> = <i>c</i><sub>v</sub> + <i>R</i>.</p>'
+  W_isothermal:'<p><i>W</i> = −∫ <i>P</i> d<i>V</i>. At constant <i>T</i>, <i>P</i> = <i>mRT</i>/<i>V</i>, so</p><p><i>W</i> = −∫<sub>1</sub><sup>2</sup> (<i>mRT</i>/<i>V</i>) d<i>V</i> = −<i>mRT</i> ln(<i>V</i><sub>2</sub>/<i>V</i><sub>1</sub>) = <i>mRT</i> ln(<i>V</i><sub>1</sub>/<i>V</i><sub>2</sub>) = <i>mRT</i> ln(<i>P</i><sub>2</sub>/<i>P</i><sub>1</sub>),</p><p>using <i>P</i><sub>1</sub><i>V</i><sub>1</sub> = <i>P</i><sub>2</sub><i>V</i><sub>2</sub>. In an expansion <i>V</i><sub>1</sub>/<i>V</i><sub>2</sub> &lt; 1, so <i>W</i> &lt; 0: net work output.</p>',
+  W_adiabatic:'<p>With <i>PV</i><sup>γ</sup> = <i>C</i>: <i>W</i> = −∫ <i>CV</i><sup>−γ</sup> d<i>V</i> = (<i>CV</i><sub>2</sub><sup>1−γ</sup> − <i>CV</i><sub>1</sub><sup>1−γ</sup>)/(γ − 1) = (<i>P</i><sub>2</sub><i>V</i><sub>2</sub> − <i>P</i><sub>1</sub><i>V</i><sub>1</sub>)/(γ − 1).</p><p>Because <i>PV</i> = <i>mRT</i> and <i>mR</i>/(γ − 1) = <i>C</i><sub>v</sub>, this is also <i>W</i> = <i>C</i><sub>v</sub>(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>) = Δ<i>U</i>, exactly as the first law needs when <i>Q</i> = 0.</p>',
+  Q_isobaric:'<p>Δ<i>U</i> = <i>Q</i> + <i>W</i>, so <i>Q</i> = Δ<i>U</i> − <i>W</i> = <i>C</i><sub>v</sub>(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>) − [−<i>P</i>(<i>V</i><sub>2</sub> − <i>V</i><sub>1</sub>)] = <i>C</i><sub>v</sub>(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>) + <i>P</i>(<i>V</i><sub>2</sub> − <i>V</i><sub>1</sub>).</p><p>At constant <i>P</i>, <i>P</i>(<i>V</i><sub>2</sub> − <i>V</i><sub>1</sub>) = <i>mR</i>(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>), so <i>Q</i> = (<i>C</i><sub>v</sub> + <i>mR</i>)(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>) = <i>C</i><sub>p</sub>(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>), because <i>c</i><sub>p</sub> = <i>c</i><sub>v</sub> + <i>R</i>.</p>'
 };
 const STEPS={
   isochoric:[
@@ -597,18 +606,18 @@ const STEPS={
       fb:{B:'The heater raises the temperature with the volume fixed, so P = mRT/V rises.', C:'The heater raises the temperature.', D:'The heater adds heat.'},
       explain:'The piston cannot move, so V is fixed. In PVᵃ = constant, only a → ±∞ keeps V fixed (take the a-th root: P^(1/a)V = constant, and P^(1/a) → 1).' },
     { key:'pv', type:'sketch', title:'Sketch it on a P-V diagram', q:'Draw the path from state 1 as the air is heated with the piston pinned.' },
-    { key:'W', type:'mc', title:'Work', q:'The work done by the air is ∫P dV, the area under the P-V path. How much work, and which way?',
-      opts:{A:'No work (W_in = W_out = 0), because the volume does not change: there is no area under a vertical line', B:'W_out = P(V₂ − V₁), which is not zero', C:'W_in = V(P₂ − P₁)', D:'W_out = mRT ln(P₂/P₁)'}, answer:'A',
-      fb:{B:'V₂ = V₁ here, so P(V₂ − V₁) is zero. Why?', C:'V(P₂ − P₁) is the area to the left of the line, not under it. Boundary work needs the piston to move.', D:'That is the isothermal result. Here T changes and V does not.'},
-      explain:'Boundary work needs the boundary to move. With the piston pinned, dV = 0, so ∫P dV = 0: W_in = W_out = 0. On the P-V diagram the path is vertical, with no area under it.' },
-    { key:'dU', type:'mc', title:'Change in internal energy', q:'What is ΔU?',
-      opts:{A:'ΔU = mc_v(T₂ − T₁), positive because T rises', B:'ΔU = mc_p(T₂ − T₁)', C:'ΔU = 0, because the volume does not change', D:'ΔU = mc_v(T₁ − T₂)'}, answer:'A',
-      fb:{B:'For an ideal gas, ΔU always uses c_v, whatever the process.', C:'U depends on T, not on V. T doubles here.', D:'That has the wrong sign: T rises, so U goes up.'},
-      explain:'For an ideal gas, U depends on T only, so ΔU = mc_v(T₂ − T₁) for any process. Here T goes from 300 K to 600 K, so ΔU is positive.' },
-    { key:'Q', type:'mc', title:'Heat', q:'Use ΔU = (Q_in − Q_out) + (W_in − W_out). How much heat, and which way?',
-      opts:{A:'Q_in = ΔU = mc_v(T₂ − T₁)', B:'Q_in = mc_p(T₂ − T₁)', C:'No heat', D:'Q_out = mc_v(T₂ − T₁)'}, answer:'A',
-      fb:{B:'c_p goes with heating at constant pressure. Here the volume is constant.', C:'The heater is on: heat goes in.', D:'The heater adds heat to the air, so it is Q_in.'},
-      explain:'No work, so the first law gives ΔU = Q_in. All the heat goes into internal energy: Q_in = mc_v(T₂ − T₁).' },
+    { key:'W', type:'mc', title:'Work', q:'W = W_in − W_out = −∫P dV is the net work done on the air. What is W, and what does its sign tell you?',
+      opts:{A:'W = 0, because dV = 0: there is no area under a vertical line', B:'W = −P(V₂ − V₁) < 0', C:'W = V(P₂ − P₁) > 0', D:'W = mRT ln(P₂/P₁)'}, answer:'A',
+      fb:{B:'V₂ = V₁ here, so this is zero anyway. Why?', C:'V(P₂ − P₁) is the area to the left of the line, not under it. Boundary work needs the piston to move.', D:'That is the isothermal result. Here T changes and V does not.'},
+      explain:'Boundary work needs the boundary to move. With the piston pinned, dV = 0, so W = −∫P dV = 0. On the P-V diagram the path is vertical, with no area under it.' },
+    { key:'dU', type:'mc', title:'Change in internal energy', q:'What is ΔU? (C_v = mc_v is the heat capacity at constant volume.)',
+      opts:{A:'ΔU = C_v(T₂ − T₁) > 0', B:'ΔU = C_p(T₂ − T₁)', C:'ΔU = 0, because the volume does not change', D:'ΔU = C_v(T₂ − T₁) < 0'}, answer:'A',
+      fb:{B:'For an ideal gas, ΔU always uses C_v, whatever the process.', C:'U depends on T, not on V. T doubles here.', D:'T rises, so T₂ − T₁ > 0.'},
+      explain:'For an ideal gas, U depends on T only, so ΔU = C_v(T₂ − T₁) for any process. Here T goes from 300 K to 600 K, so ΔU > 0.' },
+    { key:'Q', type:'mc', title:'Heat', q:'ΔU = Q + W, with Q = Q_in − Q_out. What is Q, and what does its sign tell you?',
+      opts:{A:'W = 0, so ΔU = Q and Q = C_v(T₂ − T₁). T₂ − T₁ > 0, so Q > 0: net heat input', B:'Q = C_p(T₂ − T₁) > 0', C:'Q = 0', D:'Q = −C_v(T₂ − T₁) < 0: net heat output'}, answer:'A',
+      fb:{B:'C_p goes with heating at constant pressure. Here the volume is constant.', C:'The heater is on: heat goes in.', D:'Check the sign: with W = 0, Q = ΔU, which is positive.'},
+      explain:'W = 0, so ΔU = Q, and Q = C_v(T₂ − T₁). Since T₂ − T₁ > 0, Q > 0: net heat input. All the heat goes into internal energy.' },
     { key:'ts', type:'sketch', title:'Sketch it on a T-S diagram', q:'Draw the path from state 1. Heat flows in, and the temperature doubles.' }
   ],
   isobaric:[
@@ -617,18 +626,18 @@ const STEPS={
       fb:{A:'The piston is free to move, so the volume changes.', C:'The heater warms the air, so T rises.', D:'The heater adds heat.'},
       explain:'The weight pushes down with the same force all the time, so the air pressure stays the same: PV⁰ = P = constant, a = 0.' },
     { key:'pv', type:'sketch', title:'Sketch it on a P-V diagram', q:'Draw the path from state 1 as the air expands to twice its volume at constant pressure.' },
-    { key:'W', type:'mc', title:'Work', q:'The work done by the air is ∫P dV, the area under the P-V path. How much work, and which way?',
-      opts:{A:'W_out = P(V₂ − V₁), which is also mR(T₂ − T₁)', B:'W_in = P(V₂ − V₁)', C:'No work, because the pressure is constant', D:'W_out = V(P₂ − P₁)'}, answer:'A',
-      fb:{B:'The air pushes the piston out (expansion), so the air does the work: W_out.', C:'The piston moves, so there is an area under the line.', D:'P₂ = P₁ here, and the area under a horizontal line is P × ΔV.'},
-      explain:'The air pushes the piston up, so it does work: W_out = ∫P dV = P(V₂ − V₁), the area under the horizontal line. W_in = 0. Using PV = mRT at both ends, W_out = mR(T₂ − T₁).' },
-    { key:'dU', type:'mc', title:'Change in internal energy', q:'What is ΔU?',
-      opts:{A:'ΔU = mc_v(T₂ − T₁)', B:'ΔU = mc_p(T₂ − T₁), because the pressure is constant', C:'ΔU = 0, because the pressure is constant', D:'ΔU = P(V₂ − V₁)'}, answer:'A',
-      fb:{B:'This is the classic trap. For an ideal gas, ΔU always uses c_v, even at constant pressure. c_p appears in the heat.', C:'U depends on T, and T doubles here (V doubles at the same P).', D:'That is the work, not the change in internal energy.'},
-      explain:'U depends on T only, so ΔU = mc_v(T₂ − T₁) even though the pressure is constant. T doubles (V doubles at the same P), so ΔU is positive.' },
-    { key:'Q', type:'mc', title:'Heat', q:'Use ΔU = (Q_in − Q_out) + (W_in − W_out). How much heat, and which way?',
-      opts:{A:'Q_in = ΔU = mc_v(T₂ − T₁)', B:'Q_in = ΔU + W_out = mc_v(T₂ − T₁) + P(V₂ − V₁) = mc_p(T₂ − T₁)', C:'Q_in = W_out', D:'Q_out = mc_p(T₂ − T₁)'}, answer:'B',
-      fb:{A:'That is only ΔU. Some of the heat also leaves as work on the piston.', C:'That would mean ΔU = 0, but T rises.', D:'The heater adds heat to the air: Q_in.'},
-      explain:'ΔU = (Q_in − 0) + (0 − W_out), so Q_in = ΔU + W_out = mc_v(T₂ − T₁) + mR(T₂ − T₁) = mc_p(T₂ − T₁), because c_p = c_v + R. The heat has to raise the internal energy and push the piston.',
+    { key:'W', type:'mc', title:'Work', q:'W = W_in − W_out = −∫P dV is the net work done on the air. What is W, and what does its sign tell you?',
+      opts:{A:'W = −P(V₂ − V₁) = P(V₁ − V₂). V₁ − V₂ < 0, so W < 0: net work output', B:'W = P(V₂ − V₁) > 0: net work input', C:'W = 0, because the pressure is constant', D:'W = −V(P₂ − P₁)'}, answer:'A',
+      fb:{B:'Check the sign: W = −∫P dV, and V increases. The air pushes the piston out, so the work is a net output.', C:'The piston moves, so there is an area under the line.', D:'P₂ = P₁ here, and the area under a horizontal line is P × ΔV.'},
+      explain:'P is constant, so W = −∫P dV = −P(V₂ − V₁) = P(V₁ − V₂). Since V₁ − V₂ < 0, W < 0: net work output, which is in line with an expansion. Using PV = mRT at both ends, W = −mR(T₂ − T₁).' },
+    { key:'dU', type:'mc', title:'Change in internal energy', q:'What is ΔU? (C_v = mc_v is the heat capacity at constant volume.)',
+      opts:{A:'ΔU = C_v(T₂ − T₁) > 0', B:'ΔU = C_p(T₂ − T₁), because the pressure is constant', C:'ΔU = 0, because the pressure is constant', D:'ΔU = −P(V₂ − V₁)'}, answer:'A',
+      fb:{B:'This is the classic trap. For an ideal gas, ΔU always uses C_v, even at constant pressure. C_p appears in the heat.', C:'U depends on T, and T doubles here (V doubles at the same P).', D:'That is the work, not the change in internal energy.'},
+      explain:'U depends on T only, so ΔU = C_v(T₂ − T₁) even though the pressure is constant. T doubles (V doubles at the same P), so ΔU > 0.' },
+    { key:'Q', type:'mc', title:'Heat', q:'ΔU = Q + W, with Q = Q_in − Q_out. What is Q, and what does its sign tell you?',
+      opts:{A:'Q = ΔU = C_v(T₂ − T₁) > 0', B:'Q = ΔU − W = C_v(T₂ − T₁) + P(V₂ − V₁) = C_p(T₂ − T₁) > 0: net heat input', C:'Q = −W > 0', D:'Q = ΔU + W = C_v(T₂ − T₁) − P(V₂ − V₁)'}, answer:'B',
+      fb:{A:'That would need W = 0, but the piston moves. Some of the heat leaves again as work.', C:'That would mean ΔU = 0, but T rises.', D:'Check the rearrangement: ΔU = Q + W gives Q = ΔU − W.'},
+      explain:'Q = ΔU − W = C_v(T₂ − T₁) − [−P(V₂ − V₁)] = C_v(T₂ − T₁) + mR(T₂ − T₁) = C_p(T₂ − T₁), because C_p = C_v + mR. T₂ > T₁, so Q > 0: net heat input. The heat raises the internal energy and also pushes the piston.',
       derive:DERIVE.Q_isobaric },
     { key:'ts', type:'sketch', title:'Sketch it on a T-S diagram', q:'Draw the path from state 1. The dashed line is the constant-volume heating you drew before.' }
   ],
@@ -638,51 +647,51 @@ const STEPS={
       fb:{A:'The piston moves out, so V changes.', B:'There is no weight keeping P fixed. As V grows at fixed T, P = mRT/V falls.', D:'Heat flows in from the bath.'},
       explain:'The bath keeps T at 300 K. With T fixed, PV = mRT is constant: PV¹ = constant, a = 1.' },
     { key:'pv', type:'sketch', title:'Sketch it on a P-V diagram', q:'Draw the path from state 1 as the air expands slowly to twice its volume at constant temperature.' },
-    { key:'W', type:'mc', title:'Work', q:'The work done by the air is ∫P dV, the area under the P-V path. How much work, and which way?',
-      opts:{A:'W_out = P₁(V₂ − V₁)', B:'W_out = mRT ln(V₂/V₁) = mRT ln(P₁/P₂)', C:'W_in = mRT ln(V₂/V₁)', D:'No work, because the temperature does not change'}, answer:'B',
-      fb:{A:'P falls as the air expands, so the area under the curve is less than P₁ × ΔV.', C:'The air expands and pushes the piston out, so the air does the work: W_out.', D:'The piston moves, so there is area under the curve. Constant T makes ΔU zero, not the work.'},
-      explain:'The air pushes the piston out, so it does work: W_out = ∫P dV. With P = mRT/V, the area under the curve is mRT ln(V₂/V₁), which equals mRT ln(P₁/P₂) because P₁V₁ = P₂V₂. W_in = 0.',
+    { key:'W', type:'mc', title:'Work', q:'W = W_in − W_out = −∫P dV is the net work done on the air. What is W, and what does its sign tell you?',
+      opts:{A:'W = −P₁(V₂ − V₁) < 0: net work output', B:'W = −mRT ln(V₂/V₁) = mRT ln(V₁/V₂) = mRT ln(P₂/P₁). V₂ > V₁, so W < 0: net work output', C:'W = mRT ln(V₂/V₁) > 0: net work input', D:'W = 0, because the temperature does not change'}, answer:'B',
+      fb:{A:'P falls as the air expands, so the area under the curve is less than P₁ × ΔV.', C:'Check the sign: W = −∫P dV, and V increases. The air pushes the piston out, so the work is a net output.', D:'The piston moves, so there is area under the curve. Constant T makes ΔU zero, not W.'},
+      explain:'With P = mRT/V, W = −∫P dV = −mRT ln(V₂/V₁) = mRT ln(V₁/V₂) = mRT ln(P₂/P₁). V₁/V₂ < 1, so the logarithm is negative and W < 0: net work output, as expected for an expansion.',
       derive:DERIVE.W_isothermal },
-    { key:'dU', type:'mc', title:'Change in internal energy', q:'What is ΔU?',
-      opts:{A:'ΔU = 0, because T does not change', B:'ΔU = mc_v(T₂ − T₁), positive', C:'ΔU = −W_out', D:'ΔU = mc_p(T₂ − T₁)'}, answer:'A',
-      fb:{B:'T₂ = T₁ = 300 K, so mc_v(T₂ − T₁) = 0.', C:'That would be true only with no heat transfer. Here heat flows in from the bath.', D:'T₂ = T₁, and ΔU uses c_v anyway.'},
-      explain:'U of an ideal gas depends on T only. T stays at 300 K, so ΔU = mc_v(T₂ − T₁) = 0.' },
-    { key:'Q', type:'mc', title:'Heat', q:'Use ΔU = (Q_in − Q_out) + (W_in − W_out). How much heat, and which way?',
-      opts:{A:'No heat, because the temperature does not change', B:'Q_out = W_out', C:'Q_in = W_out = mRT ln(V₂/V₁)', D:'Q_in = mc_p(T₂ − T₁) = 0'}, answer:'C',
-      fb:{A:'Constant temperature does not mean no heat. The air does work, so energy must come in from somewhere.', B:'The air loses energy as work, so heat must come in to keep T (and U) fixed.', D:'T₂ = T₁, but that does not make the heat zero: mc_pΔT is the heat only at constant pressure.'},
-      explain:'ΔU = 0, so 0 = (Q_in − 0) + (0 − W_out), which gives Q_in = W_out = mRT ln(V₂/V₁). Every kJ of work the air does on the piston is replaced by a kJ of heat from the bath.' },
+    { key:'dU', type:'mc', title:'Change in internal energy', q:'What is ΔU? (C_v = mc_v is the heat capacity at constant volume.)',
+      opts:{A:'ΔU = 0, because T does not change', B:'ΔU = C_v(T₂ − T₁) > 0', C:'ΔU = W < 0', D:'ΔU = C_p(T₂ − T₁)'}, answer:'A',
+      fb:{B:'T₂ = T₁ = 300 K, so C_v(T₂ − T₁) = 0.', C:'That would be true only with no heat transfer. Here heat flows in from the bath.', D:'T₂ = T₁, and ΔU uses C_v anyway.'},
+      explain:'U of an ideal gas depends on T only. T stays at 300 K, so ΔU = C_v(T₂ − T₁) = 0.' },
+    { key:'Q', type:'mc', title:'Heat', q:'ΔU = Q + W, with Q = Q_in − Q_out. What is Q, and what does its sign tell you?',
+      opts:{A:'Q = 0, because the temperature does not change', B:'Q = W < 0: net heat output', C:'Q = ΔU − W = −W = mRT ln(V₂/V₁) > 0: net heat input', D:'Q = C_p(T₂ − T₁) = 0'}, answer:'C',
+      fb:{A:'Constant temperature does not mean no heat. The air does work, so energy must come in from somewhere.', B:'Check the sign: ΔU = Q + W = 0 gives Q = −W, not Q = W. The air loses energy as work, so heat must come in.', D:'C_pΔT is the heat only at constant pressure.'},
+      explain:'ΔU = 0, so Q = −W = mRT ln(V₂/V₁) > 0: net heat input. Every kJ of work the air does on the piston is replaced by a kJ of heat from the bath.' },
     { key:'ts', type:'sketch', title:'Sketch it on a T-S diagram', q:'Draw the path from state 1. The temperature stays at 300 K, and heat flows in.' }
   ],
   adiabatic:[
     { key:'a', type:'mc', title:'What stays fixed?', q:'The cylinder is insulated and the piston moves out. What is special about this process, and what is a?',
       opts:{A:'Volume is fixed: a = ±∞', B:'Pressure is fixed: a = 0', C:'Temperature is fixed: a = 1', D:'No heat flows: a = γ = c_p/c_v = 1.4'}, answer:'D',
       fb:{A:'The piston moves out, so V changes.', B:'There is no weight keeping P fixed.', C:'No bath keeps T fixed. With no heat coming in, T falls as the air does work.'},
-      explain:'Insulation means no heat flows (Q_in = Q_out = 0): an adiabatic process. For a reversible adiabatic process of an ideal gas, PVᵞ = constant, so a = γ = 1.4 for air.' },
+      explain:'Insulation means no heat flows (Q = 0): an adiabatic process. For a reversible adiabatic process of an ideal gas, PVᵞ = constant, so a = γ = 1.4 for air.' },
     { key:'pv', type:'sketch', title:'Sketch it on a P-V diagram', q:'Draw the path from state 1 as the air expands to twice its volume with no heat transfer. The dashed line is the isothermal expansion.' },
-    { key:'W', type:'mc', title:'Work', q:'The work done by the air is ∫P dV, the area under the P-V path. How much work, and which way?',
-      opts:{A:'W_out = (P₁V₁ − P₂V₂)/(γ − 1)', B:'W_out = mRT₁ ln(V₂/V₁)', C:'W_out = P₁(V₂ − V₁)', D:'No work, because no heat flows'}, answer:'A',
-      fb:{B:'That is the isothermal result. Here T falls, so the area under the path is smaller.', C:'That treats P as constant. P falls steeply here.', D:'No heat flows, but the piston still moves, so there is work.'},
-      explain:'The air pushes the piston out, so it does work: W_out = ∫P dV. With PVᵞ = constant, this area is (P₁V₁ − P₂V₂)/(γ − 1), which is positive because P₂V₂ < P₁V₁ in an expansion. W_in = 0.',
+    { key:'W', type:'mc', title:'Work', q:'W = W_in − W_out = −∫P dV is the net work done on the air. What is W, and what does its sign tell you?',
+      opts:{A:'W = (P₂V₂ − P₁V₁)/(γ − 1). P₂V₂ < P₁V₁, so W < 0: net work output', B:'W = −mRT₁ ln(V₂/V₁) < 0: net work output', C:'W = −P₁(V₂ − V₁) < 0: net work output', D:'W = 0, because no heat flows'}, answer:'A',
+      fb:{B:'That is the isothermal result. Here T falls, so P falls faster and the area under the path is smaller.', C:'That treats P as constant. P falls steeply here.', D:'No heat flows, but the piston still moves, so there is work.'},
+      explain:'For PVᵃ = constant with a ≠ 1, W = −∫P dV = (P₂V₂ − P₁V₁)/(a − 1), here with a = γ. In an expansion P₂V₂ < P₁V₁, so W < 0: net work output, as expected when the air pushes the piston out.',
       derive:DERIVE.W_adiabatic },
-    { key:'dU', type:'mc', title:'Change in internal energy', q:'What is ΔU?',
-      opts:{A:'ΔU = 0, because no heat flows', B:'ΔU = mc_v(T₂ − T₁), negative because T falls', C:'ΔU = mc_v(T₂ − T₁), positive because T rises', D:'ΔU = mc_p(T₂ − T₁)'}, answer:'B',
-      fb:{A:'No heat flows, but work still leaves the air.', C:'The air does work with no heat coming in, so its temperature falls.', D:'ΔU always uses c_v for an ideal gas.'},
-      explain:'ΔU = mc_v(T₂ − T₁) as always. The air loses energy as work with nothing coming in, so T₂ < T₁ and ΔU is negative.' },
-    { key:'Q', type:'mc', title:'Heat', q:'Use ΔU = (Q_in − Q_out) + (W_in − W_out). How much heat, and which way?',
-      opts:{A:'Q_in = W_out', B:'Q_out = W_out', C:'No heat (Q_in = Q_out = 0), so ΔU = −W_out: the internal energy falls by W_out', D:'Q_out = mc_v(T₁ − T₂)'}, answer:'C',
+    { key:'dU', type:'mc', title:'Change in internal energy', q:'What is ΔU? (C_v = mc_v is the heat capacity at constant volume.)',
+      opts:{A:'ΔU = 0, because no heat flows', B:'ΔU = C_v(T₂ − T₁). T₂ < T₁, so ΔU < 0', C:'ΔU = C_v(T₂ − T₁). T₂ > T₁, so ΔU > 0', D:'ΔU = C_p(T₂ − T₁)'}, answer:'B',
+      fb:{A:'No heat flows, but work still leaves the air.', C:'The air does work with no heat coming in, so its temperature falls.', D:'ΔU always uses C_v for an ideal gas.'},
+      explain:'ΔU = C_v(T₂ − T₁) as always. The air loses energy as work with nothing coming in, so T₂ < T₁ and ΔU < 0.' },
+    { key:'Q', type:'mc', title:'Heat', q:'ΔU = Q + W, with Q = Q_in − Q_out. What is Q, and what does its sign tell you?',
+      opts:{A:'Q = −W > 0: net heat input', B:'Q = W < 0: net heat output', C:'Q = 0 (insulated), so ΔU = W < 0: the work output comes out of the internal energy', D:'Q = C_v(T₂ − T₁) < 0: net heat output'}, answer:'C',
       fb:{A:'That is the isothermal case, where the bath supplies the heat. Here the walls are insulated.', B:'No heat can cross the insulation.', D:'No heat can cross the insulation.'},
-      explain:'Insulated, so Q_in = Q_out = 0. The first law becomes ΔU = (0 − 0) + (0 − W_out) = −W_out: the air pays for the work out of its own internal energy, which is why it cools.' },
+      explain:'Insulated, so Q = 0. Then ΔU = Q + W = W < 0: the air pays for the work output out of its own internal energy, which is why it cools.' },
     { key:'ts', type:'sketch', title:'Sketch it on a T-S diagram', q:'Draw the path from state 1. No heat flows, and the process is reversible.' }
   ],
   final:[
-    { key:'f1', type:'mc', title:'Which expansion does the most work?', q:'The isobaric, isothermal and adiabatic expansions all start at state 1 and end at V₂ = 2V₁. Rank the work done by the air, W_out.',
+    { key:'f1', type:'mc', title:'Which expansion does the most work?', q:'The isobaric, isothermal and adiabatic expansions all start at state 1 and end at V₂ = 2V₁. All three have W < 0 (net work output). Rank the size of W, the area under each path.',
       opts:{A:'Isobaric > isothermal > adiabatic', B:'Isothermal > isobaric > adiabatic', C:'Adiabatic > isothermal > isobaric', D:'All the same, because ΔV is the same'}, answer:'A',
       fb:{B:'Compare the areas under the three paths on the P-V diagram: which path stays highest?', C:'The adiabatic path is the steepest, so it has the least area under it.', D:'Work is the area under the path, not just ΔV, and the paths are at different heights.'},
-      explain:'Work is the area under each path. The isobaric path stays at 100 kPa (86.1 kJ), the isothermal one falls to 50 kPa (59.7 kJ), and the adiabatic one falls fastest, to about 38 kPa (52.1 kJ).' },
-    { key:'f2', type:'mc', title:'Same heat, two boxes', q:'The same amount of heat Q_in is added to two identical cylinders of air. In one the piston is pinned (constant volume); in the other it carries a weight (constant pressure). Which ends up hotter?',
+      explain:'The size of W is the area under each path. The isobaric path stays at 100 kPa (W = −86.1 kJ), the isothermal one falls to 50 kPa (W = −59.7 kJ), and the adiabatic one falls fastest, to about 38 kPa (W = −52.1 kJ).' },
+    { key:'f2', type:'mc', title:'Same heat, two boxes', q:'The same net heat input Q > 0 is added to two identical cylinders of air. In one the piston is pinned (constant volume); in the other it carries a weight (constant pressure). Which ends up hotter?',
       opts:{A:'The constant-volume one', B:'The constant-pressure one', C:'They end up at the same temperature', D:'It depends on the amount of heat'}, answer:'A',
-      fb:{B:'At constant pressure some of the heat leaves again as work on the piston.', C:'Compare where the heat goes: ΔU = Q_in in one case, ΔU = Q_in − W_out in the other.', D:'For any amount of heat the comparison is the same.'},
-      explain:'At constant volume, all of Q_in goes into ΔU = mc_vΔT. At constant pressure, part of it leaves as W_out, so ΔU is smaller: Q_in = mc_pΔT, and c_p > c_v means a smaller ΔT.' }
+      fb:{B:'At constant pressure some of the heat leaves again as work on the piston.', C:'Compare ΔU = Q + W: W = 0 in one case and W < 0 in the other.', D:'For any amount of heat the comparison is the same.'},
+      explain:'At constant volume W = 0, so ΔU = Q = C_vΔT. At constant pressure W < 0, so ΔU = Q + W is smaller than Q: Q = C_pΔT, and C_p > C_v means a smaller ΔT.' }
   ]
 };
 const TABS=['How it works','1 Isochoric','2 Isobaric','3 Isothermal','4 Adiabatic','Put it together'];
@@ -745,11 +754,11 @@ function drawState(){
     const pts=pathPts(a);
     pv.series.push({pts:pts.map(q=>[q.V,q.P]),cls:'p-'+p}); ts.series.push({pts:pts.map(q=>[q.S,q.T]),cls:'p-'+p});
     const sub=t=>`<tspan baseline-shift="sub" font-size="8">${t}</tspan>`;
-    if (isFinite(a)){ pv.area=pts.map(q=>[q.V,q.P]).concat([[2*V1,0],[V1,0]]); pv.areaLab=[1.29,22,'area = W'+sub('out')]; }
-    else pv.areaLab=[1.35,60,'vertical line: no area, no work','#6B7B86'];
+    if (isFinite(a)){ pv.area=pts.map(q=>[q.V,q.P]).concat([[2*V1,0],[V1,0]]); pv.areaLab=[1.29,22,'area = size of W']; }
+    else pv.areaLab=[1.35,60,'vertical line: no area, W = 0','#6B7B86'];
     const Send=pts[pts.length-1].S;
-    if (Math.abs(Send)>1e-6){ ts.area=pts.map(q=>[q.S,q.T]).concat([[Send,0],[0,0]]); ts.areaCls='area-q'; ts.areaLab=[Send/2,40,'area = Q'+sub('in'),'#2A6F8E']; }
-    else ts.areaLab=[0.38,100,'vertical line: no area, no heat','#6B7B86'];
+    if (Math.abs(Send)>1e-6){ ts.area=pts.map(q=>[q.S,q.T]).concat([[Send,0],[0,0]]); ts.areaCls='area-q'; ts.areaLab=[Send/2,40,'area = Q','#2A6F8E']; }
+    else ts.areaLab=[0.38,100,'vertical line: no area, Q = 0','#6B7B86'];
     pv.points.push({x:e.V,y:e.P,lab:'2'}); ts.points.push({x:pts[pts.length-1].S,y:e.T,lab:'2',dy:p==='adiabatic'?14:-6});
     if (f>0 && f<1){ pv.marker=[s.V,s.P]; ts.marker=[s.S,s.T]; }
   } else { pv.empty='The real path appears once you finish'; ts.empty=''; }
@@ -766,15 +775,20 @@ document.getElementById('playBtn').onclick=startPlay;
 function energyBox(p){
   const E=energies(PROCS[p].a);
   const wd=got(p,'W'), ud=got(p,'dU'), qd=got(p,'Q');
-  const Win=wd?Math.max(0,E.W):null, Wout=wd?Math.max(0,-E.W):null, Qin=qd?Math.max(0,E.Q):null, Qout=qd?Math.max(0,-E.Q):null, dU=ud?E.dU:null;
-  const nums=[Win,Wout,Qin,Qout,dU].filter(x=>x!=null).map(Math.abs), max=Math.max(1,...nums,300);
-  const row=(lab,val,cls)=>{ if (val==null) return `<div class="ebar unk"><span class="elab">${lab}</span><span class="etrack"></span><span class="eval">?</span></div>`;
-    const z=Math.abs(val)<0.05; return `<div class="ebar ${z?'zero':''}"><span class="elab">${lab}</span><span class="etrack"><span class="efill ${cls}" style="width:${(Math.abs(val)/max*100).toFixed(1)}%"></span></span><span class="eval">${z?'0':val.toFixed(1)}</span></div>`; };
-  const n=v=>v==null?'?':(Math.abs(v)<0.05?'0':v.toFixed(1));
-  return row('<i>Q</i><sub>in</sub> (heat in)',Qin,'cold')+row('<i>Q</i><sub>out</sub> (heat out)',Qout,'cold')
-    +row('<i>W</i><sub>in</sub> (work in)',Win,'warm')+row('<i>W</i><sub>out</sub> (work out)',Wout,'warm')
-    +'<div class="esep"></div>'+row('Δ<i>U</i>',dU,'hot')
-    +`<div class="eeq">Δ<i>U</i> = (<i>Q</i><sub>in</sub> − <i>Q</i><sub>out</sub>) + (<i>W</i><sub>in</sub> − <i>W</i><sub>out</sub>)<br>${n(dU)} = (${n(Qin)} − ${n(Qout)}) + (${n(Win)} − ${n(Wout)})</div>`
+  const W=wd?E.W:null, Q=qd?E.Q:null, dU=ud?E.dU:null;
+  const max=Math.max(300,...[W,Q,dU].filter(x=>x!=null).map(Math.abs));
+  const sg=v=>Math.abs(v)<0.05?'0':(v>0?'+':'−')+Math.abs(v).toFixed(1);
+  const row=(lab,val,cls,word)=>{
+    if (val==null) return `<div class="ebar2 unk"><span class="elab">${lab}</span><span class="etrack2"><span class="emid"></span></span><span class="eval">?</span></div><p class="emean"> </p>`;
+    const z=Math.abs(val)<0.05, w=Math.abs(val)/max*50;
+    const bar=z?'':`<span class="efill ${cls}" style="position:absolute;top:0;bottom:0;${val>0?'left:50%':'right:50%'};width:${w.toFixed(1)}%"></span>`;
+    const mean=z?'zero':val>0?'net '+word+' input':'net '+word+' output';
+    return `<div class="ebar2 ${z?'zero':''}"><span class="elab">${lab}</span><span class="etrack2">${bar}<span class="emid"></span></span><span class="eval">${sg(val)}</span></div><p class="emean">${word==='change'?(z?'U unchanged':val>0?'U increases':'U decreases'):mean}</p>`; };
+  const n=v=>v==null?'?':(Math.abs(v)<0.05?'0':(v<0?'(−'+Math.abs(v).toFixed(1)+')':v.toFixed(1)));
+  return '<p class="small muted" style="margin:0 0 4px">Left of centre: negative · right of centre: positive</p>'
+    +row('<i>Q</i>',Q,'cold','heat')+row('<i>W</i>',W,'warm','work')
+    +'<div class="esep"></div>'+row('Δ<i>U</i>',dU,'hot','change')
+    +`<div class="eeq">Δ<i>U</i> = <i>Q</i> + <i>W</i><br>${n(dU)} = ${n(Q)} + ${n(W)}</div>`
     +'<p class="small muted" style="margin:6px 0 0">Values in kJ, for 1 kg of air. Each value appears once you have answered that step.</p>';
 }
 /* overview charts for How it works and Put it together */
@@ -828,34 +842,37 @@ const CARDS=[
     <div class="eq"><i>PV</i> = <i>mRT</i> &nbsp;&nbsp; (the same as <i>PV</i> = <i>nrT</i>, because <i>mR</i> = <i>nr</i>)</div>
     <p>For air, <i>R</i> = 0.287 kJ/kg·K. Use <i>T</i> in kelvin. Upper-case symbols are for the whole mass (<i>V</i>, <i>U</i>, <i>Q</i>, <i>W</i>, <i>C</i><sub>v</sub>); lower-case ones are per kilogram, the <b>specific form</b> (<i>v</i> = <i>V</i>/<i>m</i>, <i>u</i> = <i>U</i>/<i>m</i>, <i>c</i><sub>v</sub> = <i>C</i><sub>v</sub>/<i>m</i>).</p>`},
   {t:'Work = area under the P-V path', b:`<p>The gas pushes on the piston (area <i>A</i>) with a force <i>F</i> = <i>PA</i>. If the piston moves out a small distance d<i>x</i>, the gas does work <i>F</i> d<i>x</i> on it, and the gas volume grows by d<i>V</i> = <i>A</i> d<i>x</i>:</p>${MINI_FDX}
-    <div class="eq"><i>F</i> d<i>x</i> = <i>PA</i> d<i>x</i> = <i>P</i> d<i>V</i></div>
-    <p>Adding up all the small steps gives the <b>work done by the gas</b>, which is the <b>area under the path</b> on a P-V diagram:</p>
-    <div class="eq">work done by the gas = ∫ <i>P</i> d<i>V</i> = <i>W</i><sub>out</sub> − <i>W</i><sub>in</sub></div>${MINI_WORK}
-    <p><b>Expansion</b> (<i>V</i> increases): ∫ <i>P</i> d<i>V</i> is positive. The gas pushes the piston out, so this is <b><i>W</i><sub>out</sub></b>.<br><b>Compression</b> (<i>V</i> decreases): ∫ <i>P</i> d<i>V</i> is negative. The piston pushes the gas in, so its size is <b><i>W</i><sub>in</sub></b>.<br>If the piston does not move, there is no boundary work.</p>`},
-  {t:'The first law (sign convention)', b:`<div class="eq">Δ<i>U</i> = (<i>Q</i><sub>in</sub> − <i>Q</i><sub>out</sub>) + (<i>W</i><sub>in</sub> − <i>W</i><sub>out</sub>)</div>
-    <p>Every <i>Q</i><sub>in</sub>, <i>Q</i><sub>out</sub>, <i>W</i><sub>in</sub> and <i>W</i><sub>out</sub> is a <b>positive number</b> (or zero). You decide the direction from the physics: heat flowing into the gas is <i>Q</i><sub>in</sub>, work done by the gas on the piston is <i>W</i><sub>out</sub>. The signs are already in the equation, so you never have to remember which way is negative. Example: a gas does 50 kJ of work while 80 kJ of heat flows in. Δ<i>U</i> = (80 − 0) + (0 − 50) = 30 kJ.</p>
+    <div class="eq"><i>F</i> d<i>x</i> = <i>PA</i> d<i>x</i> = <i>P</i> d<i>V</i> &nbsp;(work done <b>by</b> the gas)</div>
+    <p>We count work done <b>on</b> the gas as positive, so the work done on the gas is the opposite. Adding up all the small steps:</p>
+    <div class="eq"><i>W</i> = −∫ <i>P</i> d<i>V</i></div>${MINI_WORK}
+    <p>The <b>area under the path</b> on a P-V diagram is the size of <i>W</i>.<br><b>Expansion</b> (d<i>V</i> &gt; 0): <i>W</i> &lt; 0, net work output (the gas pushes the piston out).<br><b>Compression</b> (d<i>V</i> &lt; 0): <i>W</i> &gt; 0, net work input (the piston pushes the gas in).<br>If the piston does not move, <i>W</i> = 0.</p>`},
+  {t:'The first law (sign convention)', b:`<div class="eq">Δ<i>U</i> = <i>Q</i> + <i>W</i></div>
+    <p><i>Q</i> = <i>Q</i><sub>in</sub> − <i>Q</i><sub>out</sub>: if <i>Q</i> &gt; 0 there is a <b>net heat input</b>; if <i>Q</i> &lt; 0, a <b>net heat output</b>.<br>
+    <i>W</i> = <i>W</i><sub>in</sub> − <i>W</i><sub>out</sub>: if <i>W</i> &gt; 0 there is <b>net work done on</b> the system (the gas); if <i>W</i> &lt; 0, <b>net work done by</b> the system.</p>
+    <p>So work out <i>Q</i> and <i>W</i> with their signs, then read the sign to say which way the energy went. Example: a gas does 50 kJ of work while 80 kJ of heat flows in: <i>Q</i> = +80 kJ, <i>W</i> = −50 kJ, Δ<i>U</i> = 80 + (−50) = 30 kJ.</p>
     <p class="small muted">Some textbooks write the first law with a different sign convention. On this page, always use the form above.</p>`},
   {t:'Internal energy of an ideal gas', b:`<p>For an ideal gas, internal energy depends on <b>temperature only</b>. So, for <b>any</b> process:</p>
-    <div class="eq">Δ<i>U</i> = <i>mc</i><sub>v</sub>(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>) = <i>C</i><sub>v</sub>Δ<i>T</i></div>
+    <div class="eq">Δ<i>U</i> = <i>C</i><sub>v</sub>(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>) &nbsp;&nbsp; with <i>C</i><sub>v</sub> = <i>mc</i><sub>v</sub></div>
     <p>Always <i>c</i><sub>v</sub>, even at constant pressure. For air, <i>c</i><sub>v</sub> = 0.718 and <i>c</i><sub>p</sub> = <i>c</i><sub>v</sub> + <i>R</i> = 1.005 kJ/kg·K, and γ = <i>c</i><sub>p</sub>/<i>c</i><sub>v</sub> = 1.4. If <i>T</i> does not change, Δ<i>U</i> = 0.</p>`},
   {t:'Polytropic processes', b:`<p>Many processes follow</p><div class="eq"><i>PV</i><sup><i>a</i></sup> = constant &nbsp;&nbsp; so &nbsp;&nbsp; <i>P</i><sub>1</sub><i>V</i><sub>1</sub><sup><i>a</i></sup> = <i>P</i><sub>2</sub><i>V</i><sub>2</sub><sup><i>a</i></sup></div>
     <table class="atab"><thead><tr><th class="nocase"><i>a</i></th><th>Process</th><th>What stays fixed</th></tr></thead><tbody>
       <tr><td>0</td><td>isobaric</td><td>pressure</td></tr><tr><td>1</td><td>isothermal</td><td>temperature</td></tr>
       <tr><td>γ = 1.4 (air)</td><td>adiabatic</td><td>no heat transfer</td></tr><tr><td>±∞</td><td>isochoric</td><td>volume</td></tr></tbody></table>
-    <p>The work done by the gas, ∫ <i>P</i> d<i>V</i>, for <i>a</i> ≠ 1:</p><div class="eq"><i>W</i><sub>out</sub> − <i>W</i><sub>in</sub> = (<i>P</i><sub>1</sub><i>V</i><sub>1</sub> − <i>P</i><sub>2</sub><i>V</i><sub>2</sub>) / (<i>a</i> − 1)</div>
-    <p>Positive in an expansion (work out), negative in a compression (its size is the work in). In this activity you take each process in turn and work out where Δ<i>U</i>, the heat and the work come from.</p>`},
+    <p>The work, for <i>a</i> ≠ 1:</p><div class="eq"><i>W</i> = −∫ <i>P</i> d<i>V</i> = (<i>P</i><sub>2</sub><i>V</i><sub>2</sub> − <i>P</i><sub>1</sub><i>V</i><sub>1</sub>) / (<i>a</i> − 1)</div>
+    <p>Negative in an expansion (net work output), positive in a compression (net work input). In this activity you take each process in turn and work out Δ<i>U</i>, <i>Q</i> and <i>W</i>, with their signs.</p>`},
   {t:'Reading a T-S diagram', b:`<p><i>S</i> is <b>entropy</b>. You do not need to calculate it here; just read the diagram like this, for a reversible process:</p>
     <p>• Heat flows <b>in</b> → <i>S</i> increases: the path moves to the <b>right</b>.<br>• Heat flows <b>out</b> → the path moves to the <b>left</b>.<br>• <b>No heat</b> → <i>S</i> stays the same: a <b>vertical</b> line.<br>• Constant temperature → a <b>horizontal</b> line.</p>
     <p>For a reversible process, the <b>area under the path</b> on a T-S diagram is the size of the heat transfer, just as the area under a P-V path is the size of the work:</p>
-    <div class="eq">heat into the gas = ∫ <i>T</i> d<i>S</i> = <i>Q</i><sub>in</sub> − <i>Q</i><sub>out</sub></div>${MINI_TS}
-    <p>Moving right (<i>S</i> increases): the area is <i>Q</i><sub>in</sub>. Moving left: the area is <i>Q</i><sub>out</sub>.</p>
+    <div class="eq"><i>Q</i> = ∫ <i>T</i> d<i>S</i></div>${MINI_TS}
+    <p>Moving right (<i>S</i> increases): <i>Q</i> &gt; 0, net heat input. Moving left: <i>Q</i> &lt; 0, net heat output.</p>
     <p>So the T-S diagram shows heat at a glance, the way the P-V diagram shows work.</p>`}
 ];
 const QUIZ=[
   {q:'1 kg of air is at 100 kPa and 300 K (R = 0.287 kJ/kg·K). What is its volume?', o:{A:'0.861 m³',B:'861 m³',C:'0.000861 m³',D:'0.287 m³'}, a:'A',
    e:'V = mRT/P = 1 × 0.287 × 300 / 100 = 0.861 m³ (kPa × m³ = kJ).'},
-  {q:'A gas expands and pushes a piston out. Using ΔU = (Q_in − Q_out) + (W_in − W_out), which work term is not zero?', o:{A:'W_in',B:'W_out',C:'Both',D:'Neither'}, a:'B',
-   e:'The gas pushes the piston, so the gas does work: W_out. W_in = 0.'},
+  {q:'A gas expands and pushes a piston out. With W = −∫P dV, which is true?', o:{A:'W > 0: net work done on the gas',B:'W < 0: net work done by the gas',C:'W = 0',D:'It depends on the heat transfer'}, a:'B',
+   e:'In an expansion dV > 0, so W = −∫P dV < 0: net work done by the gas on the piston.'},
+
   {q:'On a P-V diagram, what tells you the boundary work of a process?', o:{A:'The slope of the path',B:'The area under the path, down to P = 0',C:'The height of the end point',D:'The area to the left of the path'}, a:'B',
    e:'Boundary work is ∫P dV, the area under the path.'},
   {q:'1 kg of air (c_v = 0.718 kJ/kg·K) warms from 300 K to 400 K at constant pressure. What is ΔU?', o:{A:'71.8 kJ',B:'100.5 kJ',C:'0',D:'28.7 kJ'}, a:'A',
@@ -990,8 +1007,9 @@ function renderSecEnd(p){
   if (p==='final'){ box.innerHTML=`<div class="hint good done-banner">All done. Scroll down to send your results.</div>`; renderSend(); return; }
   const idx=PROC_IDS.indexOf(p), E=energies(PROCS[p].a);
   const fmt=v=>Math.abs(v)<0.05?'0':Math.abs(v).toFixed(1)+' kJ';
-  const w=E.W>0.05?'W_in = '+fmt(E.W):E.W<-0.05?'W_out = '+fmt(E.W):'no work';
-  const q=E.Q>0.05?'Q_in = '+fmt(E.Q):E.Q<-0.05?'Q_out = '+fmt(E.Q):'no heat';
+  const sg=v=>Math.abs(v)<0.05?'0':(v>0?'+':'−')+Math.abs(v).toFixed(1)+' kJ';
+  const w='W = '+sg(E.W);
+  const q='Q = '+sg(E.Q);
   box.innerHTML=`<div class="hint good done-banner"><b>${PROCS[p].name} finished.</b> With the numbers for 1 kg of air: ${subs(w)}, ΔU = ${E.dU.toFixed(1)} kJ, ${subs(q)}. Press <b>Play the process</b> in the side panel to watch it.
     <button class="btn small" type="button" style="margin-left:8px">${idx<3?'Next: '+PROCS[PROC_IDS[idx+1]].name.toLowerCase()+' →':'Put it together →'}</button></div>`;
   box.querySelector('button').onclick=()=>goTab(TAB_PROC.indexOf(p)+1);
@@ -999,14 +1017,14 @@ function renderSecEnd(p){
 
 /* ---------- Put it together ---------- */
 const EXPR={
-  isochoric:{W:'No work',dU:'mc_v(T₂ − T₁)',Q:'Q_in = mc_v(T₂ − T₁)'},
-  isobaric:{W:'W_out = P(V₂ − V₁)',dU:'mc_v(T₂ − T₁)',Q:'Q_in = mc_p(T₂ − T₁)'},
-  isothermal:{W:'W_out = mRT ln(V₂/V₁)',dU:'0',Q:'Q_in = W_out = mRT ln(V₂/V₁)'},
-  adiabatic:{W:'W_out = (P₁V₁ − P₂V₂)/(γ − 1)',dU:'mc_v(T₂ − T₁), negative',Q:'No heat'}
+  isochoric:{W:'0',dU:'C_v(T₂ − T₁) > 0',Q:'C_v(T₂ − T₁) > 0'},
+  isobaric:{W:'−P(V₂ − V₁) < 0',dU:'C_v(T₂ − T₁) > 0',Q:'C_p(T₂ − T₁) > 0'},
+  isothermal:{W:'mRT ln(V₁/V₂) < 0',dU:'0',Q:'−W = mRT ln(V₂/V₁) > 0'},
+  adiabatic:{W:'(P₂V₂ − P₁V₁)/(γ − 1) < 0',dU:'C_v(T₂ − T₁) < 0',Q:'0'}
 };
 function renderFinal(main){
   const fmt=v=>Math.abs(v)<0.05?'0':v.toFixed(1);
-  const dir=(sym,v)=>Math.abs(v)<0.05?`${sym}<sub>in</sub> = ${sym}<sub>out</sub> = 0`:v>0?`${sym}<sub>in</sub> = ${v.toFixed(1)} kJ`:`${sym}<sub>out</sub> = ${(-v).toFixed(1)} kJ`;
+  const dir=(sym,v)=>Math.abs(v)<0.05?`${sym} = 0`:`${sym} = ${v>0?'+':'−'}${Math.abs(v).toFixed(1)} kJ (${v>0?'net '+(sym==='W'?'work':'heat')+' input':'net '+(sym==='W'?'work':'heat')+' output'})`;
   const mark=(p,k)=>{ const r=got(p,k); return r?`<span class="status ${r.status}" style="margin:0;font-size:11px;padding:1px 7px">${r.status==='first'?'✓':r.status==='retry'?'↻':'shown'}</span>`:''; };
   const rows=PROC_IDS.map(p=>{ const E=energies(PROCS[p].a), X=EXPR[p];
     return `<tr><td><b>${PROCS[p].name}</b><span class="num">${PROCS[p].aTxt}</span></td>
@@ -1017,8 +1035,8 @@ function renderFinal(main){
   main.innerHTML=`
     <div class="card"><h2>Your Four Processes Table</h2>
       <p class="lead">For an ideal gas in a closed system. The numbers are for 1 kg of air starting at 100 kPa and 300 K. ✓ = right first time, ↻ = after a retry.</p>
-      <div class="ptable-wrap"><table class="sum-table"><thead><tr><th>Process</th><th>Work</th><th style="text-transform:none">Δ<i>U</i></th><th>Heat</th><th>P-V</th><th>T-S</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <p class="small muted" style="margin-top:8px">Check every row with Δ<i>U</i> = (<i>Q</i><sub>in</sub> − <i>Q</i><sub>out</sub>) + (<i>W</i><sub>in</sub> − <i>W</i><sub>out</sub>). The grey line under each expression gives its value for 1 kg of air. The side panel shows all four paths on one P-V and one T-S diagram.</p></div>
+      <div class="ptable-wrap"><table class="sum-table"><thead><tr><th>Process</th><th style="text-transform:none"><i>W</i> = −∫<i>P</i> d<i>V</i></th><th style="text-transform:none">Δ<i>U</i></th><th style="text-transform:none"><i>Q</i></th><th>P-V</th><th>T-S</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="small muted" style="margin-top:8px">Check every row with Δ<i>U</i> = <i>Q</i> + <i>W</i>. The grey line under each expression gives its value for 1 kg of air. The side panel shows all four paths on one P-V and one T-S diagram.</p></div>
     <div class="card" style="margin-top:14px"><h2>One family: slide through a</h2>
       <p class="lead">Every process here is <i>PV</i><sup><i>a</i></sup> = constant. Move the slider to see the path for an expansion to 2<i>V</i><sub>1</sub> sweep between the cases (black line in the side panel). Nothing here is recorded.</p>
       <div class="slider-row"><span class="aval" id="aval"></span><input type="range" id="aslide" min="0" max="3" step="0.01" value="1.4" aria-label="polytropic exponent a"></div>
@@ -1031,8 +1049,8 @@ function renderFinal(main){
   const sl=document.getElementById('aslide');
   const upd=()=>{ const a=+sl.value, E=energies(a);
     document.getElementById('aval').textContent='a = '+a.toFixed(2);
-    const w=E.W<-0.05?`W<sub>out</sub> = ${(-E.W).toFixed(1)} kJ`:E.W>0.05?`W<sub>in</sub> = ${E.W.toFixed(1)} kJ`:'no work';
-    const q=E.Q>0.05?`Q<sub>in</sub> = ${E.Q.toFixed(1)} kJ`:E.Q<-0.05?`Q<sub>out</sub> = ${(-E.Q).toFixed(1)} kJ`:'no heat';
+    const sg=v=>Math.abs(v)<0.05?'0':(v>0?'+':'−')+Math.abs(v).toFixed(1)+' kJ';
+    const w=`<i>W</i> = ${sg(E.W)}`, q=`<i>Q</i> = ${sg(E.Q)}`;
     document.getElementById('aread').innerHTML=`${w}, &nbsp; Δ<i>U</i> = ${E.dU.toFixed(1)} kJ, &nbsp; ${q} &nbsp; (<i>T</i><sub>2</sub> = ${E.end.T.toFixed(0)} K)`;
     document.getElementById('anote').textContent = a<1-0.005 ? 'Between isobaric and isothermal: the gas warms up as it expands, so it needs a lot of heat.'
       : a<1+0.005 ? 'Isothermal: ΔU = 0, all the heat leaves as work.'
