@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polytropic Processes · Guided activity</title>
+<script>
+/* Paste the Microsoft Form pre-filled link between the quotes (see the set-up notes). */
+window.FORM_URL = "";
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cold:#2A6F8E; --hot:#BC4A2B; --warm:#DE9127; --bg:#EDF1F3;
+  --ink:#14232D; --ink2:#41525D; --muted:#6B7B86; --line:#D3DBE0;
+  --card:#FFFFFF; --soft:#F6F8F9; --ok:#2E7D5B; --okbg:#E6F2EC; --badbg:#F8E9E4; --warnbg:#FBF1E1;
+  --radius:12px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3,h4{font-family:"Space Grotesk",Inter,sans-serif;line-height:1.2;margin:0}
+sub,sup{font-size:.72em}
+button{font:inherit;cursor:pointer}
+input,select{font:inherit}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+header.top{background:var(--ink);color:#fff;padding:22px 0 20px}
+.eyebrow{font:600 12px/1 "Space Grotesk",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#9CC3D5;margin-bottom:8px}
+header.top h1{font-size:30px;font-weight:700;letter-spacing:-.01em}
+header.top .sub{margin:6px 0 0;color:#C9D6DD;font-size:15px}
+nav.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:18px 0 0}
+nav.tabs button{background:rgba(255,255,255,.08);color:#DCE6EB;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:7px 14px;font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+nav.tabs button .n{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.14);font-size:12px}
+nav.tabs button.on{background:#fff;color:var(--ink);border-color:#fff}
+nav.tabs button.on .n{background:var(--cold);color:#fff}
+nav.tabs button.done .n{background:var(--ok);color:#fff}
+nav.tabs button:disabled{opacity:.45;cursor:not-allowed}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:20px;padding:20px 0 40px;align-items:start}
+.side{position:sticky;top:12px;display:flex;flex-direction:column;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
+.card h2{font-size:21px;margin-bottom:6px}
+.card h3{font-size:16px;margin-bottom:6px}
+.lead{color:var(--ink2);margin:6px 0 0}
+.panel-title{font:600 12px/1 "Space Grotesk",sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.vis{padding:12px 14px}
+.given{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--cold);border-radius:var(--radius);padding:12px 16px;font-size:13.5px}
+.given h4{font-size:14px;margin-bottom:6px;color:var(--cold)}
+.given dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0}
+.given dt{color:var(--muted)}
+.given dd{margin:0;font-weight:600}
+.given .assume{margin:8px 0 0;color:var(--ink2);font-size:12.5px}
+.btn{background:var(--cold);color:#fff;border:0;border-radius:8px;padding:9px 16px;font-weight:600}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--cold);border:1.5px solid var(--cold)}
+.btn.small{padding:6px 12px;font-size:13.5px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.hint{border-radius:8px;padding:9px 12px;margin-top:10px;font-size:14px}
+.hint.bad{background:var(--badbg);border-left:3px solid var(--hot)}
+.hint.good{background:var(--okbg);border-left:3px solid var(--ok)}
+.hint.info{background:var(--warnbg);border-left:3px solid var(--warm)}
+.eq{font-family:"Cambria Math","STIX Two Math","Times New Roman",serif;font-size:16.5px;background:var(--soft);border-radius:8px;padding:8px 12px;margin:8px 0;overflow-x:auto;white-space:nowrap}
+.locked{opacity:.5;pointer-events:none;filter:grayscale(.3)}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.hidden{display:none !important}
+@media (max-width:980px){ .layout{grid-template-columns:minmax(0,1fr)} .side{position:static} }
+@media (max-width:520px){ .wrap{padding:0 16px} header.top h1{font-size:25px} .card{padding:15px 15px} }
+
+/* drawings */
+.pic-svg,.chart-svg{width:100%;height:auto;display:block}
+.pic-svg .wall{stroke:#41525D;stroke-width:3;stroke-linecap:round}
+.pic-svg .base{fill:#5B6A74}
+.pic-svg .piston{fill:#9AA6AE;stroke:#5B6A74;stroke-width:1}
+.pic-svg .ring{stroke:#5B6A74;stroke-width:1}
+.pic-svg .lab{font-size:11px;fill:var(--ink2)}
+.pic-svg .sym{font:italic 700 14px "Cambria Math","Times New Roman",serif;paint-order:stroke;stroke:#fff;stroke-width:3px}
+.pic-svg .gas-lab{font:600 12px Inter,sans-serif;fill:var(--ink);opacity:.75}
+.cylctl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
+.readout{font-size:12.5px;color:var(--ink2);margin-top:6px;font-variant-numeric:tabular-nums}
+.readout b{color:var(--ink)}
+.chart-svg .grid{stroke:#E7ECEF}
+.chart-svg .axis{stroke:#9AA6AE}
+.chart-svg .tick{font-size:10px;fill:var(--muted)}
+.chart-svg .axlab{font-size:11px;fill:var(--ink2)}
+.chart-svg .path{fill:none;stroke:var(--hot);stroke-width:2.4;stroke-linejoin:round}
+.chart-svg .p-isochoric{fill:none;stroke:#7A4FA0;stroke-width:2.2}
+.chart-svg .p-isobaric{fill:none;stroke:var(--warm);stroke-width:2.2}
+.chart-svg .p-isothermal{fill:none;stroke:var(--cold);stroke-width:2.2}
+.chart-svg .p-adiabatic{fill:none;stroke:var(--hot);stroke-width:2.2}
+.chart-svg .p-general{fill:none;stroke:var(--ink);stroke-width:2.6}
+.chart-svg .p-faint{fill:none;stroke:#C9D2D8;stroke-width:1.4;stroke-dasharray:4 3}
+.chart-svg .area{fill:var(--warm);fill-opacity:.22}
+.chart-svg .pt{fill:var(--ink)}
+.chart-svg .pt-lab{font-size:11.5px;fill:var(--ink);font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:3px}
+.chart-svg .lab-c{font-size:10.5px;font-weight:600;paint-order:stroke;stroke:#fff;stroke-width:3px}
+.chart-svg .marker{fill:#fff;stroke:var(--hot);stroke-width:2.4}
+.chart-svg .empty{font-size:12px;fill:var(--muted)}
+.ebar{display:grid;grid-template-columns:112px 1fr 62px;align-items:center;gap:8px;font-size:13px;margin:5px 0}
+.ebar .elab{color:var(--ink2)}
+.ebar .etrack{height:12px;border-radius:6px;background:var(--soft);border:1px solid #E3E9EC;overflow:hidden}
+.ebar .efill{display:block;height:100%;border-radius:6px}
+.efill.warm{background:var(--warm)} .efill.cold{background:var(--cold)} .efill.hot{background:var(--hot)}
+.ebar .eval{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.ebar.zero .eval,.ebar.zero .elab{color:var(--muted);font-weight:400}
+.ebar.unk .eval{color:var(--muted)}
+.esep{border-top:1px solid var(--line);margin:8px 0 4px}
+.eeq{font-family:"Cambria Math","STIX Two Math","Times New Roman",serif;font-size:14.5px;background:var(--soft);border-radius:8px;padding:7px 10px;margin-top:8px;overflow-x:auto;white-space:nowrap}
+
+/* guided */
+.story{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+.story .chip{width:44px;height:44px;border-radius:10px;background:var(--ink);display:grid;place-items:center;color:#fff;font:700 13px "Space Grotesk",Inter,system-ui,sans-serif}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.hcard{border:1px solid var(--line);border-radius:10px;background:var(--soft);overflow:hidden}
+.hcard>button{width:100%;text-align:left;background:none;border:0;padding:12px 14px;display:flex;align-items:center;gap:10px;font:600 15px "Space Grotesk",sans-serif;color:var(--ink)}
+.hcard>button .ic{width:26px;height:26px;border-radius:50%;background:#fff;border:1.5px solid var(--line);display:grid;place-items:center;font-size:13px;flex:none;color:var(--muted)}
+.hcard.seen>button .ic{background:var(--ok);border-color:var(--ok);color:#fff}
+.hcard>button .chev{margin-left:auto;color:var(--muted);transition:transform .2s}
+.hcard.open>button .chev{transform:rotate(90deg)}
+.hcard .body{display:none;padding:0 14px 14px;font-size:14.5px;color:var(--ink2)}
+.hcard.open{grid-column:1 / -1;background:#fff}
+.hcard.open .body{display:block}
+table.atab{border-collapse:collapse;font-size:14px;margin:6px 0}
+table.atab td,table.atab th{padding:4px 10px;border-bottom:1px solid var(--line);text-align:left}
+table.atab th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.mini-svg{width:100%;max-width:340px;height:auto;display:block;margin:6px 0}
+.progress-note{margin-top:12px;font-size:14px;color:var(--muted)}
+.quiz{margin-top:16px;display:flex;flex-direction:column;gap:12px}
+.q{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:#fff}
+.q .qt{font-weight:600;margin-bottom:10px}
+.opts{display:grid;gap:7px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;background:var(--soft);border:1.5px solid var(--line);border-radius:8px;padding:8px 12px;color:var(--ink)}
+.opt b{font-family:"Space Grotesk",Inter,system-ui,sans-serif;color:var(--cold);min-width:14px}
+.opt:hover:not(:disabled){border-color:var(--cold)}
+.opt.picked-bad{border-color:var(--hot);background:var(--badbg)}
+.opt.picked-good{border-color:var(--ok);background:var(--okbg)}
+.opt.is-answer{border-color:var(--ok)}
+.opt:disabled{cursor:default}
+.step{border:1px solid var(--line);border-radius:10px;background:#fff;padding:14px 16px;margin-top:12px}
+.step-h{display:flex;align-items:center;gap:10px}
+.step-h .num{width:26px;height:26px;border-radius:50%;background:var(--cold);color:#fff;display:grid;place-items:center;font:700 13px "Space Grotesk",Inter,system-ui,sans-serif;flex:none}
+.step-h h3{font-size:16px;margin:0}
+.status{margin-left:auto;font-size:12.5px;font-weight:600;border-radius:999px;padding:3px 10px}
+.status.first{background:var(--okbg);color:var(--ok)}
+.status.retry{background:var(--warnbg);color:#9A5F0E}
+.status.revealed{background:var(--badbg);color:var(--hot)}
+.step.done .step-h .num{background:var(--ok)}
+.step .why{margin:8px 0 0;color:var(--ink2);font-size:14.5px}
+details.derive{margin-top:8px;border:1px dashed var(--line);border-radius:8px;padding:6px 12px;background:#FCFDFD;font-size:14px;color:var(--ink2)}
+details.derive summary{cursor:pointer;font-weight:600;color:var(--cold)}
+details.derive p{margin:6px 0}
+.done-banner{margin-top:14px}
+.lockmsg{background:var(--soft);border:1px dashed var(--line);border-radius:10px;padding:12px 14px;color:var(--muted);margin-top:14px;font-size:14px}
+.sum-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+.sum-table td,.sum-table th{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.sum-table th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.sum-table .num{font-size:12px;color:var(--muted);display:block;font-variant-numeric:tabular-nums}
+.sum-table svg{width:84px;height:auto;display:block}
+.sum-table td:nth-child(2),.sum-table td:nth-child(3),.sum-table td:nth-child(4){min-width:130px}
+.ptable-wrap{overflow-x:auto}
+.idrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.idrow input{width:160px;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px}
+footer.foot{padding:0 0 30px;font-size:13px;color:var(--muted)}
+footer.foot button{background:none;border:0;color:var(--muted);text-decoration:underline;padding:0}
+.case-note{padding:0 0 18px}
+.case-note h3{font-size:16px;margin-bottom:6px}
+.case-note p{margin:6px 0 0;font-size:14px;color:var(--ink2)}
+.case-note .credit{margin-top:12px;font-size:13px;color:var(--muted)}
+.tag{font:600 13px "Space Grotesk",sans-serif;color:var(--cold);background:#E4EFF4;border-radius:999px;padding:3px 10px;margin-left:8px;vertical-align:middle}
+.slider-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.slider-row input[type=range]{flex:1;min-width:180px;accent-color:var(--cold)}
+.slider-row .aval{font:700 16px "Space Grotesk",sans-serif;min-width:80px}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.presets button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:4px 10px;font-size:13px;color:var(--ink2)}
+.presets button:hover{border-color:var(--cold)}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2);margin-top:6px}
+.legend span::before{content:'';display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle;background:var(--c)}
+/* sketch pads */
+.pad{margin-top:10px}
+.pad svg{width:100%;max-width:440px;height:auto;display:block;background:#fff;border-radius:8px;border:1px solid #E3E9EC;touch-action:none;cursor:crosshair;user-select:none;-webkit-user-select:none}
+.pad.done svg{cursor:default}
+.pad .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.pad svg .axis{stroke:#41525D;stroke-width:1.6}
+.pad svg .axlab{font:italic 700 15px "Cambria Math","Times New Roman",serif;fill:var(--ink)}
+.pad svg .guide{stroke:#9AA6AE;stroke-width:1.2;stroke-dasharray:5 4}
+.pad svg .guide-lab{font-size:11px;fill:var(--muted)}
+.pad svg .ref{fill:none;stroke:var(--cold);stroke-width:1.6;stroke-dasharray:6 4}
+.pad svg .ref-lab{font-size:11px;fill:var(--cold);font-weight:600;paint-order:stroke;stroke:#fff;stroke-width:3px}
+.pad svg .pt{fill:var(--ink)}
+.pad svg .pt-ring{fill:none;stroke:var(--ink);stroke-width:1.2;stroke-dasharray:2 2}
+.pad svg .pt-lab{font-size:12px;font-weight:700;fill:var(--ink);paint-order:stroke;stroke:#fff;stroke-width:3px}
+.pad svg .ink{fill:none;stroke:#14232D;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.pad svg .ink.old{stroke:#9AA6AE;stroke-width:2.2}
+.pad svg .ans{fill:none;stroke:var(--hot);stroke-width:2.8;stroke-linecap:round}
+.pad svg .startmsg{font-size:12px;fill:var(--muted)}
+@media (max-width:620px){ .cards,.two{grid-template-columns:1fr} .ebar{grid-template-columns:100px 1fr 56px} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">Thermal Systems</div>
+    <h1>Polytropic Processes</h1>
+    <p class="sub">Guided activity · Four ways to heat or expand a gas in a cylinder: where ΔU, Q and W come from, and how to sketch each one</p>
+    <nav class="tabs" id="tabs"></nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="layout">
+    <main id="main"></main>
+    <aside class="side">
+      <div class="given" id="given"></div>
+      <div class="card vis" id="picCard">
+        <p class="panel-title" id="picTitle">The cylinder</p>
+        <div id="picBox"></div>
+        <div class="cylctl">
+          <button class="btn small" id="playBtn" type="button">▶ Play the process</button>
+          <span class="small muted" id="playNote"></span>
+        </div>
+        <div class="readout" id="readout"></div>
+      </div>
+      <div class="card vis" id="chartCard">
+        <p class="panel-title">P-V and T-S diagrams (with numbers)</p>
+        <div id="pvBox"></div>
+        <div id="tsBox" style="margin-top:8px"></div>
+      </div>
+      <div class="card vis" id="energyCard">
+        <p class="panel-title">Energy balance</p>
+        <div id="energyBox"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+<section class="case-note"><div class="wrap"><div class="card">
+  <h3>About this simulator</h3>
+  <p>The gas is 1 kg of air, treated as an ideal gas with constant specific heats: <i>R</i> = 0.287 kJ/kg·K, <i>c</i><sub>v</sub> = 0.718 kJ/kg·K, <i>c</i><sub>p</sub> = 1.005 kJ/kg·K and γ = <i>c</i><sub>p</sub>/<i>c</i><sub>v</sub> = 1.4. Each process is quasi-equilibrium and reversible, and kinetic and potential energy changes are neglected. <i>PV</i> = <i>mRT</i> is the same as <i>PV</i> = <i>nrT</i>, because <i>mR</i> = <i>nr</i>. Lower-case symbols are per kilogram; upper-case symbols are for the whole mass (for example <i>C</i><sub>v</sub> = <i>mc</i><sub>v</sub>).</p>
+  <p>Sign convention: Δ<i>U</i> = <i>Q</i> + <i>W</i> = (<i>Q</i><sub>in</sub> − <i>Q</i><sub>out</sub>) + (<i>W</i><sub>in</sub> − <i>W</i><sub>out</sub>). Every <i>Q</i><sub>in</sub>, <i>Q</i><sub>out</sub>, <i>W</i><sub>in</sub> and <i>W</i><sub>out</sub> is a positive number; the signs are in the equation. Some textbooks use a different sign convention, so check which one a formula assumes before you use it.</p>
+  <p class="credit">This simulation was built with Claude.</p>
+</div></div></section>
+<footer class="foot"><div class="wrap">Your answers are saved in this browser until you send them. <button id="resetBtn" type="button">Clear my answers and start again</button></div></footer>
+
+<script>
+/* ============================================================
+   Model: 1 kg of air, ideal gas, constant specific heats.
+   State 1: P1 = 100 kPa, T1 = 300 K, V1 = mRT1/P1 = 0.861 m³.
+   Isochoric heating to T2 = 600 K; the three expansions to V2 = 2V1.
+   W_in − W_out = −∫P dV ; ΔU = m c_v (T2 − T1) ;
+   Q_in − Q_out = ΔU − (W_in − W_out) ; S − S1 = m[c_v ln(T/T1) + R ln(V/V1)].
+   (γ is taken as 1 + R/c_v = 1.3997 inside the calculations so that the
+   adiabatic numbers balance exactly; it is shown as 1.4.)
+============================================================ */
+const M=1, R=0.287, CV=0.718, CP=1.005, GAM=1+R/CV;
+const P1=100, T1=300, V1=M*R*T1/P1;
+const PROC_IDS=['isochoric','isobaric','isothermal','adiabatic'];
+/* a polytropic expansion to V2 = 2V1 (a finite), or isochoric heating to 600 K (a = Infinity) */
+function procPath(a, f){
+  if (!isFinite(a)){ const T=T1*(1+f); const V=V1; return { V, T, P:M*R*T/V, S:M*CV*Math.log(T/T1) }; }
+  const V=V1*(1+f), P=P1*Math.pow(V1/V,a), T=P*V/(M*R);
+  const S = Math.abs(a-1.4)<1e-9 ? 0 : M*(CV*Math.log(T/T1)+R*Math.log(V/V1));
+  return { V, P, T, S };
+}
+function aEff(a){ return Math.abs(a-1.4)<1e-9 ? GAM : a; }
+function energies(a){
+  if (!isFinite(a)){ const e=procPath(a,1); const dU=M*CV*(e.T-T1); return { W:0, dU, Q:dU, end:e }; }
+  const ae=aEff(a), V2=2*V1, P2=P1*Math.pow(V1/V2,ae), T2=P2*V2/(M*R);
+  const W = Math.abs(ae-1)<1e-9 ? -M*R*T1*Math.log(V2/V1) : (P2*V2-P1*V1)/(ae-1);   /* W = W_in − W_out */
+  const dU=M*CV*(T2-T1);
+  return { W, dU, Q:dU-W, end:{V:V2,P:P2,T:T2} };
+}
+const PROCS={
+  isochoric:{ name:'Isochoric heating', a:Infinity, aTxt:'a = ±∞', short:'Isochoric',
+    how:'The piston is pinned so it cannot move. A heater under the cylinder warms the air from 300 K to 600 K.',
+    end:'Heated until <i>T</i><sub>2</sub> = 600 K; the piston cannot move' },
+  isobaric:{ name:'Isobaric expansion', a:0, aTxt:'a = 0', short:'Isobaric',
+    how:'A free piston carries a fixed weight, so the pressure of the air stays the same. A heater warms the air and it expands to twice its volume.',
+    end:'Expands to <i>V</i><sub>2</sub> = 2<i>V</i><sub>1</sub> with a fixed weight on the piston' },
+  isothermal:{ name:'Isothermal expansion', a:1, aTxt:'a = 1', short:'Isothermal',
+    how:'The cylinder sits in a large water bath at 300 K. The piston moves out slowly to twice the volume, and heat flows in from the bath so the temperature stays at 300 K.',
+    end:'Expands slowly to <i>V</i><sub>2</sub> = 2<i>V</i><sub>1</sub> in a water bath at 300 K' },
+  adiabatic:{ name:'Adiabatic expansion', a:1.4, aTxt:'a = γ = 1.4', short:'Adiabatic',
+    how:'The cylinder is wrapped in insulation, so no heat can flow in or out. The piston moves out to twice the volume.',
+    end:'Expands to <i>V</i><sub>2</sub> = 2<i>V</i><sub>1</sub>, insulated (no heat transfer)' }
+};
+
+/* ============================================================
+   Shared drawing helpers
+============================================================ */
+const NS='http://www.w3.org/2000/svg';
+const el=(tag,attrs,parent)=>{ const e=document.createElementNS(NS,tag); for (const k in attrs) e.setAttribute(k,attrs[k]); if (parent) parent.appendChild(e); return e; };
+const REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const subs=s=>String(s).replace(/([A-Za-zΔ])_([a-z][a-z,]*)/g,'$1<sub>$2</sub>');
+function tempColor(T, lo, hi){
+  let f=(T-lo)/Math.max(hi-lo,1e-6); f=Math.max(0,Math.min(1,f));
+  const c=[[0x2A,0x6F,0x8E],[0xDE,0x91,0x27],[0xBC,0x4A,0x2B]];
+  const seg=f<0.5?0:1, u=f<0.5?f*2:(f-0.5)*2, a=c[seg], b=c[seg+1];
+  return 'rgb('+a.map((v,i)=>Math.round(v+u*(b[i]-v))).join(',')+')';
+}
+function arrow(parent, x1,y1,x2,y2, color, w){
+  const ang=Math.atan2(y2-y1,x2-x1), L=8, g=el('g',{},parent);
+  el('line',{x1,y1,x2:x2-Math.cos(ang)*L*0.6,y2:y2-Math.sin(ang)*L*0.6,stroke:color,'stroke-width':w||3,'stroke-linecap':'round'},g);
+  el('polygon',{points:`${x2},${y2} ${x2-L*Math.cos(ang-0.45)},${y2-L*Math.sin(ang-0.45)} ${x2-L*Math.cos(ang+0.45)},${y2-L*Math.sin(ang+0.45)}`,fill:color},g);
+  return g;
+}
+
+/* ---------- physical picture: vertical cylinder, piston on top ---------- */
+const PIC=(function(){
+  const X0=140, X1=240, BASE=200, H0=62, PT=16, DOTR=2.6, NDOT=30;
+  let host=null, proc=null, svg=null, g={}, dots=[], st={hf:1,T:300,showQ:false}, raf=0, lastT=0;
+  function geom(){ const Hg=H0*st.hf; return { gTop:BASE-Hg, gBot:BASE, Hg, pTop:BASE-Hg-PT, pBot:BASE-Hg }; }
+  function mount(h, p){
+    if (host===h && proc===p && svg && h.contains(svg)) return;
+    host=h; proc=p; h.innerHTML='';
+    svg=el('svg',{viewBox:'0 0 380 250',class:'pic-svg',role:'img'},h);
+    svg.setAttribute('aria-label','Piston-cylinder for '+PROCS[p].name);
+    if (p==='isothermal'){ el('rect',{x:70,y:96,width:240,height:132,rx:6,fill:'#D6E8F0',stroke:'#9CC3D5'},svg);
+      const t=el('text',{x:76,y:222,class:'lab'},svg); t.textContent='water bath, 300 K'; }
+    if (p==='adiabatic'){ el('rect',{x:X0-16,y:30,width:16,height:BASE+12-30,fill:'#F1E3C8',stroke:'#C9AE7C'},svg); el('rect',{x:X1,y:30,width:16,height:BASE+12-30,fill:'#F1E3C8',stroke:'#C9AE7C'},svg);
+      el('rect',{x:X0-16,y:BASE+12,width:X1-X0+32,height:14,fill:'#F1E3C8',stroke:'#C9AE7C'},svg);
+      const t=el('text',{x:X1+22,y:120,class:'lab'},svg); t.textContent='insulation'; }
+    g.gas=el('rect',{x:X0,width:X1-X0,fill:'#2A6F8E','fill-opacity':.2},svg);
+    g.dots=el('g',{},svg);
+    g.gasLab=el('text',{x:(X0+X1)/2,'text-anchor':'middle',class:'gas-lab'},svg); g.gasLab.textContent='air';
+    el('line',{x1:X0,y1:24,x2:X0,y2:BASE+2,class:'wall'},svg); el('line',{x1:X1,y1:24,x2:X1,y2:BASE+2,class:'wall'},svg);
+    el('rect',{x:X0-6,y:BASE,width:X1-X0+12,height:12,rx:2,class:'base'},svg);
+    if (p==='isochoric'||p==='isobaric'){
+      let d=`M${X0+10},${BASE+20}`; for (let i=0;i<8;i++) d+=` l5,6 l5,-6`; el('path',{d,fill:'none',stroke:'#BC4A2B','stroke-width':2.4},svg);
+      const t=el('text',{x:X1+16,y:BASE+26,class:'lab'},svg); t.textContent='heater';
+    }
+    g.piston=el('rect',{x:X0+2,width:X1-X0-4,height:PT,rx:2,class:'piston'},svg);
+    g.ring=el('line',{x1:X0+2,x2:X1-2,class:'ring'},svg);
+    g.extra=el('g',{},svg);
+    g.heat=el('g',{},svg);
+    g.work=el('g',{},svg);
+    dots=[]; for (let i=0;i<NDOT;i++){ const ang=Math.random()*Math.PI*2; dots.push({x:DOTR+Math.random()*(X1-X0-2*DOTR),fy:Math.random(),vx:Math.cos(ang),vy:Math.sin(ang),e:el('circle',{r:DOTR},g.dots)}); }
+    update();
+    if (!raf && !REDUCE){ lastT=performance.now(); raf=requestAnimationFrame(tick); }
+  }
+  function update(){
+    if (!svg) return;
+    const G=geom(), col=tempColor(st.T,200,620);
+    g.gas.setAttribute('y',G.gTop); g.gas.setAttribute('height',G.Hg); g.gas.setAttribute('fill',col);
+    g.gasLab.setAttribute('y',(G.gTop+G.gBot)/2+4);
+    g.piston.setAttribute('y',G.pTop); g.ring.setAttribute('y1',G.pTop+6); g.ring.setAttribute('y2',G.pTop+6);
+    g.extra.innerHTML='';
+    if (proc==='isochoric'){ /* pins above the piston */
+      el('rect',{x:X0-8,y:G.pTop-8,width:18,height:7,rx:2,fill:'#3B4650'},g.extra); el('rect',{x:X1-10,y:G.pTop-8,width:18,height:7,rx:2,fill:'#3B4650'},g.extra);
+      const t=el('text',{x:X1+16,y:G.pTop-2,class:'lab'},g.extra); t.textContent='pins: piston cannot move'; }
+    else if (proc==='isobaric'){ el('rect',{x:165,y:G.pTop-26,width:50,height:26,rx:3,fill:'#5B6A74'},g.extra);
+      const t=el('text',{x:190,y:G.pTop-9,'text-anchor':'middle',class:'lab',fill:'#fff'},g.extra); t.textContent='weight'; t.setAttribute('style','fill:#fff'); }
+    else { el('rect',{x:183,y:G.pTop-30,width:14,height:30,fill:'#B7C0C6',stroke:'#7D8A93','stroke-width':.8},g.extra); }
+    /* heat arrows */
+    g.heat.innerHTML='';
+    const ym=(G.gTop+G.gBot)/2;
+    if (st.showQ){
+      if (proc==='isochoric'||proc==='isobaric'){ arrow(g.heat,190,BASE+30,190,BASE-6,'#BC4A2B'); const t=el('text',{x:198,y:BASE+40,class:'sym',fill:'#BC4A2B'},g.heat); t.innerHTML='Q<tspan baseline-shift="sub" font-size="10">in</tspan>'; }
+      if (proc==='isothermal'){ arrow(g.heat,X0-30,ym,X0-4,ym,'#2A6F8E'); arrow(g.heat,X1+30,ym,X1+4,ym,'#2A6F8E'); const t=el('text',{x:X0-34,y:ym-8,'text-anchor':'end',class:'sym',fill:'#2A6F8E'},g.heat); t.innerHTML='Q<tspan baseline-shift="sub" font-size="10">in</tspan>'; }
+      if (proc==='adiabatic'){ const t=el('text',{x:X0-22,y:ym+4,'text-anchor':'end',class:'sym',fill:'#6B7B86'},g.heat); t.textContent='Q = 0'; }
+    }
+    g.work.innerHTML='';
+    if (st.showQ && proc!=='isochoric'){ arrow(g.work,X1+48,G.pTop+20,X1+48,G.pTop-16,'#DE9127'); const t=el('text',{x:X1+56,y:G.pTop+4,class:'sym',fill:'#B26B0C'},g.work); t.innerHTML='W<tspan baseline-shift="sub" font-size="10">out</tspan>'; }
+    if (st.showQ && proc==='isochoric'){ const t=el('text',{x:X1+16,y:G.pTop+28,class:'lab'},g.work); t.textContent='no boundary work'; }
+    g.dots.querySelectorAll('circle').forEach(c=>c.setAttribute('fill',col));
+    place(G);
+  }
+  function place(G){ G=G||geom(); dots.forEach(d=>{ d.e.setAttribute('cx',(X0+d.x).toFixed(1)); d.e.setAttribute('cy',(G.gTop+DOTR+d.fy*Math.max(0,G.Hg-2*DOTR)).toFixed(1)); }); }
+  function tick(t){
+    const dt=Math.min(0.05,(t-lastT)/1000); lastT=t;
+    if (svg && document.body.contains(svg)){
+      const G=geom(), sp=50*Math.sqrt(st.T/300), W=X1-X0-2*DOTR, H=Math.max(1,G.Hg-2*DOTR);
+      dots.forEach(d=>{ d.x+=d.vx*sp*dt; d.fy+=d.vy*sp*dt/H;
+        if (d.x<0){d.x=-d.x;d.vx=Math.abs(d.vx);} if (d.x>W){d.x=2*W-d.x;d.vx=-Math.abs(d.vx);}
+        if (d.fy<0){d.fy=-d.fy;d.vy=Math.abs(d.vy);} if (d.fy>1){d.fy=2-d.fy;d.vy=-Math.abs(d.vy);} d.fy=Math.max(0,Math.min(1,d.fy)); });
+      place(G);
+    }
+    raf=requestAnimationFrame(tick);
+  }
+  return { mount, set:o=>{ Object.assign(st,o); update(); } };
+})();
+
+/* ---------- numeric chart ---------- */
+function niceStep(range, n){ const raw=range/n, p=Math.pow(10,Math.floor(Math.log10(raw))), m=raw/p; return (m<1.5?1:m<3?2:m<7?5:10)*p; }
+function fmtTick(v, step){ const dp=Math.max(0,-Math.floor(Math.log10(step)+1e-9)); return (+v.toFixed(dp)).toString().replace('-','−'); }
+function chart(host, o){
+  host.innerHTML='';
+  const VW=380, VH=o.h||210, ml=50, mr=14, mt=10, mb=36;
+  const svg=el('svg',{viewBox:`0 0 ${VW} ${VH}`,class:'chart-svg',role:'img'},host);
+  svg.setAttribute('aria-label',o.aria||'chart');
+  const X=x=>ml+(x-o.xmin)/(o.xmax-o.xmin)*(VW-ml-mr), Y=y=>VH-mb-(y-o.ymin)/(o.ymax-o.ymin)*(VH-mt-mb);
+  const xs=niceStep(o.xmax-o.xmin,5), ys=niceStep(o.ymax-o.ymin,5);
+  for (let x=Math.ceil(o.xmin/xs-1e-9)*xs; x<=o.xmax+1e-9; x+=xs){ el('line',{x1:X(x),x2:X(x),y1:mt,y2:VH-mb,class:'grid'},svg); const t=el('text',{x:X(x),y:VH-mb+13,'text-anchor':'middle',class:'tick'},svg); t.textContent=fmtTick(x,xs); }
+  for (let y=Math.ceil(o.ymin/ys-1e-9)*ys; y<=o.ymax+1e-9; y+=ys){ el('line',{x1:ml,x2:VW-mr,y1:Y(y),y2:Y(y),class:'grid'},svg); const t=el('text',{x:ml-6,y:Y(y)+3,'text-anchor':'end',class:'tick'},svg); t.textContent=fmtTick(y,ys); }
+  el('line',{x1:ml,x2:VW-mr,y1:VH-mb,y2:VH-mb,class:'axis'},svg); el('line',{x1:ml,x2:ml,y1:mt,y2:VH-mb,class:'axis'},svg);
+  const xl=el('text',{x:(ml+VW-mr)/2,y:VH-5,'text-anchor':'middle',class:'axlab'},svg); xl.innerHTML=o.xlab;
+  const yl=el('text',{x:12,y:(mt+VH-mb)/2,'text-anchor':'middle',class:'axlab',transform:`rotate(-90 12 ${(mt+VH-mb)/2})`},svg); yl.innerHTML=o.ylab;
+  const line=pts=>pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ');
+  if (o.area) el('path',{d:line(o.area)+' Z',class:'area'},svg);
+  (o.series||[]).forEach(s=>{ el('path',{d:line(s.pts),class:s.cls},svg);
+    if (s.label){ const p=s.pts[s.pts.length-1]; const t=el('text',{x:X(p[0])+(s.dx||5),y:Y(p[1])+(s.dy||4),class:'lab-c','text-anchor':s.anchor||'start',fill:s.color||'#41525D'},svg); t.textContent=s.label; } });
+  (o.points||[]).forEach(p=>{ el('circle',{cx:X(p.x),cy:Y(p.y),r:4,class:'pt'},svg); const t=el('text',{x:X(p.x)+(p.dx==null?7:p.dx),y:Y(p.y)+(p.dy==null?-6:p.dy),class:'pt-lab'},svg); t.textContent=p.lab; });
+  if (o.marker) el('circle',{cx:X(o.marker[0]),cy:Y(o.marker[1]),r:5.5,class:'marker'},svg);
+  if (o.empty){ const t=el('text',{x:(ml+VW-mr)/2,y:(mt+VH-mb)/2,'text-anchor':'middle',class:'empty'},svg); t.textContent=o.empty; }
+}
+const PVAX={ xmin:0, xmax:2, ymin:0, ymax:220, xlab:'Volume, <tspan font-style="italic">V</tspan> (m³)', ylab:'Pressure, <tspan font-style="italic">P</tspan> (kPa)', aria:'P-V diagram' };
+const TSAX={ xmin:-0.1, xmax:0.8, ymin:150, ymax:650, xlab:'<tspan font-style="italic">S</tspan> − <tspan font-style="italic">S</tspan><tspan baseline-shift="sub" font-size="8">1</tspan> (kJ/K)', ylab:'Temperature, <tspan font-style="italic">T</tspan> (K)', aria:'T-S diagram' };
+const PCOL={ isochoric:'#7A4FA0', isobaric:'#DE9127', isothermal:'#2A6F8E', adiabatic:'#BC4A2B' };
+function pathPts(a,n){ const out=[]; for (let i=0;i<=(n||50);i++) out.push(procPath(a,i/(n||50))); return out; }
+
+/* ============================================================
+   Sketch pads (normalised axes 0..1; checked by direction, end
+   point and curvature)
+============================================================ */
+const SK=(function(){
+  const VW=380, VH=260, OX=46, OY=226, AW=314, AH=204;
+  const X=u=>OX+u*AW, Y=w=>OY-w*AH;
+  const PV1={x:0.30,y:0.45}, TS1={x:0.30,y:0.35}, V2X=0.60, SX=0.30;
+  const crv=(fn,n)=>{ const p=[]; for (let i=0;i<=n;i++) p.push(fn(i/n)); return p; };
+  const ANS={
+    'pv-isochoric': crv(f=>({x:PV1.x,y:PV1.y*(1+f)}),20),
+    'pv-isobaric':  crv(f=>({x:PV1.x+(V2X-PV1.x)*f,y:PV1.y}),20),
+    'pv-isothermal':crv(f=>{ const x=PV1.x+(V2X-PV1.x)*f; return {x,y:PV1.y*PV1.x/x}; },40),
+    'pv-adiabatic': crv(f=>{ const x=PV1.x+(V2X-PV1.x)*f; return {x,y:PV1.y*Math.pow(PV1.x/x,1.4)}; },40),
+    'ts-isochoric': crv(f=>{ const T=1+f; return {x:TS1.x+SX*CV*Math.log(T),y:TS1.y*T}; },40),
+    'ts-isobaric':  crv(f=>{ const T=1+f; return {x:TS1.x+SX*CP*Math.log(T),y:TS1.y*T}; },40),
+    'ts-isothermal':crv(f=>({x:TS1.x+SX*R*Math.log(1+f)*2.2,y:TS1.y}),20),
+    'ts-adiabatic': crv(f=>({x:TS1.x,y:TS1.y*Math.pow(1+f,-0.4)}),20)
+  };
+  function resample(pts,n){
+    const d=[0]; for (let i=1;i<pts.length;i++) d.push(d[i-1]+Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y));
+    const L=d[d.length-1]; if (L===0) return [pts[0]];
+    const out=[]; let j=0;
+    for (let k=0;k<=n;k++){ const t=L*k/n; while (j<d.length-2 && d[j+1]<t) j++; const f=(t-d[j])/Math.max(d[j+1]-d[j],1e-9); out.push({x:pts[j].x+f*(pts[j+1].x-pts[j].x),y:pts[j].y+f*(pts[j+1].y-pts[j].y)}); }
+    return out;
+  }
+  function features(raw){
+    const p=resample(raw,40), a=p[0], b=p[p.length-1], dx=b.x-a.x, dy=b.y-a.y, L=Math.hypot(dx,dy);
+    let back=0, tot=0;
+    for (let i=1;i<p.length;i++){ const sx=p[i].x-p[i-1].x, sy=p[i].y-p[i-1].y; tot+=Math.hypot(sx,sy); const along=(sx*dx+sy*dy)/Math.max(L,1e-9); if (along<0) back+=-along; }
+    const below=p.reduce((s,q,i)=>{ const f=i/(p.length-1); return s+((a.y+f*dy)-q.y); },0)/p.length;
+    return { p, a, b, dx, dy, L, back:back/Math.max(tot,1e-9), below };
+  }
+  function dirOf(F){
+    if (F.L<0.08) return 'short';
+    const ax=Math.abs(F.dx), ay=Math.abs(F.dy);
+    if (ay<0.27*ax) return F.dx>0?'right':'left';
+    if (ax<0.27*ay) return F.dy>0?'up':'down';
+    if (F.dx>0) return F.dy>0?'up-right':'down-right';
+    return F.dy>0?'up-left':'down-left';
+  }
+  const xAtY=(pts,y)=>{ for (let i=1;i<pts.length;i++){ const a=pts[i-1], b=pts[i]; if ((a.y-y)*(b.y-y)<=0 && a.y!==b.y) return a.x+(y-a.y)/(b.y-a.y)*(b.x-a.x); } return null; };
+  const CHECK={
+    'pv-isochoric':F=>{ const d=dirOf(F);
+      if (d==='up') return {ok:true,msg:'Correct. The piston is pinned, so V stays fixed and the path is a vertical line. Heating raises T, and P = mRT/V rises with it.'};
+      if (d==='down') return {ok:false,msg:'V is fixed, so the line is vertical, but which way? Heating raises T, and with V fixed, P = mRT/V goes up.'};
+      return {ok:false,msg:'The piston is pinned, so the volume cannot change. Which direction on a P-V diagram keeps V the same?'}; },
+    'pv-isobaric':F=>{ const d=dirOf(F);
+      if (d==='right'){ if (Math.abs(F.b.x-V2X)>0.07) return {ok:false,msg:'Right direction. Now end your path on the V₂ = 2V₁ line.'};
+        return {ok:true,msg:'Correct. The weight keeps the pressure fixed, so the path is horizontal, and the air expands to the right. The area under it, P(V₂ − V₁), is the work done by the air, W_out.'}; }
+      if (d==='left') return {ok:false,msg:'Horizontal is right, but this is an expansion: V gets bigger, so move to the right.'};
+      if (d==='up'||d==='down') return {ok:false,msg:'The volume changes in this process. The weight on the piston keeps the pressure the same: which direction keeps P fixed?'};
+      return {ok:false,msg:'The weight on the piston keeps the pressure the same all the way, so P should not change as V increases.'}; },
+    'pv-isothermal':F=>{ const d=dirOf(F);
+      if (d==='right'||d==='up-right'||d==='up') return {ok:false,msg:'At constant T, P = mRT/V. If V goes up, what happens to P?'};
+      if (d==='left'||d==='down-left'||d==='up-left') return {ok:false,msg:'This is an expansion: V gets bigger, so the path goes to the right.'};
+      if (d==='down') return {ok:false,msg:'The volume doubles in this process, so the path must move to the right as well as down.'};
+      if (Math.abs(F.b.x-V2X)>0.07) return {ok:false,msg:'Right direction. Now end your path on the V₂ = 2V₁ line.'};
+      if (F.b.y>PV1.y*PV1.x/V2X+0.12) return {ok:false,msg:'Check where it ends: at constant T, PV stays constant, so when V doubles, P halves.'};
+      if (F.below<0.012) return {ok:false,msg:'Close. At constant T, P = mRT/V, so the line is a curve (a hyperbola): it drops steeply at first and flattens out as V grows. Try a curve that sags below a straight line.'};
+      return {ok:true,msg:'Correct. P = mRT/V with T fixed, so P falls along a curve and halves when V doubles.'}; },
+    'pv-adiabatic':F=>{ const d=dirOf(F);
+      if (d==='right'||d==='up-right'||d==='up') return {ok:false,msg:'In an expansion the air pushes the piston out and its pressure falls. Try again.'};
+      if (d==='left'||d==='down-left'||d==='up-left') return {ok:false,msg:'This is an expansion: V gets bigger, so the path goes to the right.'};
+      if (d==='down') return {ok:false,msg:'The volume doubles in this process, so the path must move to the right as well as down.'};
+      if (Math.abs(F.b.x-V2X)>0.07) return {ok:false,msg:'Right direction. Now end your path on the V₂ = 2V₁ line.'};
+      if (F.b.y>PV1.y*PV1.x/V2X-0.015) return {ok:false,msg:'Compare with the dashed isothermal line. With no heat coming in, the air cools as it does work, so its pressure falls further than at constant T. The adiabatic path is steeper and ends below the isothermal one.'};
+      if (F.below<0.008) return {ok:false,msg:'Close: the end point is right. The path should curve like the isothermal one (PVᵃ = constant), sagging below a straight line, just steeper.'};
+      return {ok:true,msg:'Correct. With no heat coming in, the air cools as it pushes the piston, so P drops faster than at constant T: the adiabatic path is steeper than the isothermal one.'}; },
+    'ts-isochoric':F=>{ const d=dirOf(F);
+      if (d==='up-right'){ if (F.below<-0.015) return {ok:false,msg:'Right direction. The curve should get steeper as T rises (it bends upwards), not flatten out.'};
+        return {ok:true,msg:'Correct. Heat flows in, so both T and S increase. The line bends slightly upwards, getting steeper as T rises.'}; }
+      if (d==='up') return {ok:false,msg:'Heat flows in, so the entropy increases as well: the path should also move to the right.'};
+      if (d==='right') return {ok:false,msg:'The temperature rises during heating, so the path must go up as well as to the right.'};
+      return {ok:false,msg:'Heat flows into the air: T goes up and the entropy increases (moves right).'}; },
+    'ts-isobaric':F=>{ const d=dirOf(F);
+      if (d!=='up-right'){ if (d==='up') return {ok:false,msg:'Heat flows in, so the entropy increases as well: the path should also move to the right.'};
+        if (d==='right') return {ok:false,msg:'The temperature rises (V doubles at constant P, so T doubles): the path must go up as well.'};
+        return {ok:false,msg:'Heat flows into the air: T goes up and the entropy increases (moves right).'}; }
+      const ys=TS1.y*1.6, xs=xAtY(F.p,ys), xr=xAtY(ANS['ts-isochoric'],ys);
+      if (xs!=null && xr!=null && xs<=xr+0.01) return {ok:false,msg:'Compare with the dashed constant-volume line. To reach the same temperature at constant pressure you need more heat (c_p > c_v), so more entropy: the constant-pressure line is less steep and lies to the right of it.'};
+      if (F.below<-0.015) return {ok:false,msg:'Right direction. The curve should get steeper as T rises (it bends upwards), not flatten out.'};
+      return {ok:true,msg:'Correct. T and S both increase, along a curve that is less steep than the constant-volume line, because c_p > c_v: each degree of heating at constant pressure needs more heat.'}; },
+    'ts-isothermal':F=>{ const d=dirOf(F);
+      if (d==='right') return {ok:true,msg:'Correct. T is fixed, so the path is horizontal. Heat flows in from the bath, so the entropy increases: the path moves to the right.'};
+      if (d==='left') return {ok:false,msg:'Horizontal is right. But heat flows into the air from the bath, so its entropy increases: move to the right.'};
+      return {ok:false,msg:'The water bath keeps the temperature at 300 K the whole time. Which direction keeps T fixed?'}; },
+    'ts-adiabatic':F=>{ const d=dirOf(F);
+      if (d==='down') return {ok:true,msg:'Correct. No heat flows (and the process is reversible), so the entropy stays the same: a vertical line. The air does work with no heat coming in, so T falls.'};
+      if (d==='up') return {ok:false,msg:'Vertical is right, but which way? The air does work on the piston with no heat coming in, so its internal energy, and its temperature, fall.'};
+      return {ok:false,msg:'No heat crosses the boundary, so the entropy does not change. Which direction keeps S fixed?'}; }
+  };
+  const dstr=pts=>pts.map((p,i)=>(i?'L':'M')+X(p.x).toFixed(1)+','+Y(p.y).toFixed(1)).join(' ');
+  /* build a pad; rec = saved record {status, tries, pts}; cb(result) after each check */
+  function pad(host, key, rec, cb){
+    const kind=key.slice(0,2), pid=key.slice(3);
+    const wrap=document.createElement('div'); wrap.className='pad'+(rec.status?' done':'');
+    wrap.innerHTML=`<div class="svgbox"></div><div class="row">${rec.status?'':'<button class="btn small chk" type="button">Check</button><button class="btn small ghost clr" type="button">Clear</button>'}${!rec.status&&rec.tries>=2?'<button class="btn small ghost rev" type="button">Show the answer</button>':''}</div>`;
+    host.appendChild(wrap);
+    const svg=el('svg',{viewBox:`0 0 ${VW} ${VH}`,role:'img'},wrap.querySelector('.svgbox'));
+    svg.setAttribute('aria-label',(kind==='pv'?'P-V':'T-S')+' sketch pad');
+    const s1=kind==='pv'?PV1:TS1;
+    el('line',{x1:OX,y1:OY,x2:OX+AW+6,y2:OY,class:'axis'},svg); el('line',{x1:OX,y1:OY,x2:OX,y2:OY-AH-8,class:'axis'},svg);
+    el('polygon',{points:`${OX+AW+12},${OY} ${OX+AW+3},${OY-4} ${OX+AW+3},${OY+4}`,fill:'#41525D'},svg);
+    el('polygon',{points:`${OX},${OY-AH-14} ${OX-4},${OY-AH-5} ${OX+4},${OY-AH-5}`,fill:'#41525D'},svg);
+    const xl=el('text',{x:OX+AW-4,y:OY+22,class:'axlab'},svg); xl.textContent=kind==='pv'?'V':'S';
+    const yl=el('text',{x:OX-24,y:OY-AH+4,class:'axlab'},svg); yl.textContent=kind==='pv'?'P':'T';
+    if (kind==='pv' && pid!=='isochoric'){ el('line',{x1:X(V2X),y1:OY,x2:X(V2X),y2:OY-AH,class:'guide'},svg); const g=el('text',{x:X(V2X)+4,y:OY-AH+12,class:'guide-lab'},svg); g.textContent='V₂ = 2V₁'; }
+    const refKey = key==='pv-adiabatic' ? 'pv-isothermal' : key==='ts-isobaric' ? 'ts-isochoric' : null;
+    if (refKey){ el('path',{d:dstr(ANS[refKey]),class:'ref'},svg); const b=ANS[refKey][ANS[refKey].length-1];
+      const t=el('text',{x:X(b.x)+(refKey==='pv-isothermal'?6:-8),y:Y(b.y)+(refKey==='pv-isothermal'?-6:-4),class:'ref-lab','text-anchor':refKey==='pv-isothermal'?'start':'end'},svg); t.textContent=refKey==='pv-isothermal'?'isothermal':'constant volume'; }
+    el('circle',{cx:X(s1.x),cy:Y(s1.y),r:11,class:'pt-ring'},svg); el('circle',{cx:X(s1.x),cy:Y(s1.y),r:4.5,class:'pt'},svg);
+    const l1=el('text',{x:X(s1.x)-14,y:Y(s1.y)+4,class:'pt-lab','text-anchor':'end'},svg); l1.textContent='1';
+    const ansG=el('g',{},svg), inkG=el('g',{},svg);
+    const msg=el('text',{x:OX+12,y:OY-AH+6,class:'startmsg'},svg);
+    let pts=(rec.pts||[]).map(p=>({x:p[0],y:p[1]}));
+    function drawInk(old){ inkG.innerHTML=''; if (pts.length>1){ el('path',{d:dstr(pts),class:'ink'+(old?' old':'')},inkG);
+      if (!old){ const b=pts[pts.length-1]; const l=el('text',{x:X(b.x)+8,y:Y(b.y)-6,class:'pt-lab'},inkG); l.textContent='2'; } } }
+    function drawAns(){ ansG.innerHTML=''; el('path',{d:dstr(ANS[key]),class:'ans'},ansG); const b=ANS[key][ANS[key].length-1];
+      el('circle',{cx:X(b.x),cy:Y(b.y),r:4.5,fill:'#BC4A2B'},ansG); const t=el('text',{x:X(b.x)+8,y:Y(b.y)+(key==='ts-adiabatic'?14:-8),class:'pt-lab',fill:'#BC4A2B'},ansG); t.textContent='2'; t.setAttribute('style','fill:#BC4A2B'); }
+    if (rec.status){ drawInk(true); drawAns(); return; }
+    msg.textContent='Press on point 1 and drag'; drawInk(false);
+    let drawing=false, path=null;
+    const toNorm=e=>{ const pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY; const q=pt.matrixTransform(svg.getScreenCTM().inverse()); return {x:(q.x-OX)/AW,y:(OY-q.y)/AH}; };
+    svg.addEventListener('pointerdown',e=>{
+      const q=toNorm(e);
+      if (Math.hypot((q.x-s1.x)*AW,(q.y-s1.y)*AH)>26){ msg.textContent='Start your sketch on point 1'; msg.style.fill='#BC4A2B'; return; }
+      e.preventDefault(); svg.setPointerCapture(e.pointerId);
+      drawing=true; pts=[{x:s1.x,y:s1.y}]; inkG.innerHTML=''; path=el('path',{class:'ink'},inkG); msg.textContent='';
+    });
+    svg.addEventListener('pointermove',e=>{ if (!drawing) return; e.preventDefault(); const q=toNorm(e);
+      q.x=Math.max(-0.05,Math.min(1.05,q.x)); q.y=Math.max(-0.05,Math.min(1.05,q.y));
+      const last=pts[pts.length-1]; if (Math.hypot(q.x-last.x,q.y-last.y)>0.004){ pts.push(q); path.setAttribute('d',dstr(pts)); } });
+    const end=e=>{ if (!drawing) return; drawing=false; try{ svg.releasePointerCapture(e.pointerId); }catch(_){} drawInk(false); };
+    svg.addEventListener('pointerup',end); svg.addEventListener('pointercancel',end);
+    wrap.querySelector('.clr').onclick=()=>{ pts=[]; inkG.innerHTML=''; msg.textContent='Press on point 1 and drag'; msg.style.fill=''; cb({clear:true}); };
+    wrap.querySelector('.chk').onclick=()=>{
+      if (pts.length<3) return cb({pre:'Draw a path first: press on point 1 and drag.'});
+      const F=features(pts);
+      if (F.L<0.08) return cb({pre:'Your sketch is very short. Drag further from point 1 to show where the process goes.'});
+      if (F.back>0.25) return cb({pre:'Your path doubles back on itself. A process moves steadily from state 1 to state 2: clear it and draw one smooth stroke.'});
+      const r=CHECK[key](F);
+      cb({ ok:r.ok, msg:r.msg, pts:resample(pts,30).map(p=>[+p.x.toFixed(3),+p.y.toFixed(3)]) });
+    };
+    const rv=wrap.querySelector('.rev'); if (rv) rv.onclick=()=>cb({reveal:true, msg:CHECK[key](features(ANS[key])).msg.replace(/^Correct\. /,''), pts:pts.length>1?resample(pts,30).map(p=>[+p.x.toFixed(3),+p.y.toFixed(3)]):[]});
+  }
+  /* small thumbnail of the correct sketch (for the summary table) */
+  function thumb(key){
+    const s=`<svg viewBox="0 0 ${VW} ${VH}" role="img" aria-label="${key}">`+
+      `<line x1="${OX}" y1="${OY}" x2="${OX+AW}" y2="${OY}" stroke="#41525D" stroke-width="5"/><line x1="${OX}" y1="${OY}" x2="${OX}" y2="${OY-AH}" stroke="#41525D" stroke-width="5"/>`+
+      `<text x="${OX+AW-20}" y="${OY+40}" font-size="40" font-style="italic" fill="#14232D">${key[0]==='p'?'V':'S'}</text><text x="${OX-40}" y="${OY-AH+30}" font-size="40" font-style="italic" fill="#14232D">${key[0]==='p'?'P':'T'}</text>`+
+      `<path d="${dstr(ANS[key])}" fill="none" stroke="${PCOL[key.slice(3)]}" stroke-width="9" stroke-linecap="round"/>`+
+      `<circle cx="${X(ANS[key][0].x)}" cy="${Y(ANS[key][0].y)}" r="11" fill="#14232D"/></svg>`;
+    return s;
+  }
+  return { pad, thumb };
+})();
+
+/* ============================================================
+   Guided activity
+============================================================ */
+const UNLOCK = new URLSearchParams(location.search).has('unlock');
+const KEY='polysim-guided-v1';
+const STATUS={ first:'First try', retry:'After a retry', revealed:'Revealed the answer' };
+let S=load()||fresh();
+function fresh(){ return { tab:0, cards:[], quiz:{}, steps:{isochoric:{},isobaric:{},isothermal:{},adiabatic:{},final:{}}, wrong:{}, t0:null, t1:null, sid:'' }; }
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){ return null; } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+
+/* ---------- the steps for each process ---------- */
+const DERIVE={
+  W_isothermal:'<p>The work done on the air is <i>W</i><sub>in</sub> − <i>W</i><sub>out</sub> = −∫ <i>P</i> d<i>V</i>. At constant <i>T</i>, <i>P</i> = <i>mRT</i>/<i>V</i>, so</p><p>−∫<sub>1</sub><sup>2</sup> (<i>mRT</i>/<i>V</i>) d<i>V</i> = −<i>mRT</i> ln(<i>V</i><sub>2</sub>/<i>V</i><sub>1</sub>).</p><p>In an expansion <i>V</i><sub>2</sub> &gt; <i>V</i><sub>1</sub>, so this is negative: <i>W</i><sub>out</sub> = <i>mRT</i> ln(<i>V</i><sub>2</sub>/<i>V</i><sub>1</sub>) = <i>mRT</i> ln(<i>P</i><sub>1</sub>/<i>P</i><sub>2</sub>).</p>',
+  W_adiabatic:'<p>With <i>PV</i><sup>γ</sup> = <i>C</i>, the work done on the air is −∫ <i>CV</i><sup>−γ</sup> d<i>V</i> = (<i>P</i><sub>2</sub><i>V</i><sub>2</sub> − <i>P</i><sub>1</sub><i>V</i><sub>1</sub>)/(γ − 1).</p><p>In an expansion this is negative, so <i>W</i><sub>out</sub> = (<i>P</i><sub>1</sub><i>V</i><sub>1</sub> − <i>P</i><sub>2</sub><i>V</i><sub>2</sub>)/(γ − 1). Because <i>PV</i> = <i>mRT</i> and <i>R</i>/(γ − 1) = <i>c</i><sub>v</sub>, this is also <i>mc</i><sub>v</sub>(<i>T</i><sub>1</sub> − <i>T</i><sub>2</sub>).</p>',
+  Q_isobaric:'<p>Δ<i>U</i> = <i>Q</i><sub>in</sub> − <i>W</i><sub>out</sub>, so <i>Q</i><sub>in</sub> = Δ<i>U</i> + <i>W</i><sub>out</sub> = <i>mc</i><sub>v</sub>(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>) + <i>P</i>(<i>V</i><sub>2</sub> − <i>V</i><sub>1</sub>).</p><p>At constant <i>P</i>, <i>P</i>(<i>V</i><sub>2</sub> − <i>V</i><sub>1</sub>) = <i>mR</i>(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>), so <i>Q</i><sub>in</sub> = <i>m</i>(<i>c</i><sub>v</sub> + <i>R</i>)(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>) = <i>mc</i><sub>p</sub>(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>), because <i>c</i><sub>p</sub> = <i>c</i><sub>v</sub> + <i>R</i>.</p>'
+};
+const STEPS={
+  isochoric:[
+    { key:'a', type:'mc', title:'What stays fixed?', q:'The piston is pinned. Which property stays fixed, and what is the polytropic exponent a?',
+      opts:{A:'Volume is fixed: a = ±∞', B:'Pressure is fixed: a = 0', C:'Temperature is fixed: a = 1', D:'No heat flows: a = γ'}, answer:'A',
+      fb:{B:'The heater raises the temperature with the volume fixed, so P = mRT/V rises.', C:'The heater raises the temperature.', D:'The heater adds heat.'},
+      explain:'The piston cannot move, so V is fixed. In PVᵃ = constant, only a → ±∞ keeps V fixed (take the a-th root: P^(1/a)V = constant, and P^(1/a) → 1).' },
+    { key:'pv', type:'sketch', title:'Sketch it on a P-V diagram', q:'Draw the path from state 1 as the air is heated with the piston pinned.' },
+    { key:'W', type:'mc', title:'Work', q:'How much boundary work crosses the boundary?',
+      opts:{A:'W_in = W_out = 0, because the volume does not change: there is no area under a vertical line', B:'W_out = P(V₂ − V₁)', C:'W_in = V(P₂ − P₁)', D:'W_out = mRT ln(P₂/P₁)'}, answer:'A',
+      fb:{B:'V₂ = V₁ here, so this would be zero anyway. Why?', C:'V(P₂ − P₁) is the area to the left of the line, not under it. Boundary work needs the piston to move.', D:'That is the isothermal result. Here T changes and V does not.'},
+      explain:'Boundary work needs the boundary to move. With the piston pinned, d V = 0, so W_in = W_out = 0. On the P-V diagram the path is vertical, with no area under it.' },
+    { key:'dU', type:'mc', title:'Change in internal energy', q:'What is ΔU?',
+      opts:{A:'ΔU = mc_v(T₂ − T₁), positive because T rises', B:'ΔU = mc_p(T₂ − T₁)', C:'ΔU = 0, because the volume does not change', D:'ΔU = mc_v(T₁ − T₂)'}, answer:'A',
+      fb:{B:'For an ideal gas, ΔU always uses c_v, whatever the process.', C:'U depends on T, not on V. T doubles here.', D:'That has the wrong sign: T rises, so U goes up.'},
+      explain:'For an ideal gas, U depends on T only, so ΔU = mc_v(T₂ − T₁) for any process. Here T goes from 300 K to 600 K, so ΔU is positive.' },
+    { key:'Q', type:'mc', title:'Heat', q:'Use ΔU = (Q_in − Q_out) + (W_in − W_out). What is the heat?',
+      opts:{A:'Q_in = ΔU = mc_v(T₂ − T₁)', B:'Q_in = mc_p(T₂ − T₁)', C:'Q = 0', D:'Q_out = mc_v(T₂ − T₁)'}, answer:'A',
+      fb:{B:'c_p goes with heating at constant pressure. Here the volume is constant.', C:'The heater is on: heat goes in.', D:'The heater adds heat to the air, so it is Q_in.'},
+      explain:'With W_in = W_out = 0 and only Q_in, the first law gives ΔU = Q_in. All the heat goes into internal energy: Q_in = mc_v(T₂ − T₁).' },
+    { key:'ts', type:'sketch', title:'Sketch it on a T-S diagram', q:'Draw the path from state 1. Heat flows in, and the temperature doubles.' }
+  ],
+  isobaric:[
+    { key:'a', type:'mc', title:'What stays fixed?', q:'A free piston carries a fixed weight. Which property stays fixed, and what is a?',
+      opts:{A:'Volume is fixed: a = ±∞', B:'Pressure is fixed: a = 0', C:'Temperature is fixed: a = 1', D:'No heat flows: a = γ'}, answer:'B',
+      fb:{A:'The piston is free to move, so the volume changes.', C:'The heater warms the air, so T rises.', D:'The heater adds heat.'},
+      explain:'The weight pushes down with the same force all the time, so the air pressure stays the same: PV⁰ = P = constant, a = 0.' },
+    { key:'pv', type:'sketch', title:'Sketch it on a P-V diagram', q:'Draw the path from state 1 as the air expands to twice its volume at constant pressure.' },
+    { key:'W', type:'mc', title:'Work', q:'How much boundary work crosses the boundary, and which way?',
+      opts:{A:'W_out = P(V₂ − V₁), which is also mR(T₂ − T₁)', B:'W_in = P(V₂ − V₁)', C:'W = 0, because the pressure is constant', D:'W_out = V(P₂ − P₁)'}, answer:'A',
+      fb:{B:'The air pushes the piston out (expansion), so the air does the work: W_out.', C:'The piston moves, so there is an area under the line.', D:'P₂ = P₁ here, and the area under a horizontal line is P × ΔV.'},
+      explain:'The air pushes the piston up, so it does work: W_out = area under the horizontal line = P(V₂ − V₁). Using PV = mRT at both ends, this is also mR(T₂ − T₁).' },
+    { key:'dU', type:'mc', title:'Change in internal energy', q:'What is ΔU?',
+      opts:{A:'ΔU = mc_v(T₂ − T₁)', B:'ΔU = mc_p(T₂ − T₁), because the pressure is constant', C:'ΔU = 0, because the pressure is constant', D:'ΔU = P(V₂ − V₁)'}, answer:'A',
+      fb:{B:'This is the classic trap. For an ideal gas, ΔU always uses c_v, even at constant pressure. c_p appears in the heat.', C:'U depends on T, and T doubles here (V doubles at the same P).', D:'That is the work, not the change in internal energy.'},
+      explain:'U depends on T only, so ΔU = mc_v(T₂ − T₁) even though the pressure is constant. T doubles (V doubles at the same P), so ΔU is positive.' },
+    { key:'Q', type:'mc', title:'Heat', q:'Use ΔU = (Q_in − Q_out) + (W_in − W_out). What is the heat?',
+      opts:{A:'Q_in = mc_v(T₂ − T₁)', B:'Q_in = ΔU + W_out = mc_p(T₂ − T₁)', C:'Q_in = W_out', D:'Q_out = mc_p(T₂ − T₁)'}, answer:'B',
+      fb:{A:'That is only ΔU. Some of the heat also leaves as work on the piston.', C:'That would mean ΔU = 0, but T rises.', D:'The heater adds heat to the air: Q_in.'},
+      explain:'ΔU = Q_in − W_out, so Q_in = ΔU + W_out = mc_v(T₂ − T₁) + mR(T₂ − T₁) = mc_p(T₂ − T₁), because c_p = c_v + R. The heat has to raise the internal energy and push the piston.',
+      derive:DERIVE.Q_isobaric },
+    { key:'ts', type:'sketch', title:'Sketch it on a T-S diagram', q:'Draw the path from state 1. The dashed line is the constant-volume heating you drew before.' }
+  ],
+  isothermal:[
+    { key:'a', type:'mc', title:'What stays fixed?', q:'The cylinder sits in a water bath at 300 K and the piston moves out slowly. Which property stays fixed, and what is a?',
+      opts:{A:'Volume is fixed: a = ±∞', B:'Pressure is fixed: a = 0', C:'Temperature is fixed: a = 1', D:'No heat flows: a = γ'}, answer:'C',
+      fb:{A:'The piston moves out, so V changes.', B:'There is no weight keeping P fixed. As V grows at fixed T, P = mRT/V falls.', D:'Heat flows in from the bath.'},
+      explain:'The bath keeps T at 300 K. With T fixed, PV = mRT is constant: PV¹ = constant, a = 1.' },
+    { key:'pv', type:'sketch', title:'Sketch it on a P-V diagram', q:'Draw the path from state 1 as the air expands slowly to twice its volume at constant temperature.' },
+    { key:'W', type:'mc', title:'Work', q:'How much boundary work crosses the boundary, and which way?',
+      opts:{A:'W_out = P₁(V₂ − V₁)', B:'W_out = mRT ln(V₂/V₁)', C:'W_in = mRT ln(V₂/V₁)', D:'W = 0, because the temperature does not change'}, answer:'B',
+      fb:{A:'P falls as the air expands, so the area under the curve is less than P₁ × ΔV.', C:'The air expands and pushes the piston out, so the air does the work: W_out.', D:'The piston moves, so there is area under the curve. Constant T makes ΔU zero, not W.'},
+      explain:'The area under the curve P = mRT/V from V₁ to V₂ is mRT ln(V₂/V₁). The air pushes the piston, so this is W_out.',
+      derive:DERIVE.W_isothermal },
+    { key:'dU', type:'mc', title:'Change in internal energy', q:'What is ΔU?',
+      opts:{A:'ΔU = 0, because T does not change', B:'ΔU = mc_v(T₂ − T₁), positive', C:'ΔU = −W_out', D:'ΔU = mc_p(T₂ − T₁)'}, answer:'A',
+      fb:{B:'T₂ = T₁ = 300 K, so mc_v(T₂ − T₁) = 0.', C:'That would be true only with no heat transfer. Here heat flows in from the bath.', D:'T₂ = T₁, and ΔU uses c_v anyway.'},
+      explain:'U of an ideal gas depends on T only. T stays at 300 K, so ΔU = mc_v(T₂ − T₁) = 0.' },
+    { key:'Q', type:'mc', title:'Heat', q:'Use ΔU = (Q_in − Q_out) + (W_in − W_out). What is the heat?',
+      opts:{A:'Q = 0, because the temperature does not change', B:'Q_out = W_out', C:'Q_in = W_out = mRT ln(V₂/V₁)', D:'Q_in = mc_p(T₂ − T₁)'}, answer:'C',
+      fb:{A:'Constant temperature does not mean no heat. The air does work, so energy must come in from somewhere.', B:'The air loses energy as work, so heat must come in to keep T (and U) fixed.', D:'T₂ = T₁, so this would be zero.'},
+      explain:'0 = Q_in − W_out, so Q_in = W_out = mRT ln(V₂/V₁). Every kJ of work the air does on the piston is replaced by a kJ of heat from the bath.' },
+    { key:'ts', type:'sketch', title:'Sketch it on a T-S diagram', q:'Draw the path from state 1. The temperature stays at 300 K, and heat flows in.' }
+  ],
+  adiabatic:[
+    { key:'a', type:'mc', title:'What stays fixed?', q:'The cylinder is insulated and the piston moves out. What is special about this process, and what is a?',
+      opts:{A:'Volume is fixed: a = ±∞', B:'Pressure is fixed: a = 0', C:'Temperature is fixed: a = 1', D:'No heat flows: a = γ = c_p/c_v = 1.4'}, answer:'D',
+      fb:{A:'The piston moves out, so V changes.', B:'There is no weight keeping P fixed.', C:'No bath keeps T fixed. With no heat coming in, T falls as the air does work.'},
+      explain:'Insulation means Q = 0: an adiabatic process. For a reversible adiabatic process of an ideal gas, PVᵞ = constant, so a = γ = 1.4 for air.' },
+    { key:'pv', type:'sketch', title:'Sketch it on a P-V diagram', q:'Draw the path from state 1 as the air expands to twice its volume with no heat transfer. The dashed line is the isothermal expansion.' },
+    { key:'W', type:'mc', title:'Work', q:'How much boundary work crosses the boundary, and which way?',
+      opts:{A:'W_out = (P₁V₁ − P₂V₂)/(γ − 1)', B:'W_out = mRT₁ ln(V₂/V₁)', C:'W_out = P₁(V₂ − V₁)', D:'W = 0, because no heat flows'}, answer:'A',
+      fb:{B:'That is the isothermal result. Here T falls, so the area is smaller.', C:'That treats P as constant. P falls steeply here.', D:'No heat flows, but the piston still moves, so there is work.'},
+      explain:'For PVᵃ = constant with a ≠ 1, W_in − W_out = (P₂V₂ − P₁V₁)/(a − 1). In an expansion that is negative, so W_out = (P₁V₁ − P₂V₂)/(γ − 1).',
+      derive:DERIVE.W_adiabatic },
+    { key:'dU', type:'mc', title:'Change in internal energy', q:'What is ΔU?',
+      opts:{A:'ΔU = 0, because no heat flows', B:'ΔU = mc_v(T₂ − T₁), negative because T falls', C:'ΔU = mc_v(T₂ − T₁), positive because T rises', D:'ΔU = mc_p(T₂ − T₁)'}, answer:'B',
+      fb:{A:'No heat flows, but work still leaves the air.', C:'The air does work with no heat coming in, so its temperature falls.', D:'ΔU always uses c_v for an ideal gas.'},
+      explain:'ΔU = mc_v(T₂ − T₁) as always. The air loses energy as work with nothing coming in, so T₂ < T₁ and ΔU is negative.' },
+    { key:'Q', type:'mc', title:'Heat', q:'Use ΔU = (Q_in − Q_out) + (W_in − W_out). What is the heat, and what does the first law tell you?',
+      opts:{A:'Q_in = W_out', B:'Q_out = W_out', C:'Q = 0 (Q_in = Q_out = 0), so ΔU = −W_out: the work comes out of the internal energy', D:'Q_in = mc_v(T₂ − T₁)'}, answer:'C',
+      fb:{A:'That is the isothermal case, where the bath supplies the heat. Here the walls are insulated.', B:'No heat can cross the insulation.', D:'No heat can cross the insulation.'},
+      explain:'Insulated, so Q_in = Q_out = 0. Then ΔU = −W_out: the air pays for the work out of its own internal energy, which is why it cools.' },
+    { key:'ts', type:'sketch', title:'Sketch it on a T-S diagram', q:'Draw the path from state 1. No heat flows, and the process is reversible.' }
+  ],
+  final:[
+    { key:'f1', type:'mc', title:'Which expansion does the most work?', q:'The isobaric, isothermal and adiabatic expansions all start at state 1 and end at V₂ = 2V₁. Rank the work done by the air, W_out.',
+      opts:{A:'Isobaric > isothermal > adiabatic', B:'Isothermal > isobaric > adiabatic', C:'Adiabatic > isothermal > isobaric', D:'All the same, because ΔV is the same'}, answer:'A',
+      fb:{B:'Compare the areas under the three paths on the P-V diagram: which path stays highest?', C:'The adiabatic path is the steepest, so it has the least area under it.', D:'Work is the area under the path, not just ΔV, and the paths are at different heights.'},
+      explain:'Work is the area under each path. The isobaric path stays at 100 kPa (86.1 kJ), the isothermal one falls to 50 kPa (59.7 kJ), and the adiabatic one falls fastest, to about 38 kPa (52.1 kJ).' },
+    { key:'f2', type:'mc', title:'Same heat, two boxes', q:'The same amount of heat Q_in is added to two identical cylinders of air. In one the piston is pinned (constant volume); in the other it carries a weight (constant pressure). Which ends up hotter?',
+      opts:{A:'The constant-volume one', B:'The constant-pressure one', C:'They end up at the same temperature', D:'It depends on the amount of heat'}, answer:'A',
+      fb:{B:'At constant pressure some of the heat leaves again as work on the piston.', C:'Compare where the heat goes: ΔU = Q_in in one case, ΔU = Q_in − W_out in the other.', D:'For any amount of heat the comparison is the same.'},
+      explain:'At constant volume, all of Q_in goes into ΔU = mc_vΔT. At constant pressure, part of it leaves as W_out, so ΔU is smaller: Q_in = mc_pΔT, and c_p > c_v means a smaller ΔT.' }
+  ]
+};
+const TABS=['How it works','1 Isochoric','2 Isobaric','3 Isothermal','4 Adiabatic','Put it together'];
+const TAB_PROC=[null,'isochoric','isobaric','isothermal','adiabatic','final'];
+function quizDone(){ for (let i=0;i<6;i++){ const q=S.quiz[i]; if (!q||!q.done) return false; } return true; }
+function secDone(p){ return STEPS[p].every(st=>S.steps[p][st.key]&&S.steps[p][st.key].status); }
+function tabDone(i){ return i===0 ? quizDone() : secDone(TAB_PROC[i]); }
+function tabOpen(i){ if (UNLOCK||i===0) return true; if (!quizDone()) return false; for (let j=1;j<i;j++) if (!secDone(TAB_PROC[j])) return false; return true; }
+function renderTabs(){
+  const nav=document.getElementById('tabs'); nav.innerHTML='';
+  TABS.forEach((t,i)=>{ const b=document.createElement('button'); b.type='button';
+    b.className=(S.tab===i?'on ':'')+(tabDone(i)?'done':'');
+    b.innerHTML=`<span class="n">${tabDone(i)?'✓':i===0?'?':i===5?'Σ':i}</span>${i>0&&i<5?t.slice(2):t}`;
+    b.disabled=!tabOpen(i); b.onclick=()=>goTab(i); nav.appendChild(b); });
+}
+function goTab(i){ if (!tabOpen(i)) return; S.tab=i; if (i===1 && !S.t0) S.t0=Date.now(); save(); render(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+/* ---------- side panel ---------- */
+const PLAY={ proc:null, f:0, anim:0 };
+function sideProc(){ const p=TAB_PROC[S.tab]; return p && p!=='final' ? p : null; }
+const got=(p,k)=>{ const r=S.steps[p]&&S.steps[p][k]; return r&&r.status ? r : null; };
+function renderSide(){
+  const p=sideProc();
+  document.getElementById('picCard').classList.toggle('hidden',!p);
+  document.getElementById('energyCard').classList.toggle('hidden',!p);
+  if (!p){
+    document.getElementById('given').innerHTML=`<h4>Given · the same start for every process</h4><dl>
+      <dt>Gas</dt><dd>1 kg of air (ideal gas) in a piston-cylinder</dd>
+      <dt>State 1</dt><dd><i>P</i><sub>1</sub> = 100 kPa, <i>T</i><sub>1</sub> = 300 K, <i>V</i><sub>1</sub> = <i>mRT</i><sub>1</sub>/<i>P</i><sub>1</sub> = 0.861 m³</dd>
+      <dt>Air</dt><dd><i>R</i> = 0.287, <i>c</i><sub>v</sub> = 0.718, <i>c</i><sub>p</sub> = 1.005 kJ/kg·K, γ = 1.4</dd></dl>
+      <p class="assume">Closed system, quasi-equilibrium (reversible) processes, constant specific heats.</p>`;
+    drawAllCharts(); return;
+  }
+  const P=PROCS[p];
+  document.getElementById('given').innerHTML=`<h4>Given · ${P.name}</h4><dl>
+    <dt>Gas</dt><dd>1 kg of air (ideal gas)</dd>
+    <dt>State 1</dt><dd><i>P</i><sub>1</sub> = 100 kPa, <i>T</i><sub>1</sub> = 300 K, <i>V</i><sub>1</sub> = 0.861 m³</dd>
+    <dt>Process</dt><dd>${P.end}</dd>
+    <dt>Air</dt><dd><i>R</i> = 0.287, <i>c</i><sub>v</sub> = 0.718, <i>c</i><sub>p</sub> = 1.005 kJ/kg·K, γ = 1.4</dd></dl>`;
+  if (PLAY.proc!==p){ cancelAnimationFrame(PLAY.anim); PLAY.proc=p; PLAY.f = secDone(p) ? 1 : 0; }
+  document.getElementById('picTitle').textContent='The cylinder · '+P.name;
+  PIC.mount(document.getElementById('picBox'), p);
+  drawState();
+  document.getElementById('energyBox').innerHTML=energyBox(p);
+}
+function drawState(){
+  const p=sideProc(); if (!p) return;
+  const done=secDone(p), a=PROCS[p].a, f=done?PLAY.f:0, s=procPath(a,f);
+  PIC.set({ hf:s.V/V1, T:s.T, showQ:true });
+  document.getElementById('playBtn').disabled=!done;
+  document.getElementById('playNote').textContent = done ? '' : 'Unlocks once you finish this process';
+  const e=energies(a).end;
+  document.getElementById('readout').innerHTML = done
+    ? `<div><b>State 1</b> · <i>P</i> = 100 kPa · <i>V</i> = 0.861 m³ · <i>T</i> = 300 K</div><div><b>${f>0.999?'State 2':'Now'}</b> · <i>P</i> = ${s.P.toFixed(1)} kPa · <i>V</i> = ${s.V.toFixed(3)} m³ · <i>T</i> = ${s.T.toFixed(1)} K</div>`
+    : `<div><b>State 1</b> · <i>P</i> = 100 kPa · <i>V</i> = 0.861 m³ · <i>T</i> = 300 K</div><div class="muted">State 2 appears once you finish this process.</div>`;
+  const pv=Object.assign({},PVAX,{series:[],points:[{x:V1,y:P1,lab:'1',dx:-14,dy:-6}]});
+  const ts=Object.assign({},TSAX,{series:[],points:[{x:0,y:T1,lab:'1',dx:-14,dy:4}]});
+  if (done){
+    const pts=pathPts(a);
+    pv.series.push({pts:pts.map(q=>[q.V,q.P]),cls:'p-'+p}); ts.series.push({pts:pts.map(q=>[q.S,q.T]),cls:'p-'+p});
+    if (isFinite(a)) pv.area=pts.map(q=>[q.V,q.P]).concat([[2*V1,0],[V1,0]]);
+    pv.points.push({x:e.V,y:e.P,lab:'2'}); ts.points.push({x:pts[pts.length-1].S,y:e.T,lab:'2',dy:p==='adiabatic'?14:-6});
+    if (f>0 && f<1){ pv.marker=[s.V,s.P]; ts.marker=[s.S,s.T]; }
+  } else { pv.empty='The real path appears once you finish'; ts.empty=''; }
+  chart(document.getElementById('pvBox'),pv); chart(document.getElementById('tsBox'),ts);
+}
+function startPlay(){
+  cancelAnimationFrame(PLAY.anim);
+  const t0=performance.now(), D=REDUCE?1:2600;
+  const stepF=t=>{ const u=Math.min(1,(t-t0)/D); PLAY.f=u<0.5?2*u*u:1-Math.pow(-2*u+2,2)/2; drawState(); if (u<1) PLAY.anim=requestAnimationFrame(stepF); };
+  PLAY.f=0; PLAY.anim=requestAnimationFrame(stepF);
+}
+document.getElementById('playBtn').onclick=startPlay;
+/* energy bars: values appear once the matching step is answered */
+function energyBox(p){
+  const E=energies(PROCS[p].a);
+  const wd=got(p,'W'), ud=got(p,'dU'), qd=got(p,'Q');
+  const Win=wd?Math.max(0,E.W):null, Wout=wd?Math.max(0,-E.W):null, Qin=qd?Math.max(0,E.Q):null, Qout=qd?Math.max(0,-E.Q):null, dU=ud?E.dU:null;
+  const nums=[Win,Wout,Qin,Qout,dU].filter(x=>x!=null).map(Math.abs), max=Math.max(1,...nums,300);
+  const row=(lab,val,cls)=>{ if (val==null) return `<div class="ebar unk"><span class="elab">${lab}</span><span class="etrack"></span><span class="eval">?</span></div>`;
+    const z=Math.abs(val)<0.05; return `<div class="ebar ${z?'zero':''}"><span class="elab">${lab}</span><span class="etrack"><span class="efill ${cls}" style="width:${(Math.abs(val)/max*100).toFixed(1)}%"></span></span><span class="eval">${z?'0':val.toFixed(1)}</span></div>`; };
+  const n=v=>v==null?'?':(Math.abs(v)<0.05?'0':v.toFixed(1));
+  return row('<i>Q</i><sub>in</sub> (heat in)',Qin,'cold')+row('<i>Q</i><sub>out</sub> (heat out)',Qout,'cold')
+    +row('<i>W</i><sub>in</sub> (work in)',Win,'warm')+row('<i>W</i><sub>out</sub> (work out)',Wout,'warm')
+    +'<div class="esep"></div>'+row('Δ<i>U</i>',dU,'hot')
+    +`<div class="eeq">Δ<i>U</i> = (<i>Q</i><sub>in</sub> − <i>Q</i><sub>out</sub>) + (<i>W</i><sub>in</sub> − <i>W</i><sub>out</sub>)<br>${n(dU)} = (${n(Qin)} − ${n(Qout)}) + (${n(Win)} − ${n(Wout)})</div>`
+    +'<p class="small muted" style="margin:6px 0 0">Values in kJ, for 1 kg of air. Each value appears once you have answered that step.</p>';
+}
+/* overview charts for How it works and Put it together */
+function drawAllCharts(highlight){
+  const pv=Object.assign({},PVAX,{series:[],points:[{x:V1,y:P1,lab:'1',dx:-14,dy:-6}]});
+  const ts=Object.assign({},TSAX,{series:[],points:[{x:0,y:T1,lab:'1',dx:-14,dy:4}]});
+  if (S.tab===5){
+    PROC_IDS.forEach(p=>{ const pts=pathPts(PROCS[p].a); const lab=PROCS[p].short;
+      pv.series.push({pts:pts.map(q=>[q.V,q.P]),cls:'p-'+p,label:lab,color:PCOL[p],dy:p==='isothermal'?-4:p==='adiabatic'?10:4});
+      ts.series.push({pts:pts.map(q=>[q.S,q.T]),cls:'p-'+p,label:lab,color:PCOL[p],anchor:p==='adiabatic'?'start':'start',dy:p==='adiabatic'?12:4}); });
+    if (highlight){ const pts=pathPts(highlight.a);
+      pv.series.push({pts:pts.map(q=>[q.V,q.P]),cls:'p-general'}); ts.series.push({pts:pts.map(q=>[q.S,q.T]),cls:'p-general'}); }
+  } else { pv.empty='Each process is drawn here as you finish it'; }
+  chart(document.getElementById('pvBox'),pv); chart(document.getElementById('tsBox'),ts);
+}
+
+/* ---------- How it works ---------- */
+const MINI_WORK=`<svg class="mini-svg" viewBox="0 0 340 150" role="img" aria-label="Work as the area under a path on a P-V diagram">
+  <line x1="40" y1="125" x2="325" y2="125" stroke="#9AA6AE"/><line x1="40" y1="10" x2="40" y2="125" stroke="#9AA6AE"/>
+  <path d="M90,30 C130,70 200,95 290,105 L290,125 L90,125 Z" fill="#DE9127" fill-opacity=".25"/>
+  <path d="M90,30 C130,70 200,95 290,105" fill="none" stroke="#BC4A2B" stroke-width="2.4"/>
+  <circle cx="90" cy="30" r="4" fill="#14232D"/><circle cx="290" cy="105" r="4" fill="#14232D"/>
+  <text x="80" y="24" font-size="12" font-weight="700" fill="#14232D">1</text><text x="296" y="100" font-size="12" font-weight="700" fill="#14232D">2</text>
+  <text x="175" y="118" text-anchor="middle" font-size="12" font-weight="700" fill="#8A5A0B">area = work</text>
+  <text x="190" y="143" text-anchor="middle" font-size="11" fill="#41525D" font-style="italic">V</text><text x="26" y="70" font-size="11" fill="#41525D" font-style="italic">P</text>
+  <text x="196" y="60" font-size="11" fill="#41525D">expansion 1 → 2: W_out</text></svg>`;
+const CARDS=[
+  {t:'The gas in the cylinder', b:`<p>The <b>system</b> is the air inside the cylinder. No air gets in or out, so it is a <b>closed system</b>: only heat and work cross its boundary. Its state is set by pressure <i>P</i>, volume <i>V</i> and temperature <i>T</i>, linked by the ideal gas law:</p>
+    <div class="eq"><i>PV</i> = <i>mRT</i> &nbsp;&nbsp; (the same as <i>PV</i> = <i>nrT</i>, because <i>mR</i> = <i>nr</i>)</div>
+    <p>For air, <i>R</i> = 0.287 kJ/kg·K. Use <i>T</i> in kelvin. Upper-case symbols are for the whole mass (<i>V</i>, <i>U</i>, <i>Q</i>, <i>W</i>); lower-case ones are per kilogram.</p>`},
+  {t:'Work = area under the P-V path', b:`<p>When the piston moves, the gas and the piston push on each other, so work crosses the boundary. On a P-V diagram that work is the <b>area under the path</b>:</p>
+    <div class="eq"><i>W</i><sub>in</sub> − <i>W</i><sub>out</sub> = −∫ <i>P</i> d<i>V</i></div>${MINI_WORK}
+    <p><b>Expansion</b> (V gets bigger): the gas does work on the piston, <i>W</i><sub>out</sub>. <b>Compression</b>: the piston does work on the gas, <i>W</i><sub>in</sub>. If the piston does not move, there is no boundary work.</p>`},
+  {t:'The first law (sign convention)', b:`<div class="eq">Δ<i>U</i> = <i>Q</i> + <i>W</i> = (<i>Q</i><sub>in</sub> − <i>Q</i><sub>out</sub>) + (<i>W</i><sub>in</sub> − <i>W</i><sub>out</sub>)</div>
+    <p>Every <i>Q</i><sub>in</sub>, <i>Q</i><sub>out</sub>, <i>W</i><sub>in</sub> and <i>W</i><sub>out</sub> is a <b>positive number</b>; the signs are already in the equation. Example: a gas does 50 kJ of work while 80 kJ of heat flows in. Δ<i>U</i> = (80 − 0) + (0 − 50) = 30 kJ.</p>
+    <p class="small muted">Some textbooks write the first law with a different sign convention. On this page, always use the form above.</p>`},
+  {t:'Internal energy of an ideal gas', b:`<p>For an ideal gas, internal energy depends on <b>temperature only</b>. So, for <b>any</b> process:</p>
+    <div class="eq">Δ<i>U</i> = <i>mc</i><sub>v</sub>(<i>T</i><sub>2</sub> − <i>T</i><sub>1</sub>) = <i>C</i><sub>v</sub>Δ<i>T</i></div>
+    <p>Always <i>c</i><sub>v</sub>, even at constant pressure. For air, <i>c</i><sub>v</sub> = 0.718 and <i>c</i><sub>p</sub> = <i>c</i><sub>v</sub> + <i>R</i> = 1.005 kJ/kg·K, and γ = <i>c</i><sub>p</sub>/<i>c</i><sub>v</sub> = 1.4. If <i>T</i> does not change, Δ<i>U</i> = 0.</p>`},
+  {t:'Polytropic processes', b:`<p>Many processes follow</p><div class="eq"><i>PV</i><sup><i>a</i></sup> = constant &nbsp;&nbsp; so &nbsp;&nbsp; <i>P</i><sub>1</sub><i>V</i><sub>1</sub><sup><i>a</i></sup> = <i>P</i><sub>2</sub><i>V</i><sub>2</sub><sup><i>a</i></sup></div>
+    <table class="atab"><thead><tr><th><i>a</i></th><th>Process</th><th>What stays fixed</th></tr></thead><tbody>
+      <tr><td>0</td><td>isobaric</td><td>pressure</td></tr><tr><td>1</td><td>isothermal</td><td>temperature</td></tr>
+      <tr><td>γ = 1.4 (air)</td><td>adiabatic</td><td>no heat transfer</td></tr><tr><td>±∞</td><td>isochoric</td><td>volume</td></tr></tbody></table>
+    <p>In this activity you take each one in turn and work out where Δ<i>U</i>, <i>Q</i> and <i>W</i> come from.</p>`},
+  {t:'Reading a T-S diagram', b:`<p><i>S</i> is <b>entropy</b>. You do not need to calculate it here; just read the diagram like this, for a reversible process:</p>
+    <p>• Heat flows <b>in</b> → <i>S</i> increases: the path moves to the <b>right</b>.<br>• Heat flows <b>out</b> → the path moves to the <b>left</b>.<br>• <b>No heat</b> → <i>S</i> stays the same: a <b>vertical</b> line.<br>• Constant temperature → a <b>horizontal</b> line.</p>
+    <p>So the T-S diagram shows heat at a glance, the way the P-V diagram shows work.</p>`}
+];
+const QUIZ=[
+  {q:'1 kg of air is at 100 kPa and 300 K (R = 0.287 kJ/kg·K). What is its volume?', o:{A:'0.861 m³',B:'861 m³',C:'0.000861 m³',D:'0.287 m³'}, a:'A',
+   e:'V = mRT/P = 1 × 0.287 × 300 / 100 = 0.861 m³ (kPa × m³ = kJ).'},
+  {q:'A gas expands and pushes a piston out. Using ΔU = (Q_in − Q_out) + (W_in − W_out), which work term is not zero?', o:{A:'W_in',B:'W_out',C:'Both',D:'Neither'}, a:'B',
+   e:'The gas pushes the piston, so the gas does work: W_out. W_in = 0.'},
+  {q:'On a P-V diagram, what tells you the boundary work of a process?', o:{A:'The slope of the path',B:'The area under the path, down to P = 0',C:'The height of the end point',D:'The area to the left of the path'}, a:'B',
+   e:'Boundary work is ∫P dV, the area under the path.'},
+  {q:'1 kg of air (c_v = 0.718 kJ/kg·K) warms from 300 K to 400 K at constant pressure. What is ΔU?', o:{A:'71.8 kJ',B:'100.5 kJ',C:'0',D:'28.7 kJ'}, a:'A',
+   e:'ΔU = mc_v ΔT = 0.718 × 100 = 71.8 kJ. Even at constant pressure, ΔU uses c_v. (100.5 kJ, with c_p, is the heat.)'},
+  {q:'For PVᵃ = constant, which value of a describes a constant-temperature (isothermal) process of an ideal gas?', o:{A:'a = 0',B:'a = 1',C:'a = γ',D:'a = ±∞'}, a:'B',
+   e:'PV = mRT, so if T is constant, PV¹ = constant: a = 1.'},
+  {q:'On a T-S diagram, a reversible process with no heat transfer is drawn as…', o:{A:'a horizontal line',B:'a vertical line',C:'a line going up and to the right',D:'a curve going down and to the left'}, a:'B',
+   e:'No heat means no change in entropy, so S stays fixed: a vertical line.'}
+];
+function renderHow(main){
+  main.innerHTML=`
+    <div class="card"><div class="story"><div class="chip">PVᵃ</div><div>
+      <h2>Four ways to change a gas</h2>
+      <p class="lead">Heat a gas in a cylinder with the piston pinned, or with a weight on it, or let it expand slowly in a water bath, or expand it inside insulation. These are the four basic processes behind every engine, compressor, air-conditioner and power plant. For each one you will decide where the heat, the work and the change in internal energy come from, and sketch it on P-V and T-S diagrams.</p>
+    </div></div></div>
+    <div class="card" style="margin-top:14px"><h2>How it works</h2>
+      <p class="lead">Open all six cards. The self-check unlocks once you have read them.</p>
+      <div class="cards" id="cards"></div><p class="progress-note" id="cardNote"></p></div>
+    <div class="card" style="margin-top:14px" id="quizCard"><h2>Self-check</h2>
+      <p class="lead">Six quick questions. If your first answer is wrong, you get a second try.</p><div id="quizBox"></div></div>`;
+  const cards=document.getElementById('cards');
+  CARDS.forEach((c,i)=>{ const div=document.createElement('div'); div.className='hcard'+(S.cards.includes(i)?' seen':'');
+    div.innerHTML=`<button type="button"><span class="ic">${S.cards.includes(i)?'✓':i+1}</span>${c.t}<span class="chev">›</span></button><div class="body">${c.b}</div>`;
+    div.querySelector('button').onclick=()=>{ const wasOpen=div.classList.contains('open'); cards.querySelectorAll('.hcard.open').forEach(x=>x.classList.remove('open'));
+      if (!wasOpen) div.classList.add('open');
+      if (!S.cards.includes(i)){ S.cards.push(i); save(); div.classList.add('seen'); div.querySelector('.ic').textContent='✓'; updateQuizLock(); } };
+    cards.appendChild(div); });
+  updateQuizLock();
+}
+function updateQuizLock(){
+  const n=S.cards.length, all=n>=6||UNLOCK;
+  document.getElementById('cardNote').textContent = n>=6 ? 'All six cards opened.' : `Opened ${n} of 6 cards.`;
+  const box=document.getElementById('quizBox');
+  if (!all){ box.innerHTML=`<div class="lockmsg">Open all six cards above to unlock the self-check.</div>`; return; }
+  if (!box.dataset.built){ box.dataset.built='1'; box.innerHTML='<div class="quiz" id="quiz"></div>'; QUIZ.forEach((q,i)=>renderQ(i)); }
+}
+function renderQ(i){
+  const q=QUIZ[i], st=S.quiz[i]||{picks:[]};
+  let div=document.getElementById('q'+i);
+  if (!div){ div=document.createElement('div'); div.className='q'; div.id='q'+i; document.getElementById('quiz').appendChild(div); }
+  div.innerHTML=`<div class="qt">${i+1}. ${subs(q.q)}</div><div class="opts"></div><div class="fb"></div>`;
+  const opts=div.querySelector('.opts');
+  Object.keys(q.o).forEach(L=>{ const b=document.createElement('button'); b.type='button'; b.className='opt'; b.innerHTML=`<b>${L}</b><span>${subs(q.o[L])}</span>`;
+    if (st.picks.includes(L)) b.classList.add(L===q.a?'picked-good':'picked-bad'); if (st.done && L===q.a) b.classList.add('is-answer');
+    b.disabled=!!st.done||st.picks.includes(L); b.onclick=()=>pickQ(i,L); opts.appendChild(b); });
+  const fb=div.querySelector('.fb');
+  if (st.done){ const ok=st.picks[st.picks.length-1]===q.a; fb.innerHTML=`<div class="hint ${ok?'good':'info'}">${ok?'Correct. ':'The answer is '+q.a+'. '}${subs(q.e)}</div>`; }
+  else if (st.picks.length===1) fb.innerHTML=`<div class="hint bad">Not quite. Have another look at the cards and try again.</div>`;
+}
+function pickQ(i,L){ const q=QUIZ[i]; const st=S.quiz[i]||(S.quiz[i]={picks:[]}); if (st.done) return;
+  st.picks.push(L); if (L===q.a||st.picks.length>=2) st.done=true; save(); renderQ(i); renderTabs(); if (quizDone()) showQuizDone(); }
+function showQuizDone(){ if (document.getElementById('quizDone')) return; const c=document.getElementById('quizCard');
+  const div=document.createElement('div'); div.id='quizDone'; div.className='hint good done-banner';
+  div.innerHTML=`Self-check finished. <button class="btn small" type="button" style="margin-left:8px">Start with isochoric heating →</button>`;
+  div.querySelector('button').onclick=()=>goTab(1); c.appendChild(div); }
+
+/* ---------- process tabs ---------- */
+function renderProc(main, p){
+  const P=PROCS[p];
+  main.innerHTML=`<div class="card"><h2>${P.name}<span class="tag">${P.aTxt}</span></h2><p class="lead">${P.how}</p>
+    <p class="small muted" style="margin:8px 0 0">Answer each step in order. The real path, the numbers and the animation appear in the side panel as you go.</p></div>
+    <div id="steps"></div><div id="secEnd"></div>`;
+  STEPS[p].forEach((st,i)=>renderStep(p,i));
+  renderSecEnd(p);
+}
+function stepUnlocked(p,i){ if (UNLOCK) return true; for (let j=0;j<i;j++){ const s=S.steps[p][STEPS[p][j].key]; if (!s||!s.status) return false; } return true; }
+const OPEN_DERIVE=new Set();
+function renderStep(p,i){
+  const st=STEPS[p][i], rec=S.steps[p][st.key]||{tries:0};
+  let div=document.getElementById(p+'-'+st.key);
+  if (!div){ div=document.createElement('div'); div.id=p+'-'+st.key; document.getElementById('steps').appendChild(div); }
+  div.className='step'+(rec.status?' done':'')+(stepUnlocked(p,i)?'':' locked');
+  const statusHtml = rec.status ? `<span class="status ${rec.status}">${STATUS[rec.status]}</span>` : '';
+  const dkey=p+'-'+st.key;
+  const derive = st.derive ? `<details class="derive" ${OPEN_DERIVE.has(dkey)?'open':''}><summary>Where does this come from?</summary>${st.derive}</details>` : '';
+  if (st.type==='mc'){
+    div.innerHTML=`<div class="step-h"><span class="num">${i+1}</span><h3>${st.title}</h3>${statusHtml}</div><p class="why">${subs(st.q)}</p><div class="opts" style="margin-top:10px"></div><div class="fb"></div>${rec.status?derive:''}`;
+    const opts=div.querySelector('.opts'), picks=rec.picks||[];
+    Object.keys(st.opts).forEach(L=>{ const b=document.createElement('button'); b.type='button'; b.className='opt'; b.innerHTML=`<b>${L}</b><span>${subs(st.opts[L])}</span>`;
+      if (picks.includes(L)) b.classList.add(L===st.answer?'picked-good':'picked-bad'); if (rec.status && L===st.answer) b.classList.add('is-answer');
+      b.disabled=!!rec.status||picks.includes(L); b.onclick=()=>pickMC(p,i,L); opts.appendChild(b); });
+    const fb=div.querySelector('.fb');
+    if (rec.status) fb.innerHTML=`<div class="hint ${rec.status==='revealed'?'info':'good'}">${rec.status==='revealed'?'The answer is '+st.answer+'. ':'Correct. '}${subs(st.explain)}</div>`;
+    else if (picks.length) fb.innerHTML=`<div class="hint bad">${subs(st.fb[picks[picks.length-1]]||'Not quite.')} Try again.</div>`;
+    const det=div.querySelector('details.derive'); if (det) det.addEventListener('toggle',()=>{ if (det.open) OPEN_DERIVE.add(dkey); else OPEN_DERIVE.delete(dkey); });
+    return;
+  }
+  /* sketch step */
+  div.innerHTML=`<div class="step-h"><span class="num">${i+1}</span><h3>${st.title}</h3>${statusHtml}</div><p class="why">${subs(st.q)}</p>
+    ${rec.status?'':'<p class="small muted" style="margin:4px 0 0">Press on point 1 and drag to draw the path to state 2, then press Check. Only the direction and shape matter.</p>'}
+    <div class="padhost"></div><div class="fb"></div>`;
+  const fb=div.querySelector('.fb');
+  if (rec.status) fb.innerHTML=`<div class="hint ${rec.status==='revealed'?'info':'good'}">${rec.status==='revealed'?'The answer is shown in orange. ':''}${subs(rec.msg||'')}</div>`;
+  else if (rec.hint) fb.innerHTML=`<div class="hint bad">${subs(rec.hint)}</div>`;
+  if (!stepUnlocked(p,i)) { div.querySelector('.padhost').innerHTML='<div class="lockmsg">Answer the step above first.</div>'; return; }
+  SK.pad(div.querySelector('.padhost'), st.key+'-'+p, rec, res=>sketchResult(p,i,res));
+}
+function sketchResult(p,i,res){
+  const st=STEPS[p][i], rec=S.steps[p][st.key]||(S.steps[p][st.key]={tries:0});
+  const fb=document.querySelector('#'+p+'-'+st.key+' .fb');
+  if (res.clear){ fb.innerHTML=''; return; }
+  if (res.pre){ fb.innerHTML=`<div class="hint bad">${res.pre}</div>`; return; }
+  if (res.reveal){ rec.status='revealed'; rec.msg=res.msg; rec.pts=res.pts; afterStep(p,i); return; }
+  rec.tries++;
+  if (res.ok){ rec.status=rec.tries===1?'first':'retry'; rec.msg=res.msg; rec.pts=res.pts; delete rec.hint; afterStep(p,i); return; }
+  const wkey=p+'|'+st.key; if (S.wrong[wkey]==null) S.wrong[wkey]=shortHint(res.msg);
+  rec.hint=res.msg+(rec.tries>=2?' You can keep trying, or show the answer.':' Clear and try again.');
+  save();
+  fb.innerHTML=`<div class="hint bad">${subs(rec.hint)}</div>`;
+  if (rec.tries===2){ renderStep(p,i); }
+}
+function shortHint(m){ return m.split('.')[0]; }
+function pickMC(p,i,L){
+  const st=STEPS[p][i], rec=S.steps[p][st.key]||(S.steps[p][st.key]={tries:0,picks:[]});
+  rec.picks=rec.picks||[]; rec.picks.push(L); rec.tries=rec.picks.length;
+  if (L===st.answer) rec.status=rec.picks.length===1?'first':'retry';
+  else { const wkey=p+'|'+st.key; if (S.wrong[wkey]==null) S.wrong[wkey]=L; if (rec.picks.length>=2) rec.status='revealed'; }
+  afterStep(p,i);
+}
+function afterStep(p,i){
+  if (p==='final' && secDone('final') && !S.t1) S.t1=Date.now();
+  save();
+  STEPS[p].forEach((_,j)=>{ if (j>=i) renderStep(p,j); });
+  renderSecEnd(p); renderTabs();
+  if (p!=='final'){ renderSide(); if (secDone(p) && STEPS[p][i].key==='ts') startPlay(); }
+  const next=STEPS[p][i+1], rec=S.steps[p][STEPS[p][i].key];
+  if (rec.status && next){ const e=document.getElementById(p+'-'+next.key); e&&e.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+}
+function renderSecEnd(p){
+  const box=document.getElementById('secEnd'); if (!box) return;
+  if (!secDone(p)){ box.innerHTML=''; return; }
+  if (p==='final'){ box.innerHTML=`<div class="hint good done-banner">All done. Scroll down to send your results.</div>`; renderSend(); return; }
+  const idx=PROC_IDS.indexOf(p), E=energies(PROCS[p].a);
+  const fmt=v=>Math.abs(v)<0.05?'0':Math.abs(v).toFixed(1)+' kJ';
+  const w=E.W>0.05?'W_in = '+fmt(E.W):E.W<-0.05?'W_out = '+fmt(E.W):'W = 0';
+  const q=E.Q>0.05?'Q_in = '+fmt(E.Q):E.Q<-0.05?'Q_out = '+fmt(E.Q):'Q = 0';
+  box.innerHTML=`<div class="hint good done-banner"><b>${PROCS[p].name} finished.</b> With the numbers for 1 kg of air: ${subs(w)}, ΔU = ${E.dU.toFixed(1)} kJ, ${subs(q)}. Press <b>Play the process</b> in the side panel to watch it.
+    <button class="btn small" type="button" style="margin-left:8px">${idx<3?'Next: '+PROCS[PROC_IDS[idx+1]].name.toLowerCase()+' →':'Put it together →'}</button></div>`;
+  box.querySelector('button').onclick=()=>goTab(TAB_PROC.indexOf(p)+1);
+}
+
+/* ---------- Put it together ---------- */
+const EXPR={
+  isochoric:{W:'0',dU:'mc_v(T₂ − T₁)',Q:'Q_in = mc_v(T₂ − T₁)'},
+  isobaric:{W:'W_out = P(V₂ − V₁)',dU:'mc_v(T₂ − T₁)',Q:'Q_in = mc_p(T₂ − T₁)'},
+  isothermal:{W:'W_out = mRT ln(V₂/V₁)',dU:'0',Q:'Q_in = W_out'},
+  adiabatic:{W:'W_out = (P₁V₁ − P₂V₂)/(γ − 1)',dU:'mc_v(T₂ − T₁) &lt; 0',Q:'0'}
+};
+function renderFinal(main){
+  const fmt=v=>Math.abs(v)<0.05?'0':v.toFixed(1);
+  const dir=(sym,v)=>Math.abs(v)<0.05?`${sym} = 0`:v>0?`${sym}<sub>in</sub> = ${v.toFixed(1)} kJ`:`${sym}<sub>out</sub> = ${(-v).toFixed(1)} kJ`;
+  const mark=(p,k)=>{ const r=got(p,k); return r?`<span class="status ${r.status}" style="margin:0;font-size:11px;padding:1px 7px">${r.status==='first'?'✓':r.status==='retry'?'↻':'shown'}</span>`:''; };
+  const rows=PROC_IDS.map(p=>{ const E=energies(PROCS[p].a), X=EXPR[p];
+    return `<tr><td><b>${PROCS[p].name}</b><span class="num">${PROCS[p].aTxt}</span></td>
+      <td>${subs(X.W)} ${mark(p,'W')}<span class="num">${dir('W',E.W)}</span></td>
+      <td>${subs(X.dU)} ${mark(p,'dU')}<span class="num">${fmt(E.dU)} kJ</span></td>
+      <td>${subs(X.Q)} ${mark(p,'Q')}<span class="num">${dir('Q',E.Q)}</span></td>
+      <td>${SK.thumb('pv-'+p)}</td><td>${SK.thumb('ts-'+p)}</td></tr>`; }).join('');
+  main.innerHTML=`
+    <div class="card"><h2>Your Four Processes Table</h2>
+      <p class="lead">For an ideal gas in a closed system. The numbers are for 1 kg of air starting at 100 kPa and 300 K. ✓ = right first time, ↻ = after a retry.</p>
+      <div class="ptable-wrap"><table class="sum-table"><thead><tr><th>Process</th><th><i>W</i></th><th>Δ<i>U</i></th><th><i>Q</i></th><th>P-V</th><th>T-S</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="small muted" style="margin-top:8px">Check every row with Δ<i>U</i> = (<i>Q</i><sub>in</sub> − <i>Q</i><sub>out</sub>) + (<i>W</i><sub>in</sub> − <i>W</i><sub>out</sub>). The side panel shows all four paths on one P-V and one T-S diagram.</p></div>
+    <div class="card" style="margin-top:14px"><h2>One family: slide through a</h2>
+      <p class="lead">Every process here is <i>PV</i><sup><i>a</i></sup> = constant. Move the slider to see the path for an expansion to 2<i>V</i><sub>1</sub> sweep between the cases (black line in the side panel). Nothing here is recorded.</p>
+      <div class="slider-row"><span class="aval" id="aval"></span><input type="range" id="aslide" min="0" max="3" step="0.01" value="1.4" aria-label="polytropic exponent a"></div>
+      <div class="presets"><button type="button" data-a="0">a = 0</button><button type="button" data-a="1">a = 1</button><button type="button" data-a="1.2">a = 1.2</button><button type="button" data-a="1.4">a = γ = 1.4</button><button type="button" data-a="2.5">a = 2.5</button></div>
+      <div id="aread" class="eeq" style="margin-top:10px"></div>
+      <p class="small muted" id="anote" style="margin:6px 0 0"></p></div>
+    <div id="steps"></div><div id="secEnd"></div><div class="card" style="margin-top:14px" id="sendCard"><h2>Finish</h2><div id="sendBox"></div></div>`;
+  STEPS.final.forEach((st,i)=>renderStep('final',i));
+  renderSecEnd('final'); renderSend();
+  const sl=document.getElementById('aslide');
+  const upd=()=>{ const a=+sl.value, E=energies(a);
+    document.getElementById('aval').textContent='a = '+a.toFixed(2);
+    const w=E.W<-0.05?`W<sub>out</sub> = ${(-E.W).toFixed(1)}`:E.W>0.05?`W<sub>in</sub> = ${E.W.toFixed(1)}`:'W = 0';
+    const q=E.Q>0.05?`Q<sub>in</sub> = ${E.Q.toFixed(1)}`:E.Q<-0.05?`Q<sub>out</sub> = ${(-E.Q).toFixed(1)}`:'Q = 0';
+    document.getElementById('aread').innerHTML=`${w} kJ, &nbsp; Δ<i>U</i> = ${E.dU.toFixed(1)} kJ, &nbsp; ${q} kJ &nbsp; (<i>T</i><sub>2</sub> = ${E.end.T.toFixed(0)} K)`;
+    document.getElementById('anote').textContent = a<1-0.005 ? 'Between isobaric and isothermal: the gas warms up as it expands, so it needs a lot of heat.'
+      : a<1+0.005 ? 'Isothermal: ΔU = 0, all the heat leaves as work.'
+      : a<1.395 ? 'Between isothermal and adiabatic: the gas cools as it expands, but some heat still flows in.'
+      : a<1.405 ? 'Adiabatic: no heat. The work comes out of the internal energy.'
+      : 'Steeper than adiabatic: the gas cools so much that heat must flow out as it expands.';
+    drawAllCharts({a}); };
+  sl.oninput=upd;
+  document.querySelectorAll('.presets button').forEach(b=>b.onclick=()=>{ sl.value=b.dataset.a; upd(); });
+  upd();
+}
+function renderSend(){
+  const box=document.getElementById('sendBox'); if (!box) return;
+  if (!secDone('final')){ box.innerHTML='<p class="small muted">Answer the two questions above, then send your results here.</p>'; return; }
+  box.innerHTML=`<p class="small muted" style="margin:0">Self-check: ${selfFirstCorrect()} of 6 right first time · Steps right first time: ${firstTries()} · Time: ${minutes()||'–'} min</p>`;
+  if (!FORM_ON){ box.innerHTML+=`<div class="hint info">The results form has not been connected yet, so there is nothing to send. Tell your instructor.</div>`; return; }
+  box.innerHTML+=`<div class="idrow"><label for="sid"><b>Student ID</b></label><input id="sid" inputmode="numeric" maxlength="7" placeholder="7 digits" value="${S.sid||''}">
+    <button class="btn" id="sendBtn" type="button">Send to instructor</button></div>
+    <p class="small muted" id="sendNote">This opens a Microsoft Form with your results filled in. Nothing is sent until you press Submit on the form.</p>`;
+  const sid=document.getElementById('sid');
+  sid.oninput=()=>{ S.sid=sid.value.replace(/\D/g,'').slice(0,7); sid.value=S.sid; save(); };
+  document.getElementById('sendBtn').onclick=()=>{
+    if (!/^\d{7}$/.test(S.sid||'')){ document.getElementById('sendNote').innerHTML='<span style="color:var(--hot)">Enter your 7-digit student ID first.</span>'; sid.focus(); return; }
+    const url=formLink(S.sid); if (url) window.open(url,'_blank','noopener'); };
+}
+function selfFirstCorrect(){ let n=0; for (let i=0;i<6;i++){ const q=S.quiz[i]; if (q&&q.picks[0]===QUIZ[i].a) n++; } return n; }
+function firstTries(){ let n=0, t=0; PROC_IDS.concat(['final']).forEach(p=>STEPS[p].forEach(st=>{ t++; const r=S.steps[p][st.key]; if (r&&r.status==='first') n++; })); return n+' of '+t; }
+function minutes(){ return S.t0&&S.t1 ? String(Math.max(1,Math.round((S.t1-S.t0)/60000))) : ''; }
+
+/* ---------- results for the form (17 questions) ---------- */
+const FORM=String(window.FORM_URL||'').trim();
+const FORM_ON=/^https:\/\/forms\.(office\.com|microsoft\.com|cloud\.microsoft)\//.test(FORM);
+const STEP_LABEL={a:'a',pv:'P-V sketch',W:'W',dU:'ΔU',Q:'Q',ts:'T-S sketch',f1:'work ranking',f2:'hotter box'};
+function procSummary(p){
+  return STEPS[p].map(st=>{ const r=S.steps[p][st.key]; if (!r||!r.status) return STEP_LABEL[st.key]+': not done';
+    return STEP_LABEL[st.key]+': '+STATUS[r.status]+(st.type==='mc'?' (picked '+r.picks.join(', then ')+')':''); }).join('; ');
+}
+function finalValue(k){ const r=S.steps.final[k]; if (!r||!r.status) return ''; return STATUS[r.status]+' · picked '+r.picks.join(', then '); }
+function sketchSummary(){ let n=0,t=0; const miss=[]; PROC_IDS.forEach(p=>['pv','ts'].forEach(k=>{ t++; const r=S.steps[p][k]; if (r&&r.status==='first') n++; else if (r&&r.status) miss.push(PROCS[p].short+' '+STEP_LABEL[k]+' ('+STATUS[r.status].toLowerCase()+')'); }));
+  return `${n} of ${t} right first time`+(miss.length?'; '+miss.join('; '):''); }
+function quiz2(){ const out=[]; for (let i=0;i<6;i++){ const q=S.quiz[i]; if (q&&q.picks.length>1) out.push(`Q${i+1}: ${q.picks.join(' then ')}${q.picks[1]===QUIZ[i].a?'':' (still wrong)'}`); } return out.length?out.join('; '):'None'; }
+function wrongList(){ const out=[]; PROC_IDS.concat(['final']).forEach(p=>STEPS[p].forEach(st=>{ const w=S.wrong[p+'|'+st.key]; if (w!=null) out.push(`${p==='final'?'Final':PROCS[p].short} ${STEP_LABEL[st.key]}: ${w}`); })); return out.length?out.join('; '):'None'; }
+function formValues(sid){
+  const v=[sid];
+  for (let i=0;i<6;i++){ const q=S.quiz[i]; v.push(q&&q.picks[0]?q.picks[0]:''); }
+  v.push(quiz2());
+  PROC_IDS.forEach(p=>v.push(procSummary(p)));
+  v.push(finalValue('f1')); v.push(finalValue('f2'));
+  v.push(sketchSummary()); v.push(wrongList()); v.push(minutes());
+  return v;
+}
+function formLink(sid){
+  let u; try{ u=new URL(FORM); }catch(e){ return null; }
+  const pairs=[...u.searchParams.entries()], keys=pairs.map(p=>p[0]).filter(k=>/^r[0-9a-f]{4,}$/i.test(k)), out=new Map(pairs);
+  formValues(sid).forEach((val,i)=>{ const k=keys[i]; if (!k) return; const quoted=/^".*"$/.test(out.get(k)||''); if (!val){ out.delete(k); return; } out.set(k, quoted?`"${val}"`:val); });
+  return u.origin+u.pathname+'?'+[...out.entries()].map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+}
+
+/* ---------- main render ---------- */
+function render(){
+  if (!tabOpen(S.tab)) S.tab=0;
+  renderTabs();
+  const main=document.getElementById('main');
+  if (S.tab===0) renderHow(main); else if (S.tab===5) renderFinal(main); else renderProc(main, TAB_PROC[S.tab]);
+  if (S.tab===0 && quizDone()) showQuizDone();
+  renderSide();
+  if (S.tab===5) document.getElementById('aslide').oninput();
+}
+document.getElementById('resetBtn').onclick=()=>{ if (confirm('Clear all your answers on this page and start again?')){ S=fresh(); save(); PLAY.proc=null; render(); window.scrollTo(0,0); } };
+render();
+</script>
+</body>
+</html>
