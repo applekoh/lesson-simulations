@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How a Heat Exchanger Works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--cold:#2A6F8E;--hot:#BC4A2B;--warm:#DE9127;--bg:#EDF1F3;--ink:#1F2A33;--muted:#5B6B77;--card:#FFFFFF;--line:#D5DDE2}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:15px;line-height:1.45}
+.wrap{max-width:1280px;margin:0 auto;padding:18px 16px 28px}
+.kicker{font-family:"Space Grotesk",sans-serif;font-weight:600;color:var(--cold);letter-spacing:.06em;text-transform:uppercase;font-size:13px}
+h1{font-family:"Space Grotesk",sans-serif;margin:2px 0 4px;font-size:28px;font-weight:700;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);max-width:780px}
+.hb{text-decoration:overline;text-decoration-thickness:1px}
+sub{font-size:.72em}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0 12px}
+.seg{display:inline-flex;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;font:600 14px "Space Grotesk",sans-serif;color:var(--muted);padding:8px 13px;border-radius:7px;cursor:pointer}
+.seg button.on{background:var(--ink);color:#fff}
+.btn{border:1px solid var(--line);background:var(--card);font:600 14px "Space Grotesk",sans-serif;color:var(--ink);padding:8px 14px;border-radius:9px;cursor:pointer}
+.btn.accent{background:var(--warm);border-color:var(--warm);color:#fff}
+.btn[hidden]{display:none}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.caption{margin:0 0 10px;padding:12px 16px;border-radius:10px;background:#F6F1E8;border-left:5px solid var(--warm);font-size:17px;line-height:1.4;min-height:74px;transition:opacity .25s}
+.caption b{font-family:"Space Grotesk",sans-serif}
+canvas{display:block;width:100%;height:auto}
+.note{font-size:13px;color:var(--muted);margin-top:14px}
+.modeTag{display:none;font:600 14px "Space Grotesk",sans-serif;padding:4px 10px;border-radius:7px;background:var(--ink);color:#fff}
+@media (max-width:520px){h1{font-size:23px}.caption{font-size:15px}}
+body.video{width:1280px;height:720px;overflow:hidden}
+body.video .wrap{max-width:none;width:1280px;padding:12px 18px 0}
+body.video header p,body.video .toolbar,body.video .note{display:none}
+body.video header{display:flex;align-items:center;gap:14px;height:36px}
+body.video h1{font-size:24px;margin:0}
+body.video .modeTag{display:inline-block}
+body.video .stage{margin-top:8px;padding:10px 12px}
+body.video .caption{font-size:18.5px;min-height:76px;margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Thermal Systems</div>
+    <h1>How a heat exchanger works</h1>
+    <span class="modeTag" id="modeTag"></span>
+    <p>Heat flows from a hot fluid to a cold fluid through a metal wall, without the two fluids ever mixing. Pick a scene to watch it play, or watch all four in order.</p>
+  </header>
+  <div class="toolbar">
+    <button class="btn accent" id="allBtn">Watch all</button>
+    <div class="seg" id="sceneSeg">
+      <button data-s="0">Parallel flow</button>
+      <button data-s="1">Counterflow</button>
+      <button data-s="2">Side by side</button>
+      <button data-s="3">Shell-and-tube</button>
+    </div>
+    <button class="btn" id="pauseBtn">Pause</button>
+    <button class="btn" id="replayBtn">Replay</button>
+    <button class="btn" id="longBtn" hidden>Make it longer</button>
+  </div>
+  <div class="stage">
+    <div class="caption" id="caption"></div>
+    <canvas id="cv" aria-label="Heat exchanger animation"></canvas>
+  </div>
+  <div class="note">The parallel-flow and counterflow temperatures are calculated (steady flow, no heat loss to the surroundings, constant properties and constant <span class="hb">h</span>). The shell-and-tube colours show the idea only.</div>
+</div>
+<script>
+(function(){
+"use strict";
+const VIDEO=new URLSearchParams(location.search).has("video");
+if(VIDEO)document.body.classList.add("video");
+const W=1240,H=570;
+const cv=document.getElementById("cv"),ctx=cv.getContext("2d");
+const DPR=Math.max(1,window.devicePixelRatio||1);
+cv.width=W*DPR;cv.height=H*DPR;
+const FH="'Space Grotesk', Inter, sans-serif",FB="Inter, system-ui, sans-serif";
+const INK="#1F2A33",MUTED="#5B6B77",HOT="#BC4A2B",COLD="#2A6F8E",WARM="#DE9127",METAL="#8D99A3",METAL2="#6E7B85",EMPTY="#CDD5DA";
+
+/* ---------- helpers ---------- */
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,f)=>a+(b-a)*f;
+const ease=f=>{f=clamp(f,0,1);return f<.5?2*f*f:1-Math.pow(-2*f+2,2)/2;};
+const STOPS=[[0,[42,111,142]],[.33,[127,176,196]],[.55,[236,222,198]],[.76,[222,145,39]],[1,[188,74,43]]];
+function col(t,a){t=clamp(t,0,1);for(let i=1;i<STOPS.length;i++)if(t<=STOPS[i][0]){const[u0,c0]=STOPS[i-1],[u1,c1]=STOPS[i],f=(t-u0)/(u1-u0);const c=c0.map((v,j)=>Math.round(v+(c1[j]-v)*f));return a==null?`rgb(${c})`:`rgba(${c},${a})`;}return a==null?"rgb(188,74,43)":`rgba(188,74,43,${a})`;}
+let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646;};
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function text(s,x,y,o){o=o||{};ctx.save();ctx.globalAlpha*=o.a==null?1:o.a;ctx.font=(o.w||600)+" "+(o.size||16)+"px "+(o.f||FH);ctx.fillStyle=o.c||INK;ctx.textAlign=o.al||"left";ctx.textBaseline=o.bl||"alphabetic";
+  if(o.halo){ctx.lineWidth=5;ctx.strokeStyle="rgba(255,255,255,.95)";ctx.lineJoin="round";ctx.strokeText(s,x,y);}ctx.fillText(s,x,y);ctx.restore();}
+function callout(s,px,py,lx,ly,a,o){if(a<=0)return;o=o||{};ctx.save();ctx.globalAlpha=a;ctx.font="600 "+(o.size||15)+"px "+FH;
+  const w=ctx.measureText(s).width+22,h=(o.size||15)+14;
+  ctx.strokeStyle=INK;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(lx,ly);ctx.stroke();
+  ctx.fillStyle=INK;ctx.beginPath();ctx.arc(px,py,3.5,0,7);ctx.fill();
+  const bx=o.al==="right"?lx-w:o.al==="left"?lx:lx-w/2;rr(bx,ly-h/2,w,h,h/2);ctx.fillStyle=o.bg||INK;ctx.fill();
+  ctx.fillStyle="#fff";ctx.textBaseline="middle";ctx.textAlign="center";ctx.fillText(s,bx+w/2,ly+1);ctx.restore();}
+function hgrad(x0,x1,fn,n){const g=ctx.createLinearGradient(x0,0,x1,0);for(let i=0;i<=n;i++){const u=i/n;g.addColorStop(u,fn(u));}return g;}
+function ring(x,y,r,a,c){ctx.save();ctx.globalAlpha=a;ctx.strokeStyle=c||WARM;ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.stroke();ctx.restore();}
+
+/* ---------- double-pipe exchanger (transient, nondimensional) ----------
+   theta = 0 cold inlet, 1 hot inlet. Inner tube: cold fluid, left -> right.
+   Annulus: hot fluid, left -> right (parallel) or right -> left (counter).
+   NTU_c = 1.2, NTU_h = 0.6 (C_c/C_h = 0.5) at full length; no temperature cross. */
+const N=120;
+class Exch{
+  constructor(mode){this.mode=mode;this.h=new Float32Array(N);this.c=new Float32Array(N);this.on=false;this.scale=1;
+    this.pIn=[];this.pOut=[];for(let i=0;i<46;i++)this.pIn.push({u:rnd(),v:rnd()});for(let i=0;i<90;i++)this.pOut.push({u:rnd(),v:rnd(),top:i%2===0});
+    this.dots=[];this.acc=0;this.parcels=null;this.width=1000;this.phC=0;this.phH=0;}
+  get hIn(){return this.mode==="par"?0:1;} // annulus index side where hot enters: 0 = left
+  sh(u){const s=clamp(u,0,1)*(N-1),i=Math.min(N-2,Math.floor(s)),f=s-i;return lerp(this.h[i],this.h[i+1],f);}
+  sc(u){const s=clamp(u,0,1)*(N-1),i=Math.min(N-2,Math.floor(s)),f=s-i;return lerp(this.c[i],this.c[i+1],f);}
+  step(dt){
+    const vh=95/this.width,vc=125/this.width; // lengths per second (constant pixel speed)
+    if(this.on){
+      const NTUc=1.2*this.scale,NTUh=0.6*this.scale;
+      const uh=vh*N,uc=vc*N,Kh=NTUh*vh,Kc=NTUc*vc;
+      const n=Math.ceil(Math.max(uh,uc)*dt/0.7)+1,ds=dt/n;
+      const h=this.h,c=this.c,hn=new Float32Array(N),cn=new Float32Array(N);
+      for(let k=0;k<n;k++){
+        for(let j=0;j<N;j++){
+          const cl=j>0?c[j-1]:0; cn[j]=c[j]-uc*ds*(c[j]-cl)+Kc*ds*(h[j]-c[j]);
+          const hu=this.mode==="par"?(j>0?h[j-1]:1):(j<N-1?h[j+1]:1); hn[j]=h[j]-uh*ds*(h[j]-hu)-Kh*ds*(h[j]-c[j]);
+        }
+        h.set(hn);c.set(cn);
+      }
+      const dir=this.mode==="par"?1:-1;this.phC+=125*dt;this.phH+=95*dt;
+      for(const p of this.pIn)p.u=(p.u+vc*dt)%1;
+      for(const p of this.pOut)p.u=((p.u+dir*vh*dt)%1+1)%1;
+      if(this.parcels){for(const p of this.parcels){p.u+=p.v*dt*(p.hot?dir*vh:vc);if(p.hot&&dir<0&&p.u<0)p.u=1;if((p.u>1&&(!p.hot||dir>0)))p.u=0;}}
+    }
+    // heat dots
+    if(this.heat){this.acc+=dt*55*(this.width/1000);
+      while(this.acc>1){this.acc-=1;const u=rnd(),d=this.sh(u)-this.sc(u);if(rnd()<d*1.6)this.dots.push({u,top:rnd()<.5,t:0,life:.75+rnd()*.3});}}
+    for(const d of this.dots)d.t+=dt;this.dots=this.dots.filter(d=>d.t<d.life);
+  }
+}
+function drawExch(ex,g,o){
+  o=o||{};const s=g.s,x0=g.x0,x1=g.x1,yc=g.yc,L=x1-x0;
+  const inT=yc-22*s,inB=yc+22*s,iwT=inT-7*s,iwB=inB+7*s,anT=iwT-50*s,anB=iwB+50*s,owT=anT-8*s,owB=anB+8*s;
+  g.inT=inT;g.inB=inB;g.anT=anT;g.anB=anB;g.owT=owT;g.owB=owB;g.iwT=iwT;g.iwB=iwB;
+  const fill=(fn)=>hgrad(x0,x1,u=>col(fn(u)),24);
+  // annulus
+  ctx.fillStyle=fill(u=>ex.sh(u));ctx.fillRect(x0,anT,L,iwT-anT);ctx.fillRect(x0,iwB,L,anB-iwB);
+  // inner + stubs
+  ctx.fillStyle=col(ex.sc(0));ctx.fillRect(x0-44*s,inT,44*s,inB-inT);
+  ctx.fillStyle=col(ex.sc(1));ctx.fillRect(x1,inT,44*s,inB-inT);
+  ctx.fillStyle=fill(u=>ex.sc(u));ctx.fillRect(x0,inT,L,inB-inT);
+  // nozzles
+  const nz=[[x0+40*s,ex.sh(0)],[x1-40*s,ex.sh(1)]];
+  for(const[nx,t]of nz){ctx.fillStyle=col(t);ctx.fillRect(nx-15*s,owT-34*s,30*s,34*s+1);ctx.fillStyle=METAL;ctx.fillRect(nx-21*s,owT-34*s,6*s,34*s);ctx.fillRect(nx+15*s,owT-34*s,6*s,34*s);}
+  // walls
+  ctx.fillStyle=METAL;ctx.fillRect(x0-6*s,owT,L+12*s,8*s);ctx.fillRect(x0-6*s,anB,L+12*s,8*s);
+  ctx.fillRect(x0-6*s,owT,6*s,iwT-owT);ctx.fillRect(x1,owT,6*s,iwT-owT);ctx.fillRect(x0-6*s,iwB,6*s,owB-iwB);ctx.fillRect(x1,iwB,6*s,owB-iwB);
+  ctx.fillStyle=METAL2;ctx.fillRect(x0-44*s,iwT,L+88*s,7*s);ctx.fillRect(x0-44*s,inB,L+88*s,7*s);
+  // particles
+  // nozzle openings through the outer wall (no wall across the flow)
+  for(const[nx,t]of nz){ctx.fillStyle=col(t);ctx.fillRect(nx-15*s,owT-1,30*s,8*s+2);}
+  // heat dots
+  for(const d of ex.dots){const f=d.t/d.life,x=x0+L*d.u;const ya=d.top?(anT+iwT)/2:(anB+iwB)/2,yb=d.top?inT+10*s:inB-10*s;const y=lerp(ya,yb,ease(f));
+    const a=Math.sin(Math.PI*f);ctx.save();ctx.globalAlpha=a;ctx.shadowColor="rgba(255,200,90,.95)";ctx.shadowBlur=10*s;ctx.fillStyle="#FFC75A";ctx.beginPath();ctx.arc(x,y,4.2*Math.max(.7,s),0,7);ctx.fill();ctx.restore();}
+  // flow chevrons
+  const chev=(x,y,dir,a)=>{ctx.save();ctx.globalAlpha=a;ctx.strokeStyle="#fff";ctx.lineWidth=3*Math.max(.7,s);ctx.lineCap=ctx.lineJoin="round";ctx.beginPath();ctx.moveTo(x-6*dir*s,y-8*s);ctx.lineTo(x+4*dir*s,y);ctx.lineTo(x-6*dir*s,y+8*s);ctx.stroke();ctx.restore();};
+  if(ex.on){const sp=200*Math.max(.6,s),d=ex.mode==="par"?1:-1;const n=Math.floor(L/sp);
+    for(let i=0;i<=n;i++){const xc=x0+((i*sp+ex.phC)%(n*sp+sp))-sp/2, xh=x0+(((i*sp+d*ex.phH)%(n*sp+sp))+(n*sp+sp))%(n*sp+sp)-sp/2;
+      const fa=x=>clamp(Math.min(x-x0,x1-x)/40,0,1)*.9;
+      if(xc>x0&&xc<x1)chev(xc,yc,1,fa(xc));if(xh>x0&&xh<x1){chev(xh,(anT+iwT)/2,d,fa(xh));chev(xh,(anB+iwB)/2,d,fa(xh));}}}
+  // parcels
+  if(ex.parcels&&o.parcelA>0){for(const p of ex.parcels){const x=x0+L*clamp(p.u,0,1);const y=p.hot?(anT+iwT)/2-2*s:yc;const t=p.hot?ex.sh(p.u):ex.sc(p.u);
+    ctx.save();ctx.globalAlpha=o.parcelA;ctx.shadowColor="rgba(0,0,0,.35)";ctx.shadowBlur=6;ctx.fillStyle=col(t);ctx.beginPath();ctx.arc(x,y,10*s,0,7);ctx.fill();ctx.shadowBlur=0;ctx.lineWidth=3;ctx.strokeStyle="#fff";ctx.stroke();ctx.lineWidth=1.2;ctx.strokeStyle=INK;ctx.beginPath();ctx.arc(x,y,11.8*s,0,7);ctx.stroke();ctx.restore();}}
+  // words at the ends
+  if(o.labels!==false){const fs=o.fs||15,a=o.labelA==null?1:o.labelA;
+    const hotL=ex.mode==="par"?"Hot in":"Hot out",hotR=ex.mode==="par"?"Hot out":"Hot in";
+    text("Cold in",x0-52*s,yc+5,{al:"right",c:COLD,size:fs,a});text("Cold out",x1+52*s,yc+5,{c:COLD,size:fs,a});
+    text(hotL,x0+40*s+26*s,owT-14*s,{c:HOT,size:fs,a});text(hotR,x1-40*s-26*s,owT-14*s,{al:"right",c:HOT,size:fs,a});}
+}
+/* graph of the temperature profile */
+function drawGraph(ex,G,o){
+  o=o||{};const{x0,x1,y0,y1}=G;const Y=t=>y1-(t+.07)/1.14*(y1-y0),X=u=>x0+(x1-x0)*u;
+  ctx.save();ctx.globalAlpha=o.a==null?1:o.a;
+  ctx.strokeStyle=INK;ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x0,y0-6);ctx.lineTo(x0,y1);ctx.lineTo(x1+8,y1);ctx.stroke();
+  ctx.fillStyle=INK;ctx.beginPath();ctx.moveTo(x0,y0-12);ctx.lineTo(x0-5,y0-2);ctx.lineTo(x0+5,y0-2);ctx.fill();ctx.beginPath();ctx.moveTo(x1+14,y1);ctx.lineTo(x1+4,y1-5);ctx.lineTo(x1+4,y1+5);ctx.fill();
+  const fs=o.fs||14;
+  ctx.save();ctx.translate(x0-16,(y0+y1)/2);ctx.rotate(-Math.PI/2);text("Temperature",0,0,{al:"center",c:MUTED,f:FB,w:400,size:fs});ctx.restore();
+  text("Position along the exchanger",(x0+x1)/2,y1+20,{al:"center",c:MUTED,f:FB,w:400,size:fs});
+  const r=o.reveal==null?1:o.reveal;
+  if(r>0){const n=Math.max(2,Math.round(r*(N-1)));
+    ctx.beginPath();for(let j=0;j<=n;j++){const u=j/(N-1);ctx.lineTo(X(u),Y(ex.sh(u)));}for(let j=n;j>=0;j--){const u=j/(N-1);ctx.lineTo(X(u),Y(ex.sc(u)));}ctx.closePath();ctx.fillStyle="rgba(222,145,39,.16)";ctx.fill();
+    for(const[fn,c]of[[u=>ex.sh(u),HOT],[u=>ex.sc(u),COLD]]){ctx.beginPath();for(let j=0;j<=n;j++){const u=j/(N-1);j?ctx.lineTo(X(u),Y(fn(u))):ctx.moveTo(X(u),Y(fn(u)));}ctx.strokeStyle=c;ctx.lineWidth=o.lw||3.4;ctx.lineJoin="round";ctx.stroke();}
+  }
+  if(o.ends>0){const a=o.ends;const br=(u,lab,al)=>{const x=X(u)+(al==="left"?14:-14),ya=Y(ex.sh(u)),yb=Y(ex.sc(u));if(Math.abs(ya-yb)<10)return;
+      ctx.save();ctx.globalAlpha*=a;ctx.strokeStyle=INK;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,ya+3);ctx.lineTo(x,yb-3);ctx.stroke();
+      for(const[yy,d]of[[ya+3,1],[yb-3,-1]]){ctx.beginPath();ctx.moveTo(x,yy);ctx.lineTo(x-4,yy+7*d);ctx.lineTo(x+4,yy+7*d);ctx.fillStyle=INK;ctx.fill();}ctx.restore();
+      text(lab,x+(al==="left"?8:-8),(ya+yb)/2+6,{al,size:fs+2,a,halo:true});};
+    br(0,"ΔT","left");br(1,"ΔT","right");}
+  if(o.endLabels>0){const a=o.endLabels,par=ex.mode==="par";
+    const lab=(u,t,s,c,dy,al)=>text(s,X(u)+(al==="left"?8:-8),Y(t)+dy,{al,c,size:fs,a,halo:true});
+    lab(0,ex.sh(0),par?"Hot in":"Hot out",HOT,-10,"left");lab(1,ex.sh(1),par?"Hot out":"Hot in",HOT,-10,"right");
+    lab(0,ex.sc(0),"Cold in",COLD,20,"left");lab(1,ex.sc(1),"Cold out",COLD,22,"right");}
+  ctx.restore();
+  return{X,Y};
+}
+function drawProbe(ex,g,G,u,a){
+  if(a<=0)return;const x=g.x0+(g.x1-g.x0)*u;
+  ctx.save();ctx.globalAlpha=a;ctx.setLineDash([5,4]);ctx.strokeStyle=INK;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,g.owT-6);ctx.lineTo(x,G.y1);ctx.stroke();ctx.setLineDash([]);
+  rr(x-30,g.owB+22,60,24,12);ctx.fillStyle=INK;ctx.fill();ctx.restore();
+  text("probe",x,g.owB+39,{al:"center",c:"#fff",size:13,a});
+  ctx.save();ctx.globalAlpha=a;
+  for(const[y,c]of[[(g.anT+g.iwT)/2,HOT],[g.inT+(g.inB-g.inT)/2,COLD]]){ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(x,y,6,0,7);ctx.fill();ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,4,0,7);ctx.fill();}
+  const Y=t=>G.y1-(t+.07)/1.14*(G.y1-G.y0),yh=Y(ex.sh(u)),yc=Y(ex.sc(u));
+  ctx.strokeStyle=INK;ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(x+12,yh+3);ctx.lineTo(x+12,yc-3);ctx.stroke();
+  for(const[yy,d]of[[yh+3,1],[yc-3,-1]]){ctx.beginPath();ctx.moveTo(x+12,yy);ctx.lineTo(x+8,yy+7*d);ctx.lineTo(x+16,yy+7*d);ctx.fillStyle=INK;ctx.fill();}
+  for(const[y,c]of[[yh,HOT],[yc,COLD]]){ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(x,y,7,0,7);ctx.fill();ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fill();}
+  ctx.restore();
+  if(Math.abs(yh-yc)>22)text("ΔT",x+22,(yh+yc)/2+6,{size:16,a,halo:true});
+}
+
+/* ---------- caption ---------- */
+const capEl=document.getElementById("caption");let capHTML="";
+function cap(h){if(h===capHTML)return;capHTML=h;capEl.innerHTML=h;}
+const hb='<span class="hb">h</span>';
+
+/* ---------- scenes ---------- */
+function fadeIn(t,t0,d){return clamp((t-t0)/(d||.6),0,1);}
+function window_(t,t0,t1,d){d=d||.5;return Math.min(fadeIn(t,t0,d),1-fadeIn(t,t1-d,d));}
+
+function singleScene(mode){
+  let ex;const g={x0:120,x1:1100,yc:136,s:1},G={x0:120,x1:1100,y0:318,y1:530};
+  const sc={dur:mode==="par"?40:28,ex:null,
+    init(){seed=mode==="par"?11:23;ex=new Exch(mode);ex.width=g.x1-g.x0;this.ex=ex;
+      ex.parcels=[{hot:true,u:mode==="par"?0:1,v:1},{hot:false,u:0,v:1}];},
+    update(t,dt){
+      if(mode==="par"){
+        if(t>=4.5)ex.on=true; ex.heat=t>=10;
+      }else{ if(t>=1.8)ex.on=true; ex.heat=t>=1.8; }
+      ex.step(dt);
+      if(mode==="par"){
+        if(t<4.5)cap("A <b>double-pipe heat exchanger</b>. Hot fluid will flow in the outer pipe and cold fluid in the inner tube. A thin metal wall keeps them apart.");
+        else if(t<10)cap("<b>Parallel flow (cocurrent):</b> both fluids enter at the left end and flow the same way.");
+        else if(t<15.5)cap("Heat flows <b>through the wall</b> from the hot fluid to the cold fluid. More heat crosses where the temperature difference ΔT is larger.");
+        else if(t<21)cap("Follow one bit of each fluid: the <b>hot one cools down</b> while the <b>cold one warms up</b>.");
+        else if(t<28)cap("A probe moves along the exchanger and plots both temperatures. This is the <b>temperature profile</b>.");
+        else if(t<34)cap("ΔT is <b>large at the inlet</b> and shrinks along the length. The cold fluid can never get hotter than the hot fluid leaving.");
+        else cap("Because ΔT changes along the length, heat transfer calculations use one representative value: the <b>log mean temperature difference</b>, ΔT<sub>lm</sub>.");
+      }else{
+        if(t<7)cap("<b>Counterflow (countercurrent):</b> same exchanger, but the hot fluid now enters at the right and flows the opposite way.");
+        else if(t<12.5)cap("ΔT stays <b>more even</b> along the length, so heat crosses the wall all the way along.");
+        else if(t<19.5)cap("The probe plots the temperature profile: the two lines now run <b>roughly side by side</b>.");
+        else cap("With the same length, the cold fluid leaves <b>warmer than in parallel flow</b>: more heat is transferred.");
+      }
+    },
+    draw(t){
+      const par=mode==="par";
+      const parcelA=par?window_(t,15.5,21.6):window_(t,7,12.8);
+      drawExch(ex,g,{parcelA,labelA:par?fadeIn(t,4.5):1});
+      if(par){
+        callout("Hot fluid (outer pipe)",g.x0+260,(g.anB+g.iwB)/2,g.x0+230,268,window_(t,.6,4.6));
+        callout("Cold fluid (inner tube)",g.x0+520,g.inB-8,g.x0+520,268,window_(t,1.4,4.6));
+        callout("Metal wall",g.x0+770,g.iwB-3,g.x0+790,268,window_(t,2.2,4.6));
+      }
+      if(ex.parcels&&parcelA>0){const p=ex.parcels,X=u=>g.x0+(g.x1-g.x0)*clamp(u,0,1);
+        callout("this bit of hot fluid",X(p[0].u),(g.anT+g.iwT)/2-12,clamp(X(p[0].u),g.x0+110,g.x1-110),g.owT-22,parcelA,{bg:HOT,size:14});
+        callout("this bit of cold fluid",X(p[1].u),g.yc+12,clamp(X(p[1].u),g.x0+110,g.x1-110),g.owB+30,parcelA,{bg:COLD,size:14});}
+      const p0=par?21.2:12.8,p1=par?27:18.6;
+      const rev=clamp((t-p0)/(p1-p0),0,1);
+      drawGraph(ex,G,{reveal:rev,a:fadeIn(t,par?20.5:12.2),ends:par?fadeIn(t,28.2):fadeIn(t,19.6),endLabels:fadeIn(t,p1-.2)});
+      drawProbe(ex,g,G,rev,window_(t,p0-.3,p1+.8));
+    }};
+  return sc;
+}
+function compareScene(){
+  let a,b;const gA={x0:190,x1:590,yc:78,s:.56},GA={x0:190,x1:590,y0:152,y1:262};
+  const gB={x0:190,x1:590,yc:352,s:.56},GB={x0:190,x1:590,y0:426,y1:536};
+  const sc={dur:31,long:0,longTarget:null,
+    init(){seed=31;a=new Exch("par");b=new Exch("cnt");this.long=0;this.longTarget=null;this.a=a;this.b=b;},
+    update(t,dt){
+      if(t>=.8){a.on=b.on=true;a.heat=b.heat=true;}
+      if(this.longTarget==null){this.long=ease((t-12.5)/4);}else{this.long+=clamp(this.longTarget-this.long,-dt/2.5,dt/2.5);}
+      const w=lerp(400,800,this.long);for(const[g,G]of[[gA,GA],[gB,GB]]){g.x1=g.x0+w;G.x1=g.x1;}
+      a.width=b.width=w;a.scale=b.scale=w/800;
+      a.step(dt);b.step(dt);
+      if(this.longTarget!=null)return;
+      if(t<6.5)cap("Side by side: same fluids, same inlet temperatures, and two <b>short</b> exchangers of the same length.");
+      else if(t<12.5)cap("Look at the <b>cold outlets</b>: when the exchanger is short, both arrangements heat the cold fluid by about the same amount.");
+      else if(t<18)cap("Now make both exchangers <b>longer</b> …");
+      else if(t<24.5)cap("<b>Counterflow pulls ahead:</b> its cold fluid leaves warmer. Parallel flow starts to level off, because ΔT near its outlet becomes small.");
+      else cap("So for the same heating job, a counterflow exchanger can be <b>shorter</b>. This is why counterflow is preferred in practice.");
+    },
+    draw(t){
+      const lt=this.longTarget!=null;
+      for(const[ex,g,G,name]of[[a,gA,GA,"Parallel flow"],[b,gB,GB,"Counterflow"]]){
+        text(name,16,g.yc-32,{size:20,w:700});
+        drawExch(ex,g,{fs:13});
+        drawGraph(ex,G,{lw:3,fs:13,endLabels:1});
+      }
+      const pulse=.55+.45*Math.sin(t*6),ca=lt?0:window_(t,6.6,12.4);
+      if(ca>0){for(const[ex,g,G]of[[a,gA,GA],[b,gB,GB]]){ring(g.x1+22*g.s+14,g.yc,22,ca*pulse);const Y=t=>G.y1-(t+.07)/1.14*(G.y1-G.y0);ring(G.x1,Y(ex.sc(1)),12,ca*pulse);}}
+      const cx=lt?0:window_(t,18.2,24.4);
+      if(cx>0){for(const[ex,g,G]of[[a,gA,GA],[b,gB,GB]]){const Y=t=>G.y1-(t+.07)/1.14*(G.y1-G.y0);ring(G.x1,Y(ex.sc(1)),14,cx*pulse);ring(g.x1+22*g.s+14,g.yc,22,cx*pulse);}}
+    }};
+  return sc;
+}
+function shellScene(){
+  const ST=150,SB=430,SX0=250,SX1=1000,FX=150,RX=1100;
+  const lowY=[310,350,390],upY=[270,230,190];
+  const baff=[[920,"T"],[790,"B"],[660,"T"],[530,"B"],[400,"T"]];
+  // tube-side path for tube i
+  function tubePath(i){return[[205,505],[205,lowY[i]+12],[SX0,lowY[i]],[SX1,lowY[i]],[1050,lowY[i]],[1072,(lowY[i]+upY[i])/2],[1050,upY[i]],[SX1,upY[i]],[SX0,upY[i]],[205,upY[i]-12],[205,95]];}
+  // shell-side centreline
+  const sp=[[950,95],[952,190],[948,330],[905,404],[850,395],[815,300],[790,200],[760,190],[720,260],[690,370],[660,405],[620,400],[585,300],[555,205],[525,190],[490,240],[455,350],[420,402],[380,410],[330,415],[300,455],[300,505]];
+  function smooth(pts,n){const out=[];for(let i=0;i<pts.length-1;i++){const p0=pts[Math.max(0,i-1)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(pts.length-1,i+2)];
+    for(let k=0;k<n;k++){const t=k/n,t2=t*t,t3=t2*t;out.push([.5*((2*p1[0])+(-p0[0]+p2[0])*t+(2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*t2+(-p0[0]+3*p1[0]-3*p2[0]+p3[0])*t3),.5*((2*p1[1])+(-p0[1]+p2[1])*t+(2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*t2+(-p0[1]+3*p1[1]-3*p2[1]+p3[1])*t3)]);}}out.push(pts[pts.length-1]);return out;}
+  function arc(pts){const L=[0];for(let i=1;i<pts.length;i++)L.push(L[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]));return L;}
+  function at(pts,L,s){const d=s*L[L.length-1];let i=1;while(i<L.length-1&&L[i]<d)i++;const f=(d-L[i-1])/((L[i]-L[i-1])||1);const x=lerp(pts[i-1][0],pts[i][0],f),y=lerp(pts[i-1][1],pts[i][1],f);const dx=pts[i][0]-pts[i-1][0],dy=pts[i][1]-pts[i-1][1],m=Math.hypot(dx,dy)||1;return[x,y,-dy/m,dx/m];}
+  const SP=smooth(sp,14),SL=arc(SP);
+  const TP=[0,1,2].map(i=>{const p=tubePath(i);return{p,L:arc(p)};});
+  // illustrative temperatures
+  const shellT=x=>lerp(1,.68,clamp((SX1-x)/(SX1-SX0),0,1));
+  const tubeT=s=>clamp(.62*(1-Math.exp(-2.2*s))/(1-Math.exp(-2.2)),0,.62); // s: progress through the tube bundle 0..1
+  let tParts=[],sParts=[],dots=[],acc=0,tubeFront=0,shellFront=0;
+  const sc={dur:50,
+    init(){seed=41;tParts=[];sParts=[];dots=[];tubeFront=0;shellFront=0;
+      for(let i=0;i<54;i++)tParts.push({tube:i%3,s:rnd()});for(let i=0;i<170;i++)sParts.push({s:rnd(),off:(rnd()*2-1)});},
+    update(t,dt){
+      if(t>=5.5){for(const p of tParts)p.s=(p.s+dt*0.075)%1;tubeFront=Math.min(1.2,tubeFront+dt*0.075);}
+      if(t>=12.5){for(const p of sParts)p.s=(p.s+dt*0.06)%1;shellFront=Math.min(1.2,shellFront+dt*0.06);}
+      if(t>=14){acc+=dt*40;while(acc>1){acc-=1;const i=Math.floor(rnd()*6),x=SX0+30+rnd()*(SX1-SX0-60);if((SX1-x)/(SX1-SX0)>shellFront*1.25-.1)continue;const y=i<3?lowY[i]:upY[i-3];dots.push({x,y,dir:rnd()<.5?-1:1,t:0,life:.7});}}
+      for(const d of dots)d.t+=dt;dots=dots.filter(d=>d.t<d.life);
+      if(t<5.5)cap("A real heat exchanger: <b>shell-and-tube</b>. A bundle of tubes sits inside a large shell.");
+      else if(t<12.5)cap("Cold fluid flows <b>inside the tubes</b>. It enters the front header, flows through the bottom tubes, turns around in the rear header and comes back through the top tubes: <b>two tube passes</b>.");
+      else if(t<19)cap("Hot fluid flows <b>in the shell, outside the tubes</b>. Baffles force it to zigzag back and forth across the tube bundle.");
+      else if(t<25.5)cap("Baffles make the shell fluid flow <b>across</b> the tubes, which raises "+hb+", and they hold the long tubes in place.");
+      else if(t<32)cap("In the bottom tubes the fluids flow in opposite directions (<b>counterflow</b>); in the top tubes they flow the same way (<b>parallel flow</b>). So this exchanger performs <b>in between</b> the two.");
+      else if(t<38.5)cap("This is a <b>1 shell pass, 2 tube pass</b> heat exchanger. <b>1 shell pass:</b> the shell fluid travels along the shell once, from its inlet to its outlet.");
+      else if(t<45)cap("<b>2 tube passes:</b> the tube fluid travels the length of the exchanger twice, out through the bottom tubes (pass 1) and back through the top tubes (pass 2).");
+      else cap("More tube passes give the tube fluid a longer path inside a compact shell. Real exchangers often use 2, 4 or more tube passes.");
+    },
+    draw(t){
+      const aShell=fadeIn(t,.2,.7),aTubes=fadeIn(t,1.2,.7),aBaff=fadeIn(t,2.2,.7);
+      // shell interior fill
+      ctx.save();ctx.globalAlpha=aShell;
+      const sf=shellFront;const shellCol=x=>{const prog=(SX1-x)/(SX1-SX0);return sf<=0?EMPTY:prog<=sf*1.25-.1?col(shellT(x)):(prog<=sf*1.25?col(shellT(x),.6):EMPTY);};
+      ctx.fillStyle=hgrad(SX0,SX1,u=>shellCol(lerp(SX0,SX1,u)),30);ctx.fillRect(SX0,ST,SX1-SX0,SB-ST);
+      // nozzles shell
+      ctx.fillStyle=sf>0?col(1):EMPTY;ctx.fillRect(935,92,30,ST-92);ctx.fillStyle=sf>.8?col(.68):EMPTY;ctx.fillRect(285,SB,30,505-SB);
+      ctx.fillStyle=METAL;for(const nx of[935,285]){const y0=nx===935?92:SB,h=nx===935?ST-92:505-SB;ctx.fillRect(nx-6,y0,6,h);ctx.fillRect(nx+30,y0,6,h);}
+      // shell walls
+      ctx.fillStyle=METAL;ctx.fillRect(SX0,ST-10,SX1-SX0,10);ctx.fillRect(SX0,SB,SX1-SX0,10);
+      ctx.fillStyle=sf>0?col(1):EMPTY;ctx.fillRect(935,ST-11,30,12);ctx.fillStyle=sf>.8?col(.68):EMPTY;ctx.fillRect(285,SB-1,30,12);
+      ctx.restore();
+      // headers
+      ctx.save();ctx.globalAlpha=aTubes;
+      const tf=tubeFront;
+      const hdr=(x,w,y0,y1,t,ok,left)=>{ctx.save();ctx.beginPath();if(left){ctx.moveTo(x+w,y0);ctx.lineTo(x+40,y0);ctx.quadraticCurveTo(x,y0,x,y0+40);ctx.lineTo(x,y1-40);ctx.quadraticCurveTo(x,y1,x+40,y1);ctx.lineTo(x+w,y1);}else{ctx.moveTo(x,y0);ctx.lineTo(x+w-40,y0);ctx.quadraticCurveTo(x+w,y0,x+w,y0+40);ctx.lineTo(x+w,y1-40);ctx.quadraticCurveTo(x+w,y1,x+w-40,y1);ctx.lineTo(x,y1);}const path=new Path2D();if(left){path.moveTo(x+w,y0);path.lineTo(x+40,y0);path.quadraticCurveTo(x,y0,x,y0+40);path.lineTo(x,y1-40);path.quadraticCurveTo(x,y1,x+40,y1);path.lineTo(x+w,y1);}else{path.moveTo(x,y0);path.lineTo(x+w-40,y0);path.quadraticCurveTo(x+w,y0,x+w,y0+40);path.lineTo(x+w,y1-40);path.quadraticCurveTo(x+w,y1,x+w-40,y1);path.lineTo(x,y1);}
+        ctx.closePath();ctx.fillStyle=ok?col(t):EMPTY;ctx.fill();ctx.lineWidth=10;ctx.strokeStyle=METAL;ctx.stroke(path);ctx.restore();};
+      // front header split by pass partition
+      ctx.save();ctx.beginPath();ctx.rect(FX-10,ST-12,SX0-FX+12,(lowY[0]+upY[0])/2-ST+12);ctx.clip();hdr(FX,SX0-FX,ST,SB,tubeT(1),tf>1,true);ctx.restore();
+      ctx.save();ctx.beginPath();ctx.rect(FX-10,(lowY[0]+upY[0])/2,SX0-FX+12,SB-(lowY[0]+upY[0])/2+12);ctx.clip();hdr(FX,SX0-FX,ST,SB,0,tf>0,true);ctx.restore();
+      hdr(SX1,RX-SX1,ST,SB,tubeT(.5),tf>.5,false);
+      ctx.fillStyle=METAL2;ctx.fillRect(FX,(lowY[0]+upY[0])/2-4,SX0-FX,8);
+      // tube nozzles
+      ctx.fillStyle=tf>0?col(0):EMPTY;ctx.fillRect(190,SB+5,30,505-SB-5);ctx.fillStyle=tf>1?col(tubeT(1)):EMPTY;ctx.fillRect(190,92,30,ST-97);
+      ctx.fillStyle=METAL;for(const[y0,h]of[[SB+5,505-SB-5],[92,ST-97]]){ctx.fillRect(184,y0,6,h);ctx.fillRect(220,y0,6,h);}
+      ctx.fillStyle=tf>0?col(0):EMPTY;ctx.fillRect(190,SB-6,30,13);ctx.fillStyle=tf>1?col(tubeT(1)):EMPTY;ctx.fillRect(190,ST-7,30,13);
+      ctx.restore();
+      // baffles (behind tubes)
+      ctx.save();ctx.globalAlpha=aBaff;ctx.fillStyle="#5E6B75";
+      for(const[x,s]of baff){if(s==="T")ctx.fillRect(x-4,ST,8,(SB-ST)*.78);else ctx.fillRect(x-4,SB-(SB-ST)*.78,8,(SB-ST)*.78);}
+      ctx.restore();
+      // tubes
+      ctx.save();ctx.globalAlpha=aTubes;
+      for(let i=0;i<3;i++){for(const[y,up]of[[lowY[i],false],[upY[i],true]]){
+        const g=hgrad(SX0,SX1,u=>{const s=up?.5+.5*(1-u):.5*u;return s<=tf?col(tubeT(s)):EMPTY;},20);
+        ctx.fillStyle=g;ctx.fillRect(SX0-6,y-8,SX1-SX0+12,16);ctx.fillStyle=METAL2;ctx.fillRect(SX0,y-9,SX1-SX0,2);ctx.fillRect(SX0,y+7,SX1-SX0,2);}}
+      // tube sheets (the tubes pass straight through them)
+      ctx.fillStyle=METAL2;const ys=[...upY,...lowY].sort((p,q)=>p-q);
+      for(const xs of[SX0-5,SX1-5]){let y=ST-10;for(const ty of ys){ctx.fillRect(xs,y,10,ty-8-y);y=ty+8;}ctx.fillRect(xs,y,10,SB+10-y);}
+      ctx.restore();
+      // moving flow chevrons
+      const chev=(x,y,ang,a,sz)=>{ctx.save();ctx.globalAlpha=a;ctx.translate(x,y);ctx.rotate(ang);ctx.strokeStyle="#fff";ctx.lineWidth=2.6;ctx.lineCap=ctx.lineJoin="round";ctx.beginPath();ctx.moveTo(-sz*.6,-sz);ctx.lineTo(sz*.4,0);ctx.lineTo(-sz*.6,sz);ctx.stroke();ctx.restore();};
+      if(t>=5.5){const P=SX1-SX0,sp=125;for(let i=0;i<3;i++)for(let k=0;k<Math.ceil(P/sp)+1;k++){
+        const u=((k*sp+t*45)%(P+sp))/P;if(u<=1){const sv=.5*u;if(sv<=tubeFront)chev(SX0+u*P,lowY[i],0,.9,5);}
+        const u2=((k*sp+t*45+60)%(P+sp))/P;if(u2<=1){const sv=.5+.5*u2;if(sv<=tubeFront)chev(SX1-u2*P,upY[i],Math.PI,.9,5);}}}
+
+      // heat dots
+      for(const d of dots){const f=d.t/d.life,y=lerp(d.y+d.dir*22,d.y+d.dir*5,ease(f));ctx.save();ctx.globalAlpha=Math.sin(Math.PI*f);ctx.shadowColor="rgba(255,200,90,.95)";ctx.shadowBlur=9;ctx.fillStyle="#FFC75A";ctx.beginPath();ctx.arc(d.x,y,3.6,0,7);ctx.fill();ctx.restore();}
+      // flow labels
+      const fl=fadeIn(t,5.5);text("Cold in",232,528,{c:COLD,size:15,a:fl});text("Cold out",232,104,{c:COLD,size:15,a:fadeIn(t,10)});
+      const sl=fadeIn(t,12.5);text("Hot in",974,104,{c:HOT,size:15,a:sl});text("Hot out",328,528,{c:HOT,size:15,a:fadeIn(t,17)});
+      // path arrows for passes
+      const pa=window_(t,6,12.6);
+      if(pa>0){ctx.save();ctx.globalAlpha=pa;ctx.strokeStyle=COLD;ctx.lineWidth=3;ctx.setLineDash([9,6]);ctx.lineDashOffset=-t*30;ctx.beginPath();ctx.moveTo(205,500);ctx.lineTo(205,350);ctx.lineTo(1045,350);ctx.quadraticCurveTo(1085,310,1045,230);ctx.lineTo(205,230);ctx.lineTo(205,100);ctx.stroke();ctx.restore();
+        text("pass 1 →",620,452,{al:"center",c:COLD,size:16,a:pa});text("← pass 2",620,133,{al:"center",c:COLD,size:16,a:pa});}
+      const za=t<19.2?window_(t,13,19.2):(t<32.3?.5:.25);
+      if(za>0){ctx.save();ctx.globalAlpha=za;ctx.strokeStyle=HOT;ctx.lineWidth=3.5;ctx.setLineDash([10,7]);ctx.lineDashOffset=-t*30;ctx.beginPath();SP.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.restore();}
+      // callouts
+      callout("Shell",600,ST-10,600,60,window_(t,.4,5.5));
+      callout("Tubes (tube bundle)",470,lowY[2]+8,560,478,window_(t,1.3,5.5));
+      callout("Front header",FX+30,SB-30,110,478,window_(t,1.8,5.5));
+      callout("Rear header",RX-25,SB-35,1150,478,window_(t,1.8,5.5));
+      callout("Baffles",660,ST+60,760,60,window_(t,2.6,5.5));
+      callout("Baffle",790,330,870,478,window_(t,19,25.5),{bg:"#5E6B75"});callout("Baffle",660,200,740,60,window_(t,19,25.5),{bg:"#5E6B75"});callout("Baffle",530,330,450,478,window_(t,19,25.5),{bg:"#5E6B75"});
+      const pc=window_(t,25.7,32.2);
+      if(pc>0){callout("Bottom tubes: counterflow",640,lowY[1],640,478,pc,{bg:COLD});callout("Top tubes: parallel flow",640,upY[1],640,60,pc,{bg:HOT});
+        text("Shell fluid overall: right → left",820,128,{al:"center",c:HOT,size:15,a:pc});}
+      text("Colours show the idea only",12,H-8,{c:MUTED,f:FB,w:400,size:12.5,a:aShell});
+      // 1 shell pass, 2 tube passes
+      const h1=window_(t,32.3,60),h2=window_(t,38.6,60);
+      if(h1>0){ctx.save();ctx.globalAlpha=h1*(.55+.25*Math.sin(t*3));ctx.strokeStyle=HOT;ctx.lineWidth=7;ctx.lineCap="round";ctx.setLineDash([2,14]);ctx.lineDashOffset=-t*40;ctx.beginPath();SP.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.restore();
+        callout("1 shell pass: inlet → outlet once",755,ST-10,820,60,h1,{bg:HOT});}
+      if(h2>0){const box=(y0,y1,c)=>{ctx.save();ctx.globalAlpha=h2*(.7+.3*Math.sin(t*3));ctx.strokeStyle=c;ctx.lineWidth=3.5;rr(SX0-2,y0,SX1-SX0+4,y1-y0,10);ctx.stroke();ctx.restore();};
+        box(lowY[0]-14,lowY[2]+14,COLD);box(upY[2]-14,upY[0]+14,COLD);
+        callout("Tube pass 1 →",560,lowY[2]+14,560,478,h2,{bg:COLD});callout("← Tube pass 2",420,upY[2]-14,420,60,h2,{bg:COLD});}
+      const tg=fadeIn(t,32.3);if(tg>0){ctx.save();ctx.globalAlpha=tg;rr(14,14,262,34,9);ctx.fillStyle=INK;ctx.fill();ctx.restore();text("1 shell pass, 2 tube passes",145,37,{al:"center",c:"#fff",size:16,a:tg});}
+    }};
+  return sc;
+}
+
+/* ---------- player ---------- */
+const SCENES=[singleScene("par"),singleScene("cnt"),compareScene(),shellScene()];
+const NAMES=["Parallel flow (cocurrent)","Counterflow (countercurrent)","Side by side","Shell-and-tube"];
+const P={i:0,t:0,all:false,paused:false,fade:0};
+const segBtns=[...document.querySelectorAll("#sceneSeg button")],longBtn=document.getElementById("longBtn");
+function startScene(i){P.i=i;P.t=0;P.fade=0;SCENES[i].init();cap("");
+  segBtns.forEach((b,k)=>b.classList.toggle("on",k===i));document.getElementById("modeTag").textContent=NAMES[i];
+  longBtn.hidden=i!==2;longBtn.textContent="Make it shorter";}
+function playAll(){P.all=true;startScene(0);}
+segBtns.forEach((b,k)=>b.addEventListener("click",()=>{P.all=false;startScene(k);}));
+document.getElementById("allBtn").addEventListener("click",playAll);
+document.getElementById("replayBtn").addEventListener("click",()=>{P.all?playAll():startScene(P.i);});
+const pauseBtn=document.getElementById("pauseBtn");
+pauseBtn.addEventListener("click",()=>{P.paused=!P.paused;pauseBtn.textContent=P.paused?"Play":"Pause";});
+longBtn.addEventListener("click",()=>{const s=SCENES[2];const cur=s.longTarget==null?(s.long>.5?1:0):s.longTarget;s.longTarget=cur>.5?0:1;
+  longBtn.textContent=s.longTarget?"Make it shorter":"Make it longer";
+  cap(s.longTarget?"Longer: <b>counterflow pulls ahead</b> and heats the cold fluid more, while parallel flow starts to level off.":"Shorter: both arrangements heat the cold fluid by <b>about the same amount</b>.");});
+function step(dt){
+  const s=SCENES[P.i];P.t+=dt;
+  if(P.i===2&&s.longTarget==null)longBtn.textContent=P.t<14.5?"Make it longer":"Make it shorter";
+  s.update(P.t,dt);
+  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.clearRect(0,0,W,H);ctx.fillStyle="#fff";ctx.fillRect(0,0,W,H);
+  s.draw(P.t);
+  // scene fades
+  let fa=Math.max(0,1-P.t/.5);
+  if(P.all&&P.i<SCENES.length-1)fa=Math.max(fa,clamp((P.t-(s.dur-.5))/.5,0,1));
+  text("This animation was built with Claude.",W-12,H-8,{al:"right",c:MUTED,f:FB,w:400,size:12.5});
+  if(fa>0){ctx.fillStyle=`rgba(255,255,255,${fa})`;ctx.fillRect(0,0,W,H);}
+  capEl.style.opacity=1-fa*.8;
+  if(P.all&&P.t>=s.dur&&P.i<SCENES.length-1)startScene(P.i+1);
+}
+window.__total=()=>SCENES.reduce((a,s)=>a+s.dur,0);
+function begin(){
+  if(VIDEO){window.__start=()=>playAll();window.__step=dt=>step(dt);playAll();step(0);return;}
+  playAll();let last=performance.now();
+  const loop=now=>{const dt=Math.min(.05,(now-last)/1000);last=now;if(!P.paused)step(dt);requestAnimationFrame(loop);};requestAnimationFrame(loop);
+}
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(begin);
+})();
+</script>
+</body>
+</html>
