@@ -1,14 +1,11 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Cycle Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap">
 <style>/* Layout: header + toolbar; [palette | canvas | inspector]; results below (performance + diagram, then tables). */
 :root {
+  color-scheme: light;
   --bg: #EDF1F3; --panel: #FFFFFF; --panel2: #F6F8F9; --ink: #1D2B33; --muted: #5C6B74; --line: #D3DBE0; --grid: #E2E8EB;
   --cold: #2A6F8E; --hot: #BC4A2B; --warm: #DE9127; --accent: #2A6F8E; --accent-ink: #FFFFFF;
   --good: #2E7D4F; --bad: #B3261E; --warnbg: #FFF4E0; --errbg: #FDECEA; --okbg: #E8F4EC;
@@ -16,20 +13,6 @@
   --f-head: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
   --f-body: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   --f-num: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #11181C; --panel: #1A2329; --panel2: #202B32; --ink: #E4ECEF; --muted: #9AABB4; --line: #33424B; --grid: #26323A;
-    --cold: #5FA8C9; --hot: #E2775A; --warm: #EBA850; --accent: #5FA8C9; --accent-ink: #0E1A20;
-    --good: #6CC291; --bad: #F28B82; --warnbg: #3A2E1A; --errbg: #3D2020; --okbg: #1D3326; --sel: #EBA850; --pipe0: #6D7C84;
-    --shadow: 0 1px 2px rgba(0,0,0,.3); color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #11181C; --panel: #1A2329; --panel2: #202B32; --ink: #E4ECEF; --muted: #9AABB4; --line: #33424B; --grid: #26323A;
-  --cold: #5FA8C9; --hot: #E2775A; --warm: #EBA850; --accent: #5FA8C9; --accent-ink: #0E1A20;
-  --good: #6CC291; --bad: #F28B82; --warnbg: #3A2E1A; --errbg: #3D2020; --okbg: #1D3326; --sel: #EBA850; --pipe0: #6D7C84;
-  --shadow: 0 1px 2px rgba(0,0,0,.3); color-scheme: dark;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -216,20 +199,27 @@ table.data tr.total td { font-weight: 700; border-top: 2px solid var(--line); cu
   .field { grid-template-columns: 1fr 110px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
-</style>
-</head>
-<body>
 
+input.gin { width: 86px; border: 1px solid transparent; border-radius: 5px; padding: 2px 5px; background: transparent; font-family: var(--f-num); font-size: 13px; text-align: right; }
+input.gin:hover { border-color: var(--line); }
+input.gin:focus { border-color: var(--accent); background: var(--panel); }
+input.gin::placeholder { color: var(--muted); opacity: 1; font-weight: 400; }
+input.gin.has { font-weight: 700; color: var(--ink); background: color-mix(in srgb, var(--warm) 12%, transparent); }
+.field input.derived::placeholder { color: var(--muted); opacity: .9; }
+.given-tag { font: 600 10px var(--f-head); letter-spacing: .06em; text-transform: uppercase; color: var(--warm); margin-left: 4px; }
+.given-val { font-weight: 700; }
+.unknown { color: var(--muted); font-style: italic; }
+</style>
 
 <header class="top">
   <div>
     <div class="eyebrow">Thermal Systems</div>
     <h1>Cycle Builder</h1>
-    <p>Drag equipment onto the canvas, connect it into a cycle, and the property tables give every state. Work, heat, entropy generation, efficiency and COP update as you change it.</p>
+    <p>Drag equipment onto the canvas and connect it into a cycle. Enter the state values you know; the solver uses the property tables to find the rest, tells you what is still missing, and works out work, heat, entropy generation, efficiency and COP.</p>
   </div>
   <div class="tools" role="toolbar" aria-label="Cycle tools">
     <button class="btn primary" id="bExamples" type="button">Examples</button>
-    <button class="btn" id="bNew" type="button">New</button>
+    <button class="btn" id="bReset" type="button" title="Clear the canvas and start again">Reset</button>
     <button class="btn" id="bUndo" type="button" aria-label="Undo">Undo</button>
     <button class="btn" id="bRedo" type="button" aria-label="Redo">Redo</button>
     <button class="btn" id="bCode" type="button">Save / load</button>
@@ -244,7 +234,7 @@ table.data tr.total td { font-weight: 700; border-top: 2px solid var(--line); cu
   </aside>
   <section class="card canvas-wrap" aria-label="Cycle canvas">
     <svg id="canvas" role="img" aria-label="Cycle diagram"></svg>
-    <div class="empty-hint" id="emptyHint" hidden><div><b>Empty canvas</b><br>Drag equipment in from the left, or open an example.</div></div>
+    <div class="empty-hint" id="emptyHint" hidden><div><b>Empty canvas</b><br>Drag equipment in from the equipment panel, or open an example.</div></div>
     <div class="canvas-tools">
       <button class="btn small" id="bZout" type="button" aria-label="Zoom out">−</button>
       <button class="btn small" id="bZin" type="button" aria-label="Zoom in">+</button>
@@ -411,13 +401,14 @@ const PROPS = (function () {
     }
     if (P == null) throw PropErr('Pressure not known.');
     if (spec.x != null) {
+      if (spec.x < 0 || spec.x > 1) throw PropErr(`Quality x must be between 0 and 1 (you gave ${spec.x}).`);
       const s = satP(fl, P);
       return mix(fl, s.rec, spec.x, s.how);
     }
     const s = satP(fl, P), r = s.rec;
     if (spec.T != null) {
       const T = spec.T;
-      if (Math.abs(T - r.T) < 1e-6) throw PropErr(`T = Tsat at ${fmt(P)} kPa: the state is saturated, so the quality x is also needed.`);
+      if (Math.abs(T - r.T) < 1e-6) { const e = PropErr(`T = Tsat at ${fmt(P)} kPa: the state is saturated, so the quality x is also needed.`); e.needX = true; throw e; }
       if (T > r.T) { const L = superheated(fl, P, 'T', T); return sup(L, P, s.how, r); }
       return liquidByT(fl, P, T);
     }
@@ -503,12 +494,16 @@ const PROPS = (function () {
 })();
 if (false) module.exports = PROPS;
 
-/* ================= Cycle solver =================
+/* ================= Cycle solver (works from the values the student gives) =================
    Steady flow, no pressure drops, KE and PE neglected.
+   Students type known properties on states (P, T, x, h, s) and data on equipment
+   (isentropic efficiency, heat or power, effectiveness, splitter fraction, fuel).
+   The solver propagates what follows, reports what is still missing, and flags
+   over-specified (contradictory) inputs.
    Sign convention (course): Q = Q_in − Q_out, W = W_in − W_out,
-   steady flow: 0 = Q̇ + Ẇ + Σṁ_in h_in − Σṁ_out h_out.                    */
+   steady flow: 0 = Q̇ + Ẇ + Σṁ_in h_in − Σṁ_out h_out.                                   */
 const FUELS = [
-  // Table A-27 (HHV, LHV in kJ/kg); C, H, N atoms per molecule (per C for CnHm fuels)
+  // Table A-27 (HHV, LHV in kJ/kg); C, H, N, O atoms per molecule (per C for CnHm fuels)
   { id: 'ng', name: 'Natural gas', formula: 'CₙH₃.₈ₙN₀.₁ₙ', HHV: 50000, LHV: 45000, C: 1, H: 3.8, N: 0.1, O: 0 },
   { id: 'methane', name: 'Methane', formula: 'CH₄', HHV: 55530, LHV: 50050, C: 1, H: 4, N: 0, O: 0 },
   { id: 'hydrogen', name: 'Hydrogen', formula: 'H₂', HHV: 141800, LHV: 120000, C: 0, H: 2, N: 0, O: 0 },
@@ -529,9 +524,9 @@ FUELS.forEach(f => {
   if (f.waste || f.custom) return;
   const M = 12.011 * f.C + 1.008 * f.H + 14.007 * f.N + 15.999 * f.O;
   f.M = M;
-  f.co2 = f.C ? 44.01 * f.C / M : 0;                          // kg CO2 per kg fuel
-  const O2 = f.C + f.H / 4 - f.O / 2;                           // kmol O2 per kmol fuel
-  f.AFst = O2 * 4.76 * 28.97 / M;                               // stoichiometric air-fuel ratio, kg/kg
+  f.co2 = f.C ? 44.01 * f.C / M : 0;
+  const O2 = f.C + f.H / 4 - f.O / 2;
+  f.AFst = O2 * 4.76 * 28.97 / M;
 });
 
 const SOLVER = (function () {
@@ -550,533 +545,523 @@ const SOLVER = (function () {
     sink: { ins: ['in'], outs: [] }
   };
   const K = (T) => T + 273.15;
-  function SErr(msg, cid) { const e = new Error(msg); e.solver = true; e.cid = cid; return e; }
+  const KEYS = ['P', 'T', 'x', 'h', 's'];
+  const TOL = { P: (a) => Math.max(0.05, 2e-3 * Math.abs(a)), T: () => 0.5, h: (a) => Math.max(0.6, 3e-3 * Math.abs(a)), s: (a) => Math.max(0.003, 3e-3 * Math.abs(a)), x: () => 0.004 };
+  const UNIT = { P: ' kPa', T: ' °C', h: ' kJ/kg', s: ' kJ/kg·K', x: '' };
+  const num = (v) => v !== '' && v != null && isFinite(+v);
 
-  // --------------------------------------------------------------------------
   function solve(model) {
     const comps = model.comps, pipes = model.pipes;
-    const T0 = model.T0 != null ? model.T0 : 25;
-    const errors = [], warnings = [];
-    const warned = new Set(), unitLoops = new Set();
+    const T0 = num(model.T0) ? +model.T0 : 25;
+    const errors = [], warnings = [], missing = [];
+    const warned = new Set();
+    const warnOnce = (msg, cid) => { if (!warned.has(msg)) { warned.add(msg); warnings.push({ msg, cid }); } };
     const byId = {}; comps.forEach(c => byId[c.id] = c);
-    const pipeAt = {}; // "cid:port" -> pipe
+    if (!comps.length) return { empty: true, errors, warnings, missing };
+    const pipeAt = {};
     pipes.forEach(p => { pipeAt[p.from[0] + ':' + p.from[1]] = p; pipeAt[p.to[0] + ':' + p.to[1]] = p; });
     const inP = (c, port) => pipeAt[c.id + ':' + port];
-    // ---- 1. connectivity ----
+    const allPorts = (c) => [...TYPES[c.type].ins, ...TYPES[c.type].outs];
+    const complete = (c) => allPorts(c).every(pt => inP(c, pt));
     const open = [];
-    comps.forEach(c => {
-      const t = TYPES[c.type];
-      [...t.ins, ...t.outs].forEach(port => { if (!inP(c, port)) open.push({ cid: c.id, port }); });
-    });
-    if (!comps.length) return { empty: true, errors: [], warnings: [] };
-    if (open.length) return { incomplete: true, open, errors: [{ msg: `${open.length} connection point${open.length > 1 ? 's are' : ' is'} not connected yet. Connect every inlet and outlet to solve.`, cid: open[0].cid }], warnings };
+    comps.forEach(c => allPorts(c).forEach(pt => { if (!inP(c, pt)) open.push({ cid: c.id, port: pt }); }));
 
-    // ---- 2. loops (fluid domains) ----
+    // ---- loops (fluid domains) ----
     const uf = {}; const find = (a) => uf[a] === a ? a : (uf[a] = find(uf[a])); const uni = (a, b) => { uf[find(a)] = find(b); };
     pipes.forEach(p => uf[p.id] = p.id);
     comps.forEach(c => {
-      const t = TYPES[c.type];
-      if (c.type === 'hx') { uni(inP(c, 'hin').id, inP(c, 'hout').id); uni(inP(c, 'cin').id, inP(c, 'cout').id); return; }
-      const all = [...t.ins, ...t.outs].map(port => inP(c, port).id);
-      for (let i = 1; i < all.length; i++) uni(all[0], all[i]);
+      if (c.type === 'hx') { [['hin', 'hout'], ['cin', 'cout']].forEach(([a, b]) => { if (inP(c, a) && inP(c, b)) uni(inP(c, a).id, inP(c, b).id); }); return; }
+      const ps = allPorts(c).map(pt => inP(c, pt)).filter(Boolean);
+      for (let i = 1; i < ps.length; i++) uni(ps[0].id, ps[i].id);
     });
     const loops = {};
     pipes.forEach(p => { const r = find(p.id); (loops[r] = loops[r] || { id: r, pipes: [] }).pipes.push(p); });
     const loopList = Object.values(loops);
-    loopList.forEach((L, i) => {
-      L.index = i;
-      const fl = L.pipes.map(p => p.fluid).filter(Boolean);
-      L.fluid = fl[0] || 'water';
-      L.pipes.sort((a, b) => a.n - b.n);
-    });
+    loopList.forEach((L, i) => { L.index = i; const fl = L.pipes.map(p => p.fluid).filter(Boolean); L.fluid = fl[0] || 'water'; L.pipes.sort((a, b) => a.n - b.n); });
     const loopOf = (p) => loops[find(p.id)];
     const fluidOf = (p) => loopOf(p).fluid;
+    const isAir = (p) => fluidOf(p) === 'air';
 
-    // ---- 3. pressures ----
-    const pu = {}; const pf = (a) => pu[a] === a ? a : (pu[a] = pf(pu[a])); const pun = (a, b) => { pu[pf(a)] = pf(b); };
-    pipes.forEach(p => pu[p.id] = p.id);
-    comps.forEach(c => {
-      if (['heater', 'cooler'].includes(c.type)) pun(inP(c, 'in').id, inP(c, 'out').id);
-      if (c.type === 'hx') { pun(inP(c, 'hin').id, inP(c, 'hout').id); pun(inP(c, 'cin').id, inP(c, 'cout').id); }
-      if (c.type === 'mixer') { pun(inP(c, 'in1').id, inP(c, 'out').id); pun(inP(c, 'in2').id, inP(c, 'out').id); }
-      if (c.type === 'splitter') { pun(inP(c, 'in').id, inP(c, 'out1').id); pun(inP(c, 'in').id, inP(c, 'out2').id); }
+    // ---- knowledge store ----
+    const know = {}, src = {}, full = {}, notes = {}, given = {}, bad = {};
+    pipes.forEach(p => { know[p.id] = {}; src[p.id] = {}; notes[p.id] = []; given[p.id] = {}; });
+    let changed = false;
+    class Conflict extends Error { constructor(m, cid, pid) { super(m); this.cid = cid; this.pid = pid; } }
+    const show = (k, v, p) => k === 'T' && p && isAir(p) ? fmt(v + 273.15, 2) + ' K' : (k === 'P' ? fmt(v) : fmt(v, k === 's' || k === 'x' ? 4 : 2)) + UNIT[k];
+    function setK(p, k, v, why, cid) {
+      if (v == null || !isFinite(v)) return false;
+      const kn = know[p.id];
+      if (kn[k] != null) {
+        if (Math.abs(kn[k] - v) > TOL[k](v)) {
+          throw new Conflict(`State ${p.n} is over-specified: ${k} = ${show(k, kn[k], p)} (${src[p.id][k]}) but ${k} = ${show(k, v, p)} (${why}). Remove one of these inputs.`, cid, p.id);
+        }
+        return false;
+      }
+      kn[k] = v; src[p.id][k] = why; changed = true;
+      return true;
+    }
+    function note(p, txt) { if (!notes[p.id].includes(txt)) notes[p.id].push(txt); }
+    // user-given values
+    pipes.forEach(p => {
+      const g = p.given || {};
+      KEYS.forEach(k => { if (num(g[k])) { given[p.id][k] = true; } });
     });
-    const Pg = {}; // group -> {P, by}
-    const setP = (pipe, val, by) => {
-      const g = pf(pipe.id);
-      if (!(val > 0)) throw SErr(`${by.label || 'A component'} needs a positive outlet pressure.`, by.id);
-      if (Pg[g] && Math.abs(Pg[g].P - val) > 1e-6 * val) {
-        throw SErr(`State ${pipe.n} is given two different pressures (${fmt(Pg[g].P)} kPa from ${Pg[g].by.label} and ${fmt(val)} kPa from ${by.label}). With no pressure drops, connected heat exchangers, mixers and splitters share one pressure.`, by.id);
-      }
-      if (!Pg[g]) { Pg[g] = { P: val, by }; return true; }
-      return false;
-    };
-    try {
-      comps.forEach(c => {
-        const pr = c.params || {};
-        if (c.type === 'source') setP(inP(c, 'out'), pr.P, c);
-        if (['pump', 'turbine', 'valve'].includes(c.type)) setP(inP(c, 'out'), pr.Pout, c);
-        if (c.type === 'compressor' && pr.pmode !== 'ratio') setP(inP(c, 'out'), pr.Pout, c);
-      });
-      let changed = true, guard = 0;
-      while (changed && guard++ < 50) {
-        changed = false;
-        comps.forEach(c => {
-          if (c.type === 'compressor' && c.params.pmode === 'ratio') {
-            const r = +c.params.ratio; if (!(r > 0)) throw SErr('Compressor pressure ratio must be positive.', c.id);
-            const gi = Pg[pf(inP(c, 'in').id)], go = Pg[pf(inP(c, 'out').id)];
-            if (gi && !go) changed = setP(inP(c, 'out'), gi.P * r, c) || changed;
-            else if (go && !gi) changed = setP(inP(c, 'in'), go.P / r, c) || changed;
-            else if (gi && go && Math.abs(go.P - gi.P * r) > 1e-6 * go.P) throw SErr(`The compressor ratio (${r}) does not match the pressures set elsewhere (${fmt(gi.P)} → ${fmt(go.P)} kPa).`, c.id);
-          }
+    function applyGiven() {
+      pipes.forEach(p => {
+        const g = p.given || {};
+        KEYS.forEach(k => {
+          if (!num(g[k])) return;
+          if (k === 'x' && isAir(p)) return;
+          setK(p, k, +g[k], 'you gave this');
         });
-      }
-    } catch (e) { if (e.solver) return { errors: [{ msg: e.message, cid: e.cid }], warnings, loops: loopList }; throw e; }
-    const pres = {};
-    for (const p of pipes) {
-      const g = Pg[pf(p.id)];
-      if (!g) {
-        const c = byId[p.from[0]];
-        return { errors: [{ msg: `The pressure at state ${p.n} is not set. Give an outlet pressure to the pump, compressor, turbine or valve that feeds this part of the cycle.`, cid: c.id }], warnings, loops: loopList };
-      }
-      pres[p.id] = g.P;
-    }
-
-    // ---- 4. iterate states and mass flows ----
-    let flows = {}; pipes.forEach(p => flows[p.id] = 1);
-    let states = {}, extra = {};
-    let bases = {}; // rate sizing: cid -> mdot guess
-    let converged = false, it;
-    try {
-      for (it = 0; it < 80; it++) {
-        const res = solveStates(flows, states);
-        states = res.states; extra = res.extra;
-        const fl = solveFlows(states, extra, bases);
-        let dmax = 0;
-        pipes.forEach(p => { dmax = Math.max(dmax, Math.abs(fl[p.id] - flows[p.id]) / Math.max(1e-9, Math.abs(fl[p.id]))); });
-        flows = fl;
-        // rate sizing update
-        let rdiff = 0;
-        comps.forEach(c => {
-          const r = c.params && c.params.rate;
-          if (!(r && r.on && r.val > 0)) return;
-          const cur = Math.abs(compRate(c, states, flows, extra));
-          if (cur > 1e-12) { const m0 = bases[c.id] || 1; const m1 = m0 * r.val / cur; rdiff = Math.max(rdiff, Math.abs(m1 - m0) / m1); bases[c.id] = m1; }
-        });
-        if (it > 0 && dmax < 1e-10 && rdiff < 1e-10) { converged = true; break; }
-      }
-      // one more pass so states use the final flows
-      const res = solveStates(flows, states); states = res.states; extra = res.extra;
-    } catch (e) {
-      if (e.solver || e.prop) return { errors: [{ msg: e.message, cid: e.cid }], warnings, loops: loopList, pres };
-      throw e;
-    }
-    if (!converged) warnings.push({ msg: 'The solver did not fully converge; check the numbers.' });
-
-    // ---------------- inner: states -----------------
-    function stateOf(p, spec) {
-      const s = P.state(fluidOf(p), Object.assign({ P: pres[p.id] }, spec));
-      s.fluid = fluidOf(p);
-      return s;
-    }
-    function solveStates(flows, prev) {
-      const st = {}, ex = {};
-      const known = (port, c) => st[inP(c, port).id];
-      const fixedOut = (c) => { // outlet states independent of inlet
-        const pr = c.params || {};
-        const out = inP(c, 'out');
-        if (c.type === 'source') return stateOf(out, pr.smode === 'x' ? { x: +pr.x } : { T: +pr.T });
-        if (c.type === 'heater' || c.type === 'cooler') {
-          if (pr.omode === 'T') return stateOf(out, { T: +pr.Tout });
-          if (pr.omode === 'x') { checkTwoPhase(out, c); return stateOf(out, { x: +pr.xout }); }
-          if (pr.omode === 'dT') {
-            checkTwoPhase(out, c);
-            const Ts = P.satTemp(fluidOf(out), pres[out.id]);
-            return stateOf(out, { T: c.type === 'heater' ? Ts + (+pr.dT) : Ts - (+pr.dT) });
-          }
-        }
-        if (c.type === 'mixer' && pr.omode === 'satliq') { checkTwoPhase(out, c); return stateOf(out, { x: 0 }); }
-        return null;
-      };
-      function checkTwoPhase(p, c) { if (fluidOf(p) === 'air') throw SErr(`${c.label}: air is an ideal gas here, so it has no quality or saturation temperature. Use an outlet temperature instead.`, c.id); }
-      comps.forEach(c => { const f = fixedOut(c); if (f) { st[inP(c, 'out').id] = f; } });
-      // hx sides with a T or x spec
-      comps.filter(c => c.type === 'hx').forEach(c => {
-        const pr = c.params;
-        if (pr.mode === 'spec') {
-          ['c', 'h'].forEach(sd => {
-            const sp = pr[sd + 'spec'] || {};
-            const port = inP(c, sd + 'out');
-            if (sp.mode === 'T') st[port.id] = stateOf(port, { T: +sp.val });
-            if (sp.mode === 'x') { checkTwoPhase(port, c); st[port.id] = stateOf(port, { x: +sp.val }); }
-          });
-        }
       });
-      const done = new Set();
-      let progress = true, guard = 0;
-      const evalComp = (c, force) => {
-        const t = TYPES[c.type];
-        if (!t.outs.length) return true;
-        const ins = t.ins.map(port => st[inP(c, port).id] || (force ? prev[inP(c, port).id] : null));
-        if (ins.some(s => !s)) return false;
-        compute(c, ins, st, ex, flows);
-        return true;
-      };
-      while (progress && guard++ < 200) {
-        progress = false;
-        for (const c of comps) {
-          if (done.has(c.id)) continue;
-          if (evalComp(c, false)) { done.add(c.id); progress = true; }
+    }
+    function tryFull(p) {
+      if (full[p.id] || bad[p.id]) return;
+      const kn = know[p.id], fl = fluidOf(p);
+      let specs = [];
+      if (kn.P != null) {
+        if (fl === 'air') specs = ['T', 'h', 's'].filter(k => kn[k] != null).map(k => ({ P: kn.P, [k]: kn[k] }));
+        else specs = ['x', 'T', 's', 'h'].filter(k => kn[k] != null).map(k => ({ P: kn.P, [k]: kn[k] }));
+      } else if (fl !== 'air' && kn.T != null && kn.x != null) specs = [{ T: kn.T, x: kn.x }];
+      for (const sp of specs) {
+        let s;
+        try { s = P.state(fl, sp); }
+        catch (e) {
+          if (e.needX) continue;
+          if (e.prop) { bad[p.id] = e.message; errors.push({ msg: `State ${p.n}: ${e.message}`, pid: p.id }); return; }
+          throw e;
         }
+        s.fluid = fl;
+        full[p.id] = s;
+        const pair = Object.keys(sp).map(k => k === 'T' && fl === 'air' ? 'T' : k).join(' and ');
+        const why = `found from ${pair}`;
+        ['P', 'T', 'h', 's'].forEach(k => setK(p, k, s[k], why));
+        if (s.x != null) setK(p, 'x', s.x, why);
+        else if (kn.x != null) throw new Conflict(`State ${p.n} is over-specified: you gave x = ${fmt(kn.x, 3)}, but the other values put it in the ${s.phase} region, where x has no meaning. Remove one of these inputs.`, null, p.id);
+        return;
       }
-      // loops that need iteration (e.g. no fixed state on the path): use previous values as a guess
-      const left = comps.filter(c => !done.has(c.id));
-      if (left.length) {
-        // seed missing inputs from previous iteration, or fail
-        let seeded = false;
-        for (const c of left) {
-          for (const port of TYPES[c.type].ins) {
-            const p = inP(c, port);
-            if (!st[p.id] && prev[p.id]) { st[p.id] = prev[p.id]; seeded = true; }
-          }
-        }
-        if (!seeded) {
-          // first time: try a crude guess for a stuck hx/mixer inlet from its other inlet
-          for (const c of left) {
-            const pins = TYPES[c.type].ins.map(port => inP(c, port));
-            const kn = pins.find(p => st[p.id]);
-            const un = pins.find(p => !st[p.id]);
-            if (kn && un && fluidOf(kn) === fluidOf(un)) { st[un.id] = stateOf(un, { h: st[kn.id].h }); seeded = true; break; }
-          }
-        }
-        if (!seeded) {
-          const c = left[0];
-          throw SErr(`Not enough information to find the states around ${c.label}. Each loop needs at least one fixed state: give a heater or cooler (boiler, condenser, evaporator) an outlet temperature or quality.`, c.id);
-        }
-        for (let k = 0; k < 300; k++) {
-          let ch = 0;
-          for (const c of left) {
-            const before = TYPES[c.type].outs.map(port => (st[inP(c, port).id] || {}).h);
-            if (!evalComp(c, true)) continue;
-            TYPES[c.type].outs.forEach((port, i) => { const h = st[inP(c, port).id].h; ch = Math.max(ch, Math.abs(h - (before[i] || 0))); });
-          }
-          if (ch < 1e-9) break;
-        }
-      }
-      return { states: st, extra: ex };
     }
 
-    // compute outlets of one component
-    function compute(c, ins, st, ex, flows) {
+    // ---- flow bookkeeping ----
+    let fl0 = null; // {x0, nul, idx}
+    const idx = {}; pipes.forEach((p, i) => idx[p.id] = i);
+    const isAbs = (p) => fl0 && !fl0.inconsistent && fl0.nul.every(v => Math.abs(v[idx[p.id]]) < 1e-9);
+    const absVal = (p) => fl0.x0[idx[p.id]];
+    function ratio(pa, pb) { // ṁa/ṁb if determined
+      if (!fl0 || fl0.inconsistent) return null;
+      const i = idx[pa.id], j = idx[pb.id];
+      const vecs = [fl0.x0, ...fl0.nul].map(v => [v[i], v[j]]).filter(v => Math.abs(v[0]) + Math.abs(v[1]) > 1e-12);
+      if (!vecs.length) return null;
+      const r = vecs[0];
+      if (Math.abs(r[1]) < 1e-12) return null;
+      for (const v of vecs) if (Math.abs(v[0] * r[1] - v[1] * r[0]) > 1e-9 * (Math.abs(v[0]) + Math.abs(v[1]) + 1)) return null;
+      return r[0] / r[1];
+    }
+    const extra = {};
+
+    // ---- component rules ----
+    function rules(c) {
       const pr = c.params || {};
-      const e = ex[c.id] = {};
-      const setOut = (port, s) => { st[inP(c, port).id] = s; };
-      const outPipe = (port) => inP(c, port);
-      const s1 = ins[0];
+      const ex = extra[c.id] = extra[c.id] || {};
+      const g = (port) => inP(c, port);
+      const kn = (port) => g(port) ? know[g(port).id] : {};
+      const F = (port) => g(port) ? full[g(port).id] : null;
+      const lbl = c.label;
+      const eqP = (a, b) => { const pa = g(a), pb = g(b); if (!pa || !pb) return; const A = know[pa.id].P, B = know[pb.id].P;
+        if (A != null) setK(pb, 'P', A, `same pressure as state ${pa.n} (no pressure drop in ${lbl})`, c.id);
+        if (B != null) setK(pa, 'P', B, `same pressure as state ${pb.n} (no pressure drop in ${lbl})`, c.id); };
       switch (c.type) {
-        case 'pump': {
-          const o = outPipe('out'), P2 = pres[o.id], eta = +pr.eta || 1;
-          if (eta <= 0 || eta > 1) throw SErr(`${c.label}: isentropic efficiency must be between 0 and 1.`, c.id);
-          if (s1.phase !== 'compressed liquid' && s1.phase !== 'saturated liquid') {
-            if (!(s1.x != null && s1.x < 0.001)) warnOnce(`${c.label}: the fluid entering the pump is not liquid (${s1.phase}). Pumps move liquids; use a compressor for vapour or gas.`, c.id);
-          }
-          const ws = s1.v * (P2 - s1.P);
-          e.ws = ws; e.h2s = s1.h + ws;
-          const h2 = s1.h + ws / eta;
-          const s2 = stateOf(o, { h: h2 });
-          s2.how.unshift({ note: `Pump: w_pump,in = v₁(P₂ − P₁) = ${fmt(s1.v)} × (${fmt(P2)} − ${fmt(s1.P)}) = ${fmt(ws)} kJ/kg${eta < 1 ? `; actual = ${fmt(ws)} / ${eta} = ${fmt(ws / eta)} kJ/kg` : ''}, so h = ${fmt(s1.h)} + ${fmt(ws / eta)} = ${fmt(h2)} kJ/kg.` });
-          e.eta = eta;
-          setOut('out', s2);
-          break;
-        }
-        case 'compressor':
-        case 'turbine': {
-          const o = outPipe('out'), P2 = pres[o.id];
-          const comp = c.type === 'compressor';
-          if (comp && P2 < s1.P) throw SErr(`${c.label}: the outlet pressure (${fmt(P2)} kPa) is lower than the inlet pressure (${fmt(s1.P)} kPa). A compressor raises pressure.`, c.id);
-          if (!comp && P2 > s1.P) throw SErr(`${c.label}: the outlet pressure (${fmt(P2)} kPa) is higher than the inlet pressure (${fmt(s1.P)} kPa). A turbine lowers pressure.`, c.id);
-          if (comp && s1.x != null && s1.x < 0.999) warnOnce(`${c.label}: wet fluid (x = ${fmt(s1.x, 3)}) enters the compressor. Real compressors need dry vapour; the evaporator should end at x = 1 or superheated.`, c.id);
-          // isentropic outlet
-          let s2s;
-          if (fluidOf(o) === 'air') {
-            const Pr2 = s1.Pr * P2 / s1.P;
-            s2s = stateOf(o, { Pr: Pr2 });
-            s2s.how.unshift({ note: `Isentropic ${comp ? 'compression' : 'expansion'} of an ideal gas: Pr₂ = Pr₁ × P₂/P₁ = ${fmt(s1.Pr)} × ${fmt(P2)}/${fmt(s1.P)} = ${fmt(Pr2)}.` });
-          } else {
-            s2s = stateOf(o, { s: s1.s });
-            s2s.how.unshift({ note: `Isentropic: s = s_in = ${fmt(s1.s)} kJ/kg·K at ${fmt(P2)} kPa.` });
-          }
-          e.s2s = s2s; e.h2s = s2s.h;
-          let s2;
-          const mode = pr.omode || 'eta';
-          if (mode === 'eta') {
-            const eta = +pr.eta;
-            if (!(eta > 0 && eta <= 1)) throw SErr(`${c.label}: isentropic efficiency must be between 0 and 1.`, c.id);
-            const h2 = comp ? s1.h + (s2s.h - s1.h) / eta : s1.h - eta * (s1.h - s2s.h);
-            if (eta >= 0.99999) { s2 = s2s; }
-            else {
-              s2 = stateOf(o, { h: h2 });
-              s2.how.unshift({ note: comp
-                ? `η_C = (h₂s − h₁)/(h₂ − h₁), so h₂ = h₁ + (h₂s − h₁)/η_C = ${fmt(s1.h)} + (${fmt(s2s.h)} − ${fmt(s1.h)})/${eta} = ${fmt(h2)} kJ/kg.`
-                : `η_T = (h₁ − h₂)/(h₁ − h₂s), so h₂ = h₁ − η_T(h₁ − h₂s) = ${fmt(s1.h)} − ${eta} × (${fmt(s1.h)} − ${fmt(s2s.h)}) = ${fmt(h2)} kJ/kg.` });
-            }
-          } else {
-            s2 = mode === 'x' ? stateOf(o, { x: +pr.xout }) : stateOf(o, { T: +pr.Tout });
-          }
-          e.eta = comp ? (s2s.h - s1.h) / (s2.h - s1.h) : (s1.h - s2.h) / (s1.h - s2s.h);
-          setOut('out', s2);
-          break;
-        }
-        case 'valve': {
-          const o = outPipe('out');
-          if (pres[o.id] > s1.P) throw SErr(`${c.label}: an expansion valve can only lower the pressure.`, c.id);
-          const s2 = stateOf(o, { h: s1.h });
-          s2.how.unshift({ note: `Throttling: h stays the same, h = ${fmt(s1.h)} kJ/kg.` });
-          setOut('out', s2);
-          break;
-        }
-        case 'heater':
-        case 'cooler': {
-          const o = outPipe('out');
+        case 'heater': case 'cooler': {
+          eqP('in', 'out');
+          const pi = g('in'), po = g('out'); if (!pi || !po) break;
           const sign = c.type === 'heater' ? 1 : -1;
-          let s2 = st[o.id];
-          const mode = pr.omode;
-          if (mode === 'q' || mode === 'Q') {
-            const m = flows[inP(c, 'in').id];
-            const q = mode === 'q' ? +pr.q : (+pr.Q) / m;
-            const h2 = s1.h + sign * q;
-            s2 = stateOf(o, { h: h2 });
-            s2.how.unshift({ note: `Energy balance: h = ${fmt(s1.h)} ${sign > 0 ? '+' : '−'} ${fmt(q)} = ${fmt(h2)} kJ/kg.` });
-            setOut('out', s2);
+          let q = num(pr.q) ? +pr.q : null;
+          if (q == null && num(pr.Q) && isAbs(pi)) q = +pr.Q / absVal(pi);
+          if (q != null) {
+            const hi = know[pi.id].h, ho = know[po.id].h;
+            if (hi != null && setK(po, 'h', hi + sign * q, `h = ${fmt(hi, 2)} ${sign > 0 ? '+' : '−'} ${fmt(q, 2)} (heat ${sign > 0 ? 'added' : 'removed'} in ${lbl})`, c.id)) note(po, `Energy balance on ${lbl}: h = ${fmt(hi, 2)} ${sign > 0 ? '+' : '−'} ${fmt(q, 2)} = ${fmt(hi + sign * q, 2)} kJ/kg.`);
+            if (ho != null && setK(pi, 'h', ho - sign * q, `energy balance on ${lbl}`, c.id)) note(pi, `Energy balance on ${lbl}: h = ${fmt(ho, 2)} ${sign > 0 ? '−' : '+'} ${fmt(q, 2)} = ${fmt(ho - sign * q, 2)} kJ/kg.`);
           }
-          if (!s2) throw SErr(`${c.label}: choose how the outlet is set.`, c.id);
-          if (sign > 0 && s2.h < s1.h - 1e-6) warnOnce(`${c.label}: the outlet enthalpy is lower than the inlet, so this "heater" is removing heat. Check the outlet setting.`, c.id);
-          if (sign < 0 && s2.h > s1.h + 1e-6) warnOnce(`${c.label}: the outlet enthalpy is higher than the inlet, so this "cooler" is adding heat. Check the outlet setting.`, c.id);
           break;
         }
         case 'hx': {
-          const sh = ins[0], sc = ins[1];
-          const ph = outPipe('hout'), pc = outPipe('cout');
-          const mh = flows[inP(c, 'hin').id], mc = flows[inP(c, 'cin').id];
-          if (pr.mode === 'eps') {
+          eqP('hin', 'hout'); eqP('cin', 'cout');
+          const ph = g('hin'), pho = g('hout'), pc = g('cin'), pco = g('cout');
+          if (!ph || !pho || !pc || !pco) break;
+          const r = ratio(pc, ph); // ṁc/ṁh
+          const H = (p) => know[p.id].h;
+          if (num(pr.eps) && full[ph.id] && full[pc.id] && r != null && know[pho.id].P != null && know[pco.id].P != null) {
             const eps = +pr.eps;
-            if (!(eps >= 0 && eps <= 1)) throw SErr(`${c.label}: effectiveness must be between 0 and 1.`, c.id);
-            let qc, qh;
-            try { qc = mc * (stateOf(pc, { T: sh.T }).h - sc.h); } catch (er) { qc = Infinity; }
-            try { qh = mh * (sh.h - stateOf(ph, { T: sc.T }).h); } catch (er) { qh = Infinity; }
+            if (!(eps >= 0 && eps <= 1)) throw new Conflict(`${lbl}: effectiveness must be between 0 and 1.`, c.id);
+            const sh = full[ph.id], sc = full[pc.id];
+            let qc = Infinity, qh = Infinity; // per kg of hot
+            try { qc = r * (P.state(fluidOf(pco), { P: know[pco.id].P, T: sh.T }).h - sc.h); } catch (e) { }
+            try { qh = sh.h - P.state(fluidOf(pho), { P: know[pho.id].P, T: sc.T }).h; } catch (e) { }
             const Qmax = Math.min(qc, qh);
-            if (!isFinite(Qmax)) throw SErr(`${c.label}: could not find the maximum possible heat transfer (temperatures outside the tables).`, c.id);
-            const Q = eps * Qmax;
-            e.Q = Q; e.Qmax = Qmax;
-            const hc = sc.h + Q / mc, hh = sh.h - Q / mh;
-            const sco = stateOf(pc, { h: hc }), sho = stateOf(ph, { h: hh });
-            const lim = qc <= qh ? 'cold stream heated to the hot inlet temperature' : 'hot stream cooled to the cold inlet temperature';
-            sco.how.unshift({ note: `Effectiveness ε = Q̇/Q̇max = ${eps}; Q̇max (${lim}) = ${fmt(Qmax)} kW. Cold side: h = ${fmt(sc.h)} + ${fmt(Q)}/${fmt(mc)} = ${fmt(hc)} kJ/kg.` });
-            sho.how.unshift({ note: `Hot side gives up the same heat: h = ${fmt(sh.h)} − ${fmt(Q)}/${fmt(mh)} = ${fmt(hh)} kJ/kg.` });
-            setOut('cout', sco); setOut('hout', sho);
-          } else {
-            const cs = (pr.cspec || {}).mode, hs = (pr.hspec || {}).mode;
-            const cfix = cs === 'T' || cs === 'x', hfix = hs === 'T' || hs === 'x';
-            if (!cfix && !hfix) throw SErr(`${c.label}: set at least one outlet (hot or cold side), or use effectiveness.`, c.id);
-            if (cfix && !hfix) {
-              const Q = mc * (st[pc.id].h - sc.h); e.Q = Q;
-              const hh = sh.h - Q / mh; const s = stateOf(ph, { h: hh });
-              s.how.unshift({ note: `Energy balance (no heat lost): ṁ_hot(h_in − h_out) = ṁ_cold(h_out − h_in), so h = ${fmt(sh.h)} − ${fmt(Q)}/${fmt(mh)} = ${fmt(hh)} kJ/kg.` });
-              setOut('hout', s);
-            } else if (hfix && !cfix) {
-              const Q = mh * (sh.h - st[ph.id].h); e.Q = Q;
-              const hc = sc.h + Q / mc; const s = stateOf(pc, { h: hc });
-              s.how.unshift({ note: `Energy balance (no heat lost): ṁ_cold(h_out − h_in) = ṁ_hot(h_in − h_out), so h = ${fmt(sc.h)} + ${fmt(Q)}/${fmt(mc)} = ${fmt(hc)} kJ/kg.` });
-              setOut('cout', s);
-            } else {
-              e.Q = mh * (sh.h - st[ph.id].h);
-              e.ratio = (sh.h - st[ph.id].h) / (st[pc.id].h - sc.h); // mc/mh
+            if (isFinite(Qmax)) {
+              const Q = eps * Qmax; ex.Q = Q; ex.Qmax = Qmax;
+              const hc = sc.h + Q / r, hh = sh.h - Q;
+              const lim = qc <= qh ? 'cold stream heated to the hot inlet temperature' : 'hot stream cooled to the cold inlet temperature';
+              if (setK(pco, 'h', hc, `effectiveness of ${lbl}`, c.id)) note(pco, `Effectiveness ε = Q̇/Q̇max = ${eps}. Q̇max is when the ${lim}. Cold side: h = ${fmt(sc.h, 2)} + ${fmt(Q / r, 2)} = ${fmt(hc, 2)} kJ/kg.`);
+              if (setK(pho, 'h', hh, `effectiveness of ${lbl}`, c.id)) note(pho, `Hot side gives up the same heat: h = ${fmt(sh.h, 2)} − ${fmt(Q, 2)} = ${fmt(hh, 2)} kJ/kg (per kg of hot fluid).`);
             }
           }
-          const sco = st[pc.id], sho = st[ph.id];
-          if (sho && sco) {
-            if (sho.T < sc.T - 0.05 || sco.T > sh.T + 0.05) warnOnce(`${c.label}: temperature cross. Heat would have to flow from cold to hot (hot side leaves at ${fmt(sho.T, 1)} °C, cold side enters at ${fmt(sc.T, 1)} °C; cold side leaves at ${fmt(sco.T, 1)} °C, hot side enters at ${fmt(sh.T, 1)} °C). This breaks the second law.`, c.id);
+          if (r != null) {
+            const hs = [H(ph), H(pho), H(pc), H(pco)];
+            const nk = hs.filter(v => v == null).length;
+            if (nk === 1) {
+              // ṁh(h_hin − h_hout) = ṁc(h_cout − h_cin), ṁc = r ṁh
+              const eb = `energy balance on ${lbl}: ṁ_hot(h_in − h_out) = ṁ_cold(h_out − h_in)`;
+              if (hs[0] == null) { const v = hs[1] + r * (hs[3] - hs[2]); if (setK(ph, 'h', v, eb, c.id)) note(ph, `${cap(eb)}, so h = ${fmt(v, 2)} kJ/kg.`); }
+              if (hs[1] == null) { const v = hs[0] - r * (hs[3] - hs[2]); if (setK(pho, 'h', v, eb, c.id)) note(pho, `${cap(eb)}, so h = ${fmt(hs[0], 2)} − ${fmt(r, 4)} × (${fmt(hs[3], 2)} − ${fmt(hs[2], 2)}) = ${fmt(v, 2)} kJ/kg.`); }
+              if (hs[2] == null) { const v = hs[3] - (hs[0] - hs[1]) / r; if (setK(pc, 'h', v, eb, c.id)) note(pc, `${cap(eb)}, so h = ${fmt(v, 2)} kJ/kg.`); }
+              if (hs[3] == null) { const v = hs[2] + (hs[0] - hs[1]) / r; if (setK(pco, 'h', v, eb, c.id)) note(pco, `${cap(eb)}, so h = ${fmt(hs[2], 2)} + (${fmt(hs[0], 2)} − ${fmt(hs[1], 2)})/${fmt(r, 4)} = ${fmt(v, 2)} kJ/kg.`); }
+            }
           }
           break;
         }
         case 'mixer': {
-          const o = outPipe('out');
-          const m1 = flows[inP(c, 'in1').id], m2 = flows[inP(c, 'in2').id];
-          if (Math.abs(ins[0].P - ins[1].P) > 1e-6) throw SErr(`${c.label}: both inlets must be at the same pressure.`, c.id);
-          if (pr.omode !== 'satliq') {
-            const h = (m1 * ins[0].h + m2 * ins[1].h) / (m1 + m2);
-            const s = stateOf(o, { h });
-            s.how.unshift({ note: `Mixing (adiabatic): h = (ṁ₁h₁ + ṁ₂h₂)/(ṁ₁ + ṁ₂) = (${fmt(m1)}×${fmt(ins[0].h)} + ${fmt(m2)}×${fmt(ins[1].h)})/${fmt(m1 + m2)} = ${fmt(h)} kJ/kg.` });
-            setOut('out', s);
-          } else {
-            const ho = st[o.id].h;
-            if ((ins[0].h - ho) * (ins[1].h - ho) > 0) throw SErr(`${c.label}: the outlet cannot be saturated liquid, because both inlets are ${ins[0].h > ho ? 'hotter' : 'colder'} than saturated liquid at this pressure.`, c.id);
-            e.y = (ho - ins[0].h) / (ins[1].h - ins[0].h); // fraction of outlet from in2
-          }
+          eqP('in1', 'out'); eqP('in2', 'out'); eqP('in1', 'in2');
+          const p1 = g('in1'), p2 = g('in2'), p3 = g('out'); if (!p1 || !p2 || !p3) break;
+          const r1 = ratio(p1, p3), r2 = ratio(p2, p3);
+          if (r1 == null || r2 == null) break;
+          const h1 = know[p1.id].h, h2 = know[p2.id].h, h3 = know[p3.id].h;
+          const eb = `energy balance on ${lbl}: ṁ₁h₁ + ṁ₂h₂ = ṁ₃h₃`;
+          if (h1 != null && h2 != null && h3 == null) { const v = r1 * h1 + r2 * h2; if (setK(p3, 'h', v, eb, c.id)) note(p3, `Mixing (adiabatic): h = (ṁ₁h₁ + ṁ₂h₂)/ṁ₃ = ${fmt(r1, 4)} × ${fmt(h1, 2)} + ${fmt(r2, 4)} × ${fmt(h2, 2)} = ${fmt(v, 2)} kJ/kg.`); }
+          if (h1 == null && h2 != null && h3 != null && r1 > 0) { const v = (h3 - r2 * h2) / r1; if (setK(p1, 'h', v, eb, c.id)) note(p1, `${cap(eb)}, so h = ${fmt(v, 2)} kJ/kg.`); }
+          if (h2 == null && h1 != null && h3 != null && r2 > 0) { const v = (h3 - r1 * h1) / r2; if (setK(p2, 'h', v, eb, c.id)) note(p2, `${cap(eb)}, so h = ${fmt(v, 2)} kJ/kg.`); }
           break;
         }
         case 'splitter': {
-          ['out1', 'out2'].forEach(port => { const p = outPipe(port); const s = Object.assign({}, s1, { how: [{ note: `A splitter only divides the flow: same state as the inlet.` }] }); setOut(port, s); });
+          const pin = g('in');
+          ['out1', 'out2'].forEach(o => {
+            const po = g(o); if (!pin || !po) return;
+            KEYS.forEach(k => {
+              if (know[pin.id][k] != null && setK(po, k, know[pin.id][k], `same state as state ${pin.n} (a splitter only divides the flow)`, c.id)) note(po, `A splitter only divides the flow: same state as state ${pin.n}.`);
+              if (know[po.id][k] != null) setK(pin, k, know[po.id][k], `same state as state ${po.n} (a splitter only divides the flow)`, c.id);
+            });
+          });
           break;
         }
-        case 'source': {
-          setOut('out', st[outPipe('out').id] || fixedOutSource(c));
+        case 'valve': {
+          const pi = g('in'), po = g('out'); if (!pi || !po) break;
+          if (know[pi.id].h != null && setK(po, 'h', know[pi.id].h, `throttling in ${lbl} keeps h constant`, c.id)) note(po, `Throttling in ${lbl}: h stays the same, h = ${fmt(know[pi.id].h, 2)} kJ/kg.`);
+          if (know[po.id].h != null) setK(pi, 'h', know[po.id].h, `throttling in ${lbl} keeps h constant`, c.id);
+          if (know[pi.id].P != null && know[po.id].P != null && know[po.id].P > know[pi.id].P + 1e-6) throw new Conflict(`${lbl}: an expansion valve can only lower the pressure (state ${pi.n} is ${fmt(know[pi.id].P)} kPa, state ${po.n} is ${fmt(know[po.id].P)} kPa).`, c.id);
+          break;
+        }
+        case 'pump': case 'compressor': case 'turbine': {
+          const pi = g('in'), po = g('out'); if (!pi || !po) break;
+          const comp = c.type !== 'turbine';
+          if (c.type === 'compressor' && num(pr.ratio)) {
+            const r = +pr.ratio;
+            if (know[pi.id].P != null && setK(po, 'P', know[pi.id].P * r, `pressure ratio ${r} of ${lbl}`, c.id)) note(po, `Pressure ratio: P = ${r} × ${fmt(know[pi.id].P)} = ${fmt(know[pi.id].P * r)} kPa.`);
+            if (know[po.id].P != null && setK(pi, 'P', know[po.id].P / r, `pressure ratio ${r} of ${lbl}`, c.id)) note(pi, `Pressure ratio: P = ${fmt(know[po.id].P)} / ${r} = ${fmt(know[po.id].P / r)} kPa.`);
+          }
+          const P1 = know[pi.id].P, P2 = know[po.id].P;
+          if (P1 != null && P2 != null) {
+            if (comp && P2 < P1 - 1e-6) throw new Conflict(`${lbl}: the outlet pressure (state ${po.n}, ${fmt(P2)} kPa) is lower than the inlet (state ${pi.n}, ${fmt(P1)} kPa). A ${c.type} raises the pressure.`, c.id);
+            if (!comp && P2 > P1 + 1e-6) throw new Conflict(`${lbl}: the outlet pressure (state ${po.n}, ${fmt(P2)} kPa) is higher than the inlet (state ${pi.n}, ${fmt(P1)} kPa). A turbine lowers the pressure.`, c.id);
+          }
+          const s1 = full[pi.id];
+          if (!s1 || P2 == null) break;
+          const hasEta = num(pr.eta);
+          const eta = hasEta ? +pr.eta : null;
+          if (hasEta && !(eta > 0 && eta <= 1)) throw new Conflict(`${lbl}: isentropic efficiency must be more than 0 and at most 1.`, c.id);
+          if (c.type === 'pump') {
+            if (!(s1.x === 0 || s1.phase === 'compressed liquid' || (s1.x != null && s1.x < 0.001))) warnOnce(`${lbl}: the fluid entering the pump (state ${pi.n}) is ${s1.phase}. Pumps move liquids; use a compressor for vapour or gas.`, c.id);
+            const ws = s1.v * (P2 - s1.P);
+            ex.ws = ws; ex.h2s = s1.h + ws;
+            if (hasEta) {
+              const h2 = s1.h + ws / eta;
+              if (setK(po, 'h', h2, `pump work v₁(P₂ − P₁)${eta < 1 ? '/η' : ''}`, c.id)) note(po, `Pump: w_pump,in = v₁(P₂ − P₁)${eta < 1 ? '/η_P' : ''} = ${fmt(s1.v)} × (${fmt(P2)} − ${fmt(s1.P)})${eta < 1 ? ` / ${eta}` : ''} = ${fmt(ws / eta, 3)} kJ/kg, so h = ${fmt(s1.h, 2)} + ${fmt(ws / eta, 3)} = ${fmt(h2, 2)} kJ/kg.`);
+            }
+            if (full[po.id]) ex.eta = ws / (full[po.id].h - s1.h);
+            break;
+          }
+          if (comp && s1.x != null && s1.x < 0.999) warnOnce(`${lbl}: wet fluid (x = ${fmt(s1.x, 3)}) enters at state ${pi.n}. Real compressors need dry vapour, so the evaporator should end at x = 1 or superheated.`, c.id);
+          let s2s;
+          try {
+            if (isAir(po)) { const Pr2 = s1.Pr * P2 / s1.P; s2s = P.state('air', { P: P2, Pr: Pr2 }); s2s.how.unshift({ note: `Isentropic ${comp ? 'compression' : 'expansion'} of an ideal gas: Pr₂ = Pr₁ × P₂/P₁ = ${fmt(s1.Pr)} × ${fmt(P2)}/${fmt(s1.P)} = ${fmt(Pr2)}.` }); }
+            else { s2s = P.state(fluidOf(po), { P: P2, s: s1.s }); s2s.how.unshift({ note: `Isentropic: s₂s = s₁ = ${fmt(s1.s, 4)} kJ/kg·K at ${fmt(P2)} kPa.` }); }
+          } catch (e) { if (e.prop) { errors.push({ msg: `${lbl}: isentropic outlet: ${e.message}`, cid: c.id }); bad[po.id] = true; break; } throw e; }
+          s2s.fluid = fluidOf(po);
+          ex.s2s = s2s; ex.h2s = s2s.h;
+          if (hasEta) {
+            const h2 = comp ? s1.h + (s2s.h - s1.h) / eta : s1.h - eta * (s1.h - s2s.h);
+            const ideal = eta >= 0.99999;
+            const why = ideal ? `isentropic ${c.type} (η = 1)` : `isentropic efficiency of ${lbl}`;
+            if (ideal) {
+              const isAirP = isAir(po);
+              if (!isAirP) setK(po, 's', s1.s, why, c.id);
+              if (setK(po, 'h', s2s.h, why, c.id)) note(po, isAirP ? `Ideal (isentropic) ${c.type}: Pr₂ = Pr₁ × P₂/P₁ = ${fmt(s1.Pr)} × ${fmt(P2)}/${fmt(s1.P)} = ${fmt(s2s.Pr)}, read T and h from Table A-17.` : `Ideal (isentropic) ${c.type}: s = s_in = ${fmt(s1.s, 4)} kJ/kg·K.`);
+            } else if (setK(po, 'h', h2, why, c.id)) {
+              note(po, comp ? `η_C = (h₂s − h₁)/(h₂ − h₁), so h₂ = h₁ + (h₂s − h₁)/η_C = ${fmt(s1.h, 2)} + (${fmt(s2s.h, 2)} − ${fmt(s1.h, 2)})/${eta} = ${fmt(h2, 2)} kJ/kg.`
+                : `η_T = (h₁ − h₂)/(h₁ − h₂s), so h₂ = h₁ − η_T(h₁ − h₂s) = ${fmt(s1.h, 2)} − ${eta} × (${fmt(s1.h, 2)} − ${fmt(s2s.h, 2)}) = ${fmt(h2, 2)} kJ/kg.`);
+            }
+          }
+          if (full[po.id]) { const h2 = full[po.id].h; ex.eta = comp ? (s2s.h - s1.h) / (h2 - s1.h) : (s1.h - h2) / (s1.h - s2s.h); }
           break;
         }
       }
+      // work and heat given as a rate: derive h when the mass flow is known
+      if (TYPES[c.type].work && num(pr.W)) {
+        const pi = g('in'), po = g('out');
+        if (pi && po && isAbs(pi)) {
+          const w = +pr.W / absVal(pi), ql = num(pr.qloss) ? +pr.qloss : 0;
+          const sign = c.type === 'turbine' ? -1 : 1; // h_out = h_in + sign·w − q_loss
+          const hi = know[pi.id].h, ho = know[po.id].h;
+          if (hi != null && setK(po, 'h', hi + sign * w - ql, `power of ${lbl}`, c.id)) note(po, `Energy balance on ${lbl} with Ẇ = ${fmt(+pr.W)} kW and ṁ = ${fmt(absVal(pi), 4)} kg/s.`);
+          if (ho != null) setK(pi, 'h', ho - sign * w + ql, `power of ${lbl}`, c.id);
+        }
+      }
     }
-    function fixedOutSource(c) { const pr = c.params, out = inP(c, 'out'); return stateOf(out, pr.smode === 'x' ? { x: +pr.x } : { T: +pr.T }); }
-    function warnOnce(msg, cid) { if (!warned.has(msg)) { warned.add(msg); warnings.push({ msg, cid }); } }
+    function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
-    // ---------------- mass flows (linear system) -----------------
-    function solveFlows(st, ex, bases) {
-      const idx = {}; pipes.forEach((p, i) => idx[p.id] = i);
+    // ---- mass flow equations ----
+    function flowSystem() {
       const n = pipes.length;
-      const rows = [], rhs = [];
-      const eq = (terms, b) => { const r = new Array(n).fill(0); terms.forEach(([p, k]) => r[idx[p.id]] += k); rows.push(r); rhs.push(b || 0); };
-      const pp = (c, port) => inP(c, port);
+      const rows = [], rhs = [], tags = [];
+      const eq = (terms, b, tag) => { const r = new Array(n).fill(0); terms.forEach(([p, k]) => r[idx[p.id]] += k); rows.push(r); rhs.push(b || 0); tags.push(tag); };
+      const H = (p) => know[p.id].h;
       comps.forEach(c => {
-        const pr = c.params || {};
+        if (!complete(c)) return;
+        const pr = c.params || {}, g = (pt) => inP(c, pt);
         switch (c.type) {
           case 'pump': case 'compressor': case 'turbine': case 'valve': case 'heater': case 'cooler':
-            eq([[pp(c, 'out'), 1], [pp(c, 'in'), -1]]); break;
-          case 'hx':
-            eq([[pp(c, 'hout'), 1], [pp(c, 'hin'), -1]]); eq([[pp(c, 'cout'), 1], [pp(c, 'cin'), -1]]);
-            if (ex[c.id] && ex[c.id].ratio != null) eq([[pp(c, 'cin'), 1], [pp(c, 'hin'), -ex[c.id].ratio]]);
+            eq([[g('out'), 1], [g('in'), -1]], 0, { c }); break;
+          case 'hx': {
+            eq([[g('hout'), 1], [g('hin'), -1]], 0, { c }); eq([[g('cout'), 1], [g('cin'), -1]], 0, { c });
+            const hs = ['hin', 'hout', 'cin', 'cout'].map(pt => H(g(pt)));
+            if (hs.every(v => v != null)) eq([[g('hin'), hs[0] - hs[1]], [g('cin'), -(hs[3] - hs[2])]], 0, { c, energy: true });
             break;
-          case 'mixer':
-            eq([[pp(c, 'out'), 1], [pp(c, 'in1'), -1], [pp(c, 'in2'), -1]]);
-            if (pr.omode === 'satliq' && ex[c.id] && ex[c.id].y != null) eq([[pp(c, 'in2'), 1], [pp(c, 'out'), -ex[c.id].y]]);
+          }
+          case 'mixer': {
+            eq([[g('out'), 1], [g('in1'), -1], [g('in2'), -1]], 0, { c });
+            const hs = ['in1', 'in2', 'out'].map(pt => H(g(pt)));
+            if (hs.every(v => v != null)) eq([[g('in1'), hs[0]], [g('in2'), hs[1]], [g('out'), -hs[2]]], 0, { c, energy: true });
             break;
+          }
           case 'splitter':
-            eq([[pp(c, 'in'), 1], [pp(c, 'out1'), -1], [pp(c, 'out2'), -1]]);
-            if (pr.fmode !== 'auto') eq([[pp(c, 'out2'), 1], [pp(c, 'in'), -(+pr.y)]]);
+            eq([[g('in'), 1], [g('out1'), -1], [g('out2'), -1]], 0, { c });
+            if (num(pr.y)) eq([[g('out2'), 1], [g('in'), -(+pr.y)]], 0, { c, y: true });
             break;
-          case 'source':
-            if (+pr.mdot > 0) eq([[pp(c, 'out'), 1]], +pr.mdot); break;
+        }
+        // rates
+        const ins = TYPES[c.type].ins, outs = TYPES[c.type].outs;
+        if (ins.length === 1 && outs.length === 1) {
+          const pi = g(ins[0]), po = g(outs[0]);
+          const hi = H(pi), ho = H(po);
+          if (hi != null && ho != null) {
+            if (TYPES[c.type].work && num(pr.W)) { const ql = num(pr.qloss) ? +pr.qloss : 0; const w = Math.abs(ho - hi + ql); if (w > 1e-9) eq([[pi, w]], +pr.W, { c, rate: true }); }
+            if (TYPES[c.type].heat && num(pr.Q) && !num(pr.q)) { const q = Math.abs(ho - hi); if (q > 1e-9) eq([[pi, q]], +pr.Q, { c, rate: true }); }
+          }
         }
       });
-      // user mass flows on pipes
-      pipes.forEach(p => { if (p.mdot != null && p.mdot !== '' && +p.mdot > 0) eq([[p, 1]], +p.mdot); });
-      // rate sizing
-      comps.forEach(c => { const r = c.params && c.params.rate; if (r && r.on && r.val > 0) { const ip = inP(c, TYPES[c.type].ins[0]); eq([[ip, 1]], bases[c.id] || 1); } });
-      // fill any remaining freedom with 1 kg/s per loop (per unit mass)
-      let sol = lsq(rows, rhs, n);
-      let g = 0;
-      while (sol.free.length && g++ < 20) {
-        const v = sol.null[0];
-        let best = 0; for (let i = 0; i < n; i++) if (Math.abs(v[i]) > Math.abs(v[best])) best = i;
-        const r = new Array(n).fill(0); r[best] = 1; rows.push(r); rhs.push(1);
-        unitLoops.add(loopOf(pipes[best]).id);
-        sol = lsq(rows, rhs, n);
-      }
-      if (sol.inconsistent) throw SErr('The mass flow rates conflict. Each loop can have only one mass flow rate given (or one size such as a power or a cooling capacity).', null);
-      const out = {}; pipes.forEach((p, i) => out[p.id] = sol.x[i]);
-      pipes.forEach(p => { if (!(out[p.id] > -1e-9)) throw SErr(`The mass flow at state ${p.n} comes out negative (${fmt(out[p.id])} kg/s). Check splitter fractions and feedwater-heater settings.`, byId[p.to[0]] && p.to[0]); });
-      return out;
+      pipes.forEach(p => { if (num(p.mdot) && +p.mdot > 0) eq([[p, 1]], +p.mdot, { p }); });
+      return { rows, rhs, tags, n };
     }
-    // ---------------- results per component -----------------
+    // build the flow equations one at a time; an energy balance that is already
+    // satisfied to table-rounding accuracy is skipped instead of over-constraining
+    const zeroAt = (r) => pipes.findIndex((p, i) => r.null.every(v => Math.abs(v[i]) < 1e-9) && Math.abs(r.x[i]) < 1e-9);
+    function acceptedFlowRows() {
+      const sys = flowSystem();
+      const order = sys.rows.map((r, i) => i).sort((i, j) => rank(sys.tags[i]) - rank(sys.tags[j]));
+      function rank(t) { return t.energy ? 2 : t.rate ? 3 : 1; }
+      const A = [], B = [];
+      let prev = lsq([], [], sys.n);
+      for (const i of order) {
+        const row = sys.rows[i], b = sys.rhs[i], t = sys.tags[i];
+        const test = lsq(A.concat([row]), B.concat([b]), sys.n);
+        if (test.inconsistent || zeroAt(test) >= 0) {
+          const vecs = [prev.x, ...prev.null];
+          const small = t.energy && vecs.every(v => { let nm = 0, dn = 0; row.forEach((a, k) => { nm += a * v[k]; dn += Math.abs(a * v[k]); }); return dn === 0 || Math.abs(nm) / dn < 3e-3; });
+          if (small) continue;
+          const who = t.c ? t.c.label : `state ${t.p.n}`;
+          throw new Conflict(`The mass flows cannot satisfy everything given (the clash shows up at ${who}). Too much has been given: remove a mass flow rate, a power or heat rate, a splitter fraction, or one of the states around a mixer or heat exchanger.`, t.c ? t.c.id : null, t.p ? t.p.id : null);
+        }
+        A.push(row); B.push(b); prev = test;
+      }
+      return { A, B, n: sys.n, sol: prev };
+    }
+    function solveFlows() {
+      const r = acceptedFlowRows();
+      return { x0: r.sol.x, nul: r.sol.null, inconsistent: false };
+    }
+
+    // ---- main iteration ----
+    let conflict = null;
+    try {
+      applyGiven();
+      for (let outer = 0; outer < 60; outer++) {
+        let inner = 0;
+        do {
+          changed = false;
+          pipes.forEach(tryFull);
+          comps.forEach(rules);
+          pipes.forEach(tryFull);
+        } while (changed && inner++ < 200);
+        const before = JSON.stringify(fl0 && [fl0.x0.map(v => +v.toFixed(9)), fl0.nul.length]);
+        fl0 = solveFlows();
+        const after = JSON.stringify([fl0.x0.map(v => +v.toFixed(9)), fl0.nul.length]);
+        if (before === after && !changed) break;
+      }
+    } catch (e) {
+      if (e instanceof Conflict) { conflict = e; errors.unshift({ msg: e.message, cid: e.cid, pid: e.pid }); }
+      else if (e.prop) errors.unshift({ msg: e.message });
+      else throw e;
+    }
+
+    // ---- final mass flows (fill any free scale with 1 kg/s) ----
+    const unitLoops = new Set();
+    let flows = {};
+    try {
+      const acc = acceptedFlowRows();
+      const rowsF = acc.A.slice(), rhsF = acc.B.slice(), n = acc.n;
+      let sol = acc.sol, guard = 0;
+      while (sol.free.length && guard++ < 30) {
+        const v = sol.null[0]; let best = 0;
+        for (let i = 0; i < n; i++) if (Math.abs(v[i]) > Math.abs(v[best])) best = i;
+        const r = new Array(n).fill(0); r[best] = 1; rowsF.push(r); rhsF.push(1);
+        unitLoops.add(loopOf(pipes[best]).id);
+        sol = lsq(rowsF, rhsF, n);
+      }
+      pipes.forEach((p, i) => flows[p.id] = sol.x[i]);
+    } catch (e) { pipes.forEach(p => flows[p.id] = null); }
+    pipes.forEach(p => { if (flows[p.id] != null && flows[p.id] < -1e-9 && !conflict) errors.push({ msg: `The mass flow at state ${p.n} comes out negative (${fmt(flows[p.id], 4)} kg/s). Check the splitter fraction and the temperatures around the mixer or heat exchanger.`, pid: p.id }); });
+
+    // attach derivation notes to the full states
+    const states = {};
+    pipes.forEach(p => {
+      const s = full[p.id]; if (!s) return;
+      const c = Object.assign({}, s, { how: (notes[p.id] || []).map(t => ({ note: t })).concat(s.how || []) });
+      states[p.id] = c;
+    });
+
+    // ---- what is missing ----
+    const nKnown = pipes.filter(p => states[p.id]).length;
+    if (open.length) missing.push({ msg: `${open.length} connection point${open.length > 1 ? 's are' : ' is'} not connected yet (orange dots).`, cid: open[0].cid });
+    if (!conflict) pipes.slice().sort((a, b) => a.n - b.n).forEach(p => {
+      if (states[p.id] || bad[p.id]) return;
+      const kn = know[p.id];
+      const have = KEYS.filter(k => kn[k] != null && !(k === 'x' && isAir(p))).map(k => `${k} = ${show(k, kn[k], p)}`);
+      const props = isAir(p) ? 'T or h' : 'T, x, h or s';
+      let need;
+      if (kn.P == null && !have.length) need = `nothing known yet. Give its pressure and one more property (${props}).`;
+      else if (kn.P == null) need = `${have.join(', ')} known; it still needs its pressure.`;
+      else need = `${have.join(', ')} known; give one more property (${props})`;
+      // hint from the equipment feeding it
+      const up = byId[p.from[0]], pr = (up && up.params) || {};
+      let hint = '';
+      if (kn.P != null && up) {
+        if (['pump', 'compressor', 'turbine'].includes(up.type) && !num(pr.eta) && !num(pr.W)) hint = `, or the isentropic efficiency of ${up.label}`;
+        if (['heater', 'cooler'].includes(up.type) && !num(pr.q) && !num(pr.Q)) hint = `, or the heat ${up.type === 'heater' ? 'added' : 'removed'} in ${up.label}`;
+        if (up.type === 'hx' && !num(pr.eps)) hint = `, or the effectiveness of ${up.label}`;
+      }
+      missing.push({ msg: `State ${p.n}: ${need}${kn.P != null ? hint + '.' : ''}`, pid: p.id });
+    });
+    const allKnown = pipes.length > 0 && nKnown === pipes.length;
+
+    // ---- results per component (only where every state is known) ----
     const rows = [];
     let Qin = 0, Qout = 0, Win = 0, Wout = 0, Sgen = 0, SgenOK = true, fuelRate = 0, fuelHeat = 0, co2 = 0, co2Known = true;
-    const fuelList = [];
-    const resT = [];
+    const fuelList = [], resT = [];
     comps.forEach(c => {
       const t = TYPES[c.type], pr = c.params || {};
-      const ins = t.ins.map(port => inP(c, port)), outs = t.outs.map(port => inP(c, port));
+      if (!complete(c)) return;
+      const ins = t.ins.map(pt => inP(c, pt)), outs = t.outs.map(pt => inP(c, pt));
+      if ([...ins, ...outs].some(p => !states[p.id] || flows[p.id] == null)) return;
       let Hin = 0, Hout = 0, Sin = 0, Sout = 0;
       ins.forEach(p => { Hin += flows[p.id] * states[p.id].h; Sin += flows[p.id] * states[p.id].s; });
       outs.forEach(p => { Hout += flows[p.id] * states[p.id].h; Sout += flows[p.id] * states[p.id].s; });
-      const dH = Hout - Hin; // = Q + W
+      const dH = Hout - Hin;
       let Q = 0, W = 0, Qloss = 0, Tres = null, sg = null;
-      const m = ins.length ? flows[ins[0].id] : (outs.length ? flows[outs[0].id] : 0);
+      const m = ins.length ? flows[ins[0].id] : flows[outs[0].id];
       if (t.work) {
-        Qloss = (+pr.qloss || 0) * m;       // heat lost to surroundings, kW (positive number)
+        Qloss = (num(pr.qloss) ? +pr.qloss : 0) * m;
         Q = -Qloss; W = dH - Q;
-        const Tb = pr.Tb != null && pr.Tb !== '' ? +pr.Tb : T0;
+        const Tb = num(pr.Tb) ? +pr.Tb : T0;
         sg = (Sout - Sin) + Qloss / K(Tb);
       } else if (t.heat) {
         Q = dH;
-        Tres = pr.Tres != null && pr.Tres !== '' ? +pr.Tres : (t.heat < 0 ? T0 : null);
-        if (Tres != null) {
-          sg = (Sout - Sin) - Q / K(Tres);
-          resT.push({ T: Tres, dir: Q >= 0 ? 'source' : 'sink', c });
-        } else SgenOK = false;
-      } else if (c.type === 'source' || c.type === 'sink') {
-        // boundary only
-      } else {
+        Tres = num(pr.Tres) ? +pr.Tres : (t.heat < 0 ? T0 : null);
+        if (Tres != null) { sg = (Sout - Sin) - Q / K(Tres); resT.push({ T: Tres, dir: Q >= 0 ? 'source' : 'sink' }); }
+        else SgenOK = false;
+        if (t.heat > 0 && Q < -1e-6) warnOnce(`${c.label}: heat comes out (the outlet enthalpy is lower than the inlet). Use a cooler or condenser here, or check the states.`, c.id);
+        if (t.heat < 0 && Q > 1e-6) warnOnce(`${c.label}: heat goes in (the outlet enthalpy is higher than the inlet). Use a heater here, or check the states.`, c.id);
+      } else if (c.type !== 'source' && c.type !== 'sink') {
         sg = Sout - Sin;
-        if (Math.abs(dH) > 1e-6 * Math.max(1, Math.abs(Hin))) {/* adiabatic devices should balance */}
+        if (c.type === 'hx') {
+          const sh = states[inP(c, 'hin').id], sc = states[inP(c, 'cin').id], sho = states[inP(c, 'hout').id], sco = states[inP(c, 'cout').id];
+          if (sho.T < sc.T - 0.05 || sco.T > sh.T + 0.05) warnOnce(`${c.label}: temperature cross. Heat would have to flow from the colder stream to the hotter one, which breaks the second law.`, c.id);
+          extra[c.id] = Object.assign(extra[c.id] || {}, { Q: flows[inP(c, 'hin').id] * (sh.h - sho.h) });
+        }
+        if (c.type === 'mixer') extra[c.id] = Object.assign(extra[c.id] || {}, { y: flows[inP(c, 'in2').id] / flows[inP(c, 'out').id] });
+        if (Math.abs(dH) > 1e-3 * Math.max(1, Math.abs(Hin)) && !conflict) warnOnce(`${c.label}: the energy does not balance (ΔḢ = ${fmt(dH, 3)}). An adiabatic ${c.type === 'valve' ? 'valve' : 'device'} must have Σṁh in = Σṁh out; check the given states.`, c.id);
       }
-      // table rounding makes "isentropic" devices show ±0.0003 kJ/kg·K; treat that as zero
       if (sg != null && Math.abs(sg) < 1e-3 * Math.max(m, 1e-12)) sg = 0;
       if (sg != null) Sgen += sg;
       if (Q > 0) Qin += Q; else Qout += -Q;
       if (W > 0) Win += W; else Wout += -W;
       const row = { c, m, Q, W, Qloss, sg, Tres, dH, ex: extra[c.id] || {} };
-      // fuel
       if (c.type === 'heater' && pr.fuel && pr.fuel.on) {
         const f = FUELS.find(x => x.id === pr.fuel.id) || FUELS[0];
         const HV = f.custom ? +pr.fuel.hv : (pr.fuel.basis === 'HHV' ? f.HHV : f.LHV);
-        const etac = +pr.fuel.eta || 1;
-        const Qfuel = Q / etac;
-        const mf = Qfuel / HV;
-        row.fuel = { f, HV, etac, Qfuel, mf, basis: f.custom ? '' : (pr.fuel.basis || 'LHV'), co2: f.co2 != null ? mf * f.co2 : null,
-          AF: (fluidOf(ins[0]) === 'air' ? m / mf : null) };
-        fuelHeat += Qfuel; fuelRate += mf;
-        if (f.co2 != null) co2 += mf * f.co2; else co2Known = false;
-        fuelList.push(row.fuel);
+        const etac = num(pr.fuel.eta) ? +pr.fuel.eta : 1;
+        if (HV > 0) {
+          const Qfuel = Q / etac, mf = Qfuel / HV;
+          row.fuel = { f, HV, etac, Qfuel, mf, basis: f.custom ? '' : (pr.fuel.basis || 'LHV'), co2: f.co2 != null ? mf * f.co2 : null, AF: isAir(ins[0]) ? m / mf : null };
+          fuelHeat += Qfuel; fuelRate += mf;
+          if (f.co2 != null) co2 += mf * f.co2; else co2Known = false;
+          fuelList.push(row.fuel);
+        }
       }
       rows.push(row);
-      if (sg != null && sg < -1e-6 * Math.max(1, Math.abs(Sin))) warnOnce(`${c.label}: entropy generation is negative (${fmt(sg)} kW/K). This breaks the second law, so this device cannot work as set.`, c.id);
+      if (sg != null && sg < -1e-6 * Math.max(1, Math.abs(Sin))) warnOnce(`${c.label}: entropy generation is negative (${fmt(sg, 5)}). This breaks the second law, so the device cannot work with these values.`, c.id);
+      if (row.ex && row.ex.eta != null && row.ex.eta > 1.0005 && !conflict) warnOnce(`${c.label}: the states give an isentropic efficiency above 100 % (${fmt(row.ex.eta * 100, 1)} %), which is impossible. Check the outlet state.`, c.id);
     });
 
-    // ---------------- cycle performance -----------------
-    const Wnet = Win - Wout; // W = W_in − W_out
-    const perf = { Qin, Qout, Win, Wout, Wnet, Sgen: SgenOK ? Sgen : null, SgenPartial: Sgen, fuelHeat, fuelRate, co2: co2Known ? co2 : null, fuels: fuelList };
-    const isPower = Wnet < -1e-9;
-    perf.kind = isPower ? 'power' : (Wnet > 1e-9 ? 'refrigeration' : 'none');
-    const closed = !comps.some(c => c.type === 'source' || c.type === 'sink');
-    perf.closed = closed;
-    if (isPower && Qin > 0) {
-      perf.eta = -Wnet / Qin;
-      perf.bwr = Wout > 0 ? Win / Wout : null;
-      if (fuelHeat > 0) { perf.etaOverall = -Wnet / fuelHeat; if (perf.co2 != null) perf.co2Intensity = perf.co2 / (-Wnet) * 3600; } // kg/MWh: (kg/s)/(kW) *3600 s/h *1000 kW/MW /1000 kg/t → kg/MWh = co2/W*3.6e6/1000
+    // ---- cycle performance (only when every state is known) ----
+    let perf = null;
+    if (allKnown && !conflict) {
+      const Wnet = Win - Wout;
+      perf = { Qin, Qout, Win, Wout, Wnet, Sgen: SgenOK ? Sgen : null, fuelHeat, fuelRate, co2: co2Known ? co2 : null, fuels: fuelList };
+      const isPower = Wnet < -1e-9;
+      perf.kind = isPower ? 'power' : (Wnet > 1e-9 ? 'refrigeration' : 'none');
+      perf.closed = !comps.some(c => c.type === 'source' || c.type === 'sink');
+      if (isPower && Qin > 0) {
+        perf.eta = -Wnet / Qin;
+        perf.bwr = Wout > 0 ? Win / Wout : null;
+        if (fuelHeat > 0) { perf.etaOverall = -Wnet / fuelHeat; if (perf.co2 != null) perf.co2Intensity = perf.co2 / (-Wnet) * 3600; }
+      }
+      if (!isPower && Wnet > 0) { perf.COPR = Qin / Wnet; perf.COPHP = Qout / Wnet; }
+      const allT = pipes.map(p => states[p.id].T);
+      const srcT = resT.filter(r => r.dir === 'source').map(r => r.T), snkT = resT.filter(r => r.dir === 'sink').map(r => r.T);
+      perf.TmaxFluid = Math.max(...allT); perf.TminFluid = Math.min(...allT);
+      if (isPower) {
+        const TH = srcT.length ? Math.max(...srcT) : perf.TmaxFluid, TL = snkT.length ? Math.min(...snkT) : perf.TminFluid;
+        perf.carnotBasis = srcT.length && snkT.length ? 'reservoirs' : 'fluid';
+        perf.TcH = TH; perf.TcL = TL; perf.etaCarnot = 1 - K(TL) / K(TH);
+        if (perf.eta != null) perf.etaII = perf.eta / perf.etaCarnot;
+      } else if (Wnet > 0) {
+        const TL = srcT.length ? Math.min(...srcT) : perf.TminFluid, TH = snkT.length ? Math.max(...snkT) : perf.TmaxFluid;
+        perf.carnotBasis = srcT.length && snkT.length ? 'reservoirs' : 'fluid';
+        perf.TcH = TH; perf.TcL = TL;
+        if (K(TH) > K(TL)) { perf.COPRCarnot = K(TL) / (K(TH) - K(TL)); perf.COPHPCarnot = K(TH) / (K(TH) - K(TL)); }
+      }
     }
-    if (!isPower && Wnet > 0) {
-      perf.COPR = Qin / Wnet;
-      perf.COPHP = Qout / Wnet;
-    }
-    // reservoir/fluid temperature limits for Carnot
-    const allT = pipes.map(p => states[p.id].T);
-    const srcT = resT.filter(r => r.dir === 'source').map(r => r.T), snkT = resT.filter(r => r.dir === 'sink').map(r => r.T);
-    perf.TH = srcT.length ? Math.max(...srcT) : null; perf.TL = snkT.length ? Math.min(...snkT) : null;
-    perf.TmaxFluid = Math.max(...allT); perf.TminFluid = Math.min(...allT);
-    if (isPower) {
-      const TH = srcT.length ? Math.max(...srcT) : perf.TmaxFluid, TL = snkT.length ? Math.min(...snkT) : perf.TminFluid;
-      perf.carnotBasis = srcT.length && snkT.length ? 'reservoirs' : 'fluid';
-      perf.TcH = TH; perf.TcL = TL;
-      perf.etaCarnot = 1 - K(TL) / K(TH);
-      if (perf.eta != null) perf.etaII = perf.eta / perf.etaCarnot;
-    } else if (Wnet > 0) {
-      const TL = srcT.length ? Math.min(...srcT) : perf.TminFluid, TH = snkT.length ? Math.max(...snkT) : perf.TmaxFluid;
-      perf.carnotBasis = srcT.length && snkT.length ? 'reservoirs' : 'fluid';
-      perf.TcH = TH; perf.TcL = TL;
-      if (K(TH) > K(TL)) { perf.COPRCarnot = K(TL) / (K(TH) - K(TL)); perf.COPHPCarnot = K(TH) / (K(TH) - K(TL)); }
-    }
-    loopList.forEach(L => { L.unit = unitLoops.has(L.id); L.mdot = flows[L.pipes[0].id]; });
-    return { ok: true, states, flows, pres, rows, perf, loops: loopList, loopOf: (p) => loopOf(p), errors, warnings, extra };
-
-    function compRate(c, st, fl, ex) {
-      const t = TYPES[c.type];
-      let H = 0;
-      t.ins.forEach(port => { const p = inP(c, port); H -= fl[p.id] * st[p.id].h; });
-      t.outs.forEach(port => { const p = inP(c, port); H += fl[p.id] * st[p.id].h; });
-      if (t.work) return H + (+(c.params.qloss) || 0) * fl[inP(c, 'in').id];
-      return H;
-    }
+    loopList.forEach(L => { L.unit = unitLoops.has(L.id); });
+    // references the page uses to point at the right item
+    const addRef = (e) => { if (e.pid) { e.ref = { kind: 'pipe', id: e.pid }; e.state = true; } else if (e.cid) e.ref = { kind: 'comp', id: e.cid }; return e; };
+    errors.forEach(addRef); warnings.forEach(addRef); missing.forEach(addRef);
+    const flowKnown = {}; pipes.forEach(p => flowKnown[p.id] = flows[p.id] != null && !conflict);
+    const known = {};
+    pipes.forEach(p => { known[p.id] = {}; KEYS.forEach(k => { if (know[p.id][k] != null) known[p.id][k] = { v: know[p.id][k], src: src[p.id][k] === 'you gave this' ? 'given' : src[p.id][k] }; }); });
+    return { known, flowKnown, ok: allKnown && !conflict && !errors.length, partial: true, conflict: !!conflict, states, src, given, flows, rows, perf, loops: loopList, loopOf, errors, warnings, missing, extra, nKnown, nStates: pipes.length, open };
   }
 
-  // least squares / consistency via Gaussian elimination (RREF)
+  // Gaussian elimination (RREF) with consistency check and null space
   function lsq(A, b, n) {
     const m = A.length;
     const M = A.map((r, i) => r.concat([b[i]]));
@@ -1085,7 +1070,7 @@ const SOLVER = (function () {
     for (let col = 0; col < n && row < m; col++) {
       let best = row;
       for (let i = row + 1; i < m; i++) if (Math.abs(M[i][col]) > Math.abs(M[best][col])) best = i;
-      if (Math.abs(M[best][col]) < 1e-12) continue;
+      if (Math.abs(M[best][col]) < 1e-10) continue;
       [M[row], M[best]] = [M[best], M[row]];
       const d = M[row][col];
       for (let j = col; j <= n; j++) M[row][j] /= d;
@@ -1093,7 +1078,7 @@ const SOLVER = (function () {
       piv.push(col); row++;
     }
     let inconsistent = false;
-    for (let i = row; i < m; i++) if (Math.abs(M[i][n]) > 1e-8 * (1 + Math.abs(M[i][n]))) inconsistent = true;
+    for (let i = row; i < m; i++) if (Math.abs(M[i][n]) > 1e-6 * (1 + Math.abs(M[i][n]))) inconsistent = true;
     const x = new Array(n).fill(0);
     piv.forEach((col, i) => x[col] = M[i][n]);
     const free = []; for (let j = 0; j < n; j++) if (!piv.includes(j)) free.push(j);
@@ -1105,25 +1090,29 @@ const SOLVER = (function () {
 })();
 if (false) module.exports = SOLVER;
 
-/* ================= Palette defaults and example cycles ================= */
+/* ================= Palette defaults and example cycles =================
+   Equipment starts blank: students type what the problem gives.
+   Examples carry exactly the data of the textbook problem: known state
+   properties on the pipes, efficiencies etc. on the equipment.              */
+const NOFUEL = { on: false, id: 'ng', basis: 'LHV', eta: '', hv: '' };
 const KINDS = {
-  pump: { type: 'pump', name: 'Pump', params: { Pout: 3000, eta: 1, rate: { on: false, val: '' } } },
-  compressor: { type: 'compressor', name: 'Compressor', params: { pmode: 'P', Pout: 800, ratio: 8, omode: 'eta', eta: 1, Tout: '', qloss: 0, Tb: '', rate: { on: false, val: '' } } },
-  turbine: { type: 'turbine', name: 'Turbine', params: { Pout: 100, omode: 'eta', eta: 1, Tout: '', xout: 1, qloss: 0, Tb: '', rate: { on: false, val: '' } } },
-  valve: { type: 'valve', name: 'Expansion valve', params: { Pout: 140 } },
-  boiler: { type: 'heater', name: 'Boiler', params: { omode: 'T', Tout: 350, xout: 1, dT: 10, q: '', Q: '', Tres: '', fuel: { on: false, id: 'ng', basis: 'LHV', eta: 1, hv: '' }, rate: { on: false, val: '' } } },
-  evaporator: { type: 'heater', name: 'Evaporator', params: { omode: 'x', Tout: '', xout: 1, dT: 5, q: '', Q: '', Tres: 25, fuel: { on: false, id: 'ng', basis: 'LHV', eta: 1, hv: '' }, rate: { on: false, val: '' } } },
-  gasheater: { type: 'heater', name: 'Heater', params: { omode: 'T', Tout: 1026.85, xout: 1, dT: 10, q: '', Q: '', Tres: '', fuel: { on: false, id: 'ng', basis: 'LHV', eta: 1, hv: '' }, rate: { on: false, val: '' } } },
-  combustor: { type: 'heater', name: 'Combustion chamber', params: { omode: 'T', Tout: 1026.85, xout: 1, dT: 10, q: '', Q: '', Tres: '', fuel: { on: true, id: 'ng', basis: 'LHV', eta: 1, hv: '' }, rate: { on: false, val: '' } } },
-  condenser: { type: 'cooler', name: 'Condenser', params: { omode: 'x', Tout: '', xout: 0, dT: 5, q: '', Q: '', Tres: '', rate: { on: false, val: '' } } },
-  gascooler: { type: 'cooler', name: 'Cooler', params: { omode: 'T', Tout: 26.85, xout: 0, dT: 5, q: '', Q: '', Tres: '', rate: { on: false, val: '' } } },
-  process: { type: 'cooler', name: 'Process heater', params: { omode: 'x', Tout: '', xout: 0, dT: 5, q: '', Q: '', Tres: '', rate: { on: false, val: '' } } },
-  hx: { type: 'hx', name: 'Heat exchanger', params: { mode: 'eps', eps: 0.8, cspec: { mode: 'none', val: '' }, hspec: { mode: 'none', val: '' } } },
-  regenerator: { type: 'hx', name: 'Regenerator', params: { mode: 'eps', eps: 0.8, cspec: { mode: 'none', val: '' }, hspec: { mode: 'none', val: '' } } },
-  ofwh: { type: 'mixer', name: 'Open feedwater heater', params: { omode: 'satliq' } },
-  mixer: { type: 'mixer', name: 'Mixing chamber', params: { omode: 'balance' } },
-  splitter: { type: 'splitter', name: 'Splitter', params: { fmode: 'fixed', y: 0.2 } },
-  source: { type: 'source', name: 'Inlet', params: { P: 100, smode: 'T', T: 25, x: 1, mdot: 1 } },
+  pump: { type: 'pump', name: 'Pump', params: { eta: '', W: '' } },
+  compressor: { type: 'compressor', name: 'Compressor', params: { ratio: '', eta: '', W: '', qloss: '', Tb: '' } },
+  turbine: { type: 'turbine', name: 'Turbine', params: { eta: '', W: '', qloss: '', Tb: '' } },
+  valve: { type: 'valve', name: 'Expansion valve', params: {} },
+  boiler: { type: 'heater', name: 'Boiler', params: { q: '', Q: '', Tres: '', fuel: NOFUEL } },
+  combustor: { type: 'heater', name: 'Combustion chamber', params: { q: '', Q: '', Tres: '', fuel: { on: true, id: 'ng', basis: 'LHV', eta: '', hv: '' } } },
+  gasheater: { type: 'heater', name: 'Heater', params: { q: '', Q: '', Tres: '', fuel: NOFUEL } },
+  evaporator: { type: 'heater', name: 'Evaporator', params: { q: '', Q: '', Tres: '', fuel: NOFUEL } },
+  condenser: { type: 'cooler', name: 'Condenser', params: { q: '', Q: '', Tres: '' } },
+  gascooler: { type: 'cooler', name: 'Cooler', params: { q: '', Q: '', Tres: '' } },
+  process: { type: 'cooler', name: 'Process heater', params: { q: '', Q: '', Tres: '' } },
+  hx: { type: 'hx', name: 'Heat exchanger', params: { eps: '' } },
+  regenerator: { type: 'hx', name: 'Regenerator', params: { eps: '' } },
+  ofwh: { type: 'mixer', name: 'Open feedwater heater', params: {} },
+  mixer: { type: 'mixer', name: 'Mixing chamber', params: {} },
+  splitter: { type: 'splitter', name: 'Splitter', params: { y: '' } },
+  source: { type: 'source', name: 'Inlet', params: {} },
   sink: { type: 'sink', name: 'Outlet', params: {} }
 };
 const PALETTE_GROUPS = [
@@ -1138,29 +1127,30 @@ function mk(id, kind, x, y, params, extra) {
   const k = KINDS[kind];
   const p = JSON.parse(JSON.stringify(k.params));
   deepAssign(p, params || {});
-  return Object.assign({ id, kind, type: k.type, label: (extra && extra.label) || k.name, x, y, flip: false }, extra || {}, { params: p });
+  return Object.assign({ id, kind, type: k.type, label: (extra && extra.label) || k.name, x, y, rot: 0, flip: false }, extra || {}, { params: p });
 }
 function deepAssign(a, b) { for (const k in b) { if (b[k] && typeof b[k] === 'object' && !Array.isArray(b[k]) && a[k] && typeof a[k] === 'object') deepAssign(a[k], b[k]); else a[k] = b[k]; } return a; }
-function pp(n, from, to, extra) { return Object.assign({ id: 'p' + n + '_' + from[0] + to[0], n, from, to }, extra || {}); }
+// pipe: state number, from, to, fluid, given values {P, T (°C), x, h, s}, extra {mdot}
+function pp(n, from, to, fluid, given, extra) { return Object.assign({ id: 'p' + n + '_' + from[0] + to[0], n, from, to, fluid, given: given || {} }, extra || {}); }
 const C2K = 273.15;
 
 const TEMPLATES = [
   {
     id: 'rankine', group: 'Power: steam', name: 'Steam power plant (simple Rankine)',
-    blurb: 'Steam enters the turbine at 3 MPa and 350 °C; the condenser runs at 75 kPa.',
+    blurb: 'Steam enters the turbine at 3 MPa and 350 °C; the condenser runs at 75 kPa. Ideal pump and turbine.',
     build() {
       return {
         comps: [
-          mk('B', 'boiler', 300, 90, { Tout: 350, Tres: '' }),
-          mk('T', 'turbine', 560, 230, { Pout: 75, eta: 1 }),
-          mk('C', 'condenser', 300, 400, { omode: 'x', xout: 0 }),
-          mk('P', 'pump', 100, 230, { Pout: 3000, eta: 1 })
+          mk('B', 'boiler', 300, 90),
+          mk('T', 'turbine', 560, 230, { eta: 1 }),
+          mk('C', 'condenser', 300, 400, {}, { flip: true }),
+          mk('P', 'pump', 100, 230, { eta: 1 }, { rot: 270 })
         ],
         pipes: [
-          pp(1, ['C', 'out'], ['P', 'in'], { fluid: 'water' }),
-          pp(2, ['P', 'out'], ['B', 'in'], { fluid: 'water' }),
-          pp(3, ['B', 'out'], ['T', 'in'], { fluid: 'water' }),
-          pp(4, ['T', 'out'], ['C', 'in'], { fluid: 'water' })
+          pp(1, ['C', 'out'], ['P', 'in'], 'water', { P: 75, x: 0 }),
+          pp(2, ['P', 'out'], ['B', 'in'], 'water'),
+          pp(3, ['B', 'out'], ['T', 'in'], 'water', { P: 3000, T: 350 }),
+          pp(4, ['T', 'out'], ['C', 'in'], 'water')
         ]
       };
     }
@@ -1171,69 +1161,69 @@ const TEMPLATES = [
     build() {
       return {
         comps: [
-          mk('B', 'boiler', 280, 70, { Tout: 600 }, { label: 'Boiler' }),
-          mk('HP', 'turbine', 520, 120, { Pout: 4000, eta: 1 }, { label: 'HP turbine' }),
-          mk('R', 'boiler', 540, 290, { Tout: 600 }, { label: 'Reheater' }),
-          mk('LP', 'turbine', 720, 450, { Pout: 10, eta: 1 }, { label: 'LP turbine' }),
-          mk('C', 'condenser', 420, 580, { omode: 'x', xout: 0 }),
-          mk('P', 'pump', 110, 330, { Pout: 15000, eta: 1 })
+          mk('B', 'boiler', 280, 70),
+          mk('HP', 'turbine', 520, 120, { eta: 1 }, { label: 'HP turbine' }),
+          mk('R', 'boiler', 540, 290, {}, { label: 'Reheater', rot: 90 }),
+          mk('LP', 'turbine', 720, 450, { eta: 1 }, { label: 'LP turbine' }),
+          mk('C', 'condenser', 420, 580, {}, { flip: true }),
+          mk('P', 'pump', 110, 330, { eta: 1 }, { rot: 270 })
         ],
         pipes: [
-          pp(1, ['C', 'out'], ['P', 'in'], { fluid: 'water' }),
-          pp(2, ['P', 'out'], ['B', 'in'], { fluid: 'water' }),
-          pp(3, ['B', 'out'], ['HP', 'in'], { fluid: 'water' }),
-          pp(4, ['HP', 'out'], ['R', 'in'], { fluid: 'water' }),
-          pp(5, ['R', 'out'], ['LP', 'in'], { fluid: 'water' }),
-          pp(6, ['LP', 'out'], ['C', 'in'], { fluid: 'water' })
+          pp(1, ['C', 'out'], ['P', 'in'], 'water', { P: 10, x: 0 }),
+          pp(2, ['P', 'out'], ['B', 'in'], 'water'),
+          pp(3, ['B', 'out'], ['HP', 'in'], 'water', { P: 15000, T: 600 }),
+          pp(4, ['HP', 'out'], ['R', 'in'], 'water', { P: 4000 }),
+          pp(5, ['R', 'out'], ['LP', 'in'], 'water', { T: 600 }),
+          pp(6, ['LP', 'out'], ['C', 'in'], 'water')
         ]
       };
     }
   },
   {
     id: 'regen', group: 'Power: steam', name: 'Steam power plant with an open feedwater heater',
-    blurb: 'Some steam is bled from the turbine at 1.2 MPa to preheat the feedwater. 15 MPa, 600 °C; condenser 10 kPa.',
+    blurb: 'Steam bled at 1.2 MPa preheats the feedwater, which leaves the heater as saturated liquid. 15 MPa, 600 °C; condenser 10 kPa.',
     build() {
       return {
         comps: [
-          mk('B', 'boiler', 330, 60, { Tout: 600 }),
-          mk('T1', 'turbine', 600, 120, { Pout: 1200, eta: 1 }, { label: 'HP turbine' }),
-          mk('S', 'splitter', 640, 270, { fmode: 'auto', y: 0.2 }),
-          mk('T2', 'turbine', 800, 330, { Pout: 10, eta: 1 }, { label: 'LP turbine' }),
-          mk('C', 'condenser', 600, 540, { omode: 'x', xout: 0 }),
-          mk('P1', 'pump', 440, 470, { Pout: 1200, eta: 1 }, { label: 'Pump I' }),
-          mk('F', 'ofwh', 300, 330, { omode: 'satliq' }),
-          mk('P2', 'pump', 110, 230, { Pout: 15000, eta: 1 }, { label: 'Pump II' })
+          mk('B', 'boiler', 330, 60),
+          mk('T1', 'turbine', 600, 120, { eta: 1 }, { label: 'HP turbine' }),
+          mk('S', 'splitter', 640, 270, {}, { rot: 90 }),
+          mk('T2', 'turbine', 800, 330, { eta: 1 }, { label: 'LP turbine' }),
+          mk('C', 'condenser', 600, 540, {}, { flip: true }),
+          mk('P1', 'pump', 440, 470, { eta: 1 }, { label: 'Pump I', rot: 270 }),
+          mk('F', 'ofwh', 300, 330, {}, { flip: true }),
+          mk('P2', 'pump', 110, 230, { eta: 1 }, { label: 'Pump II', rot: 270 })
         ],
         pipes: [
-          pp(1, ['C', 'out'], ['P1', 'in'], { fluid: 'water' }),
-          pp(2, ['P1', 'out'], ['F', 'in1'], { fluid: 'water' }),
-          pp(3, ['F', 'out'], ['P2', 'in'], { fluid: 'water' }),
-          pp(4, ['P2', 'out'], ['B', 'in'], { fluid: 'water' }),
-          pp(5, ['B', 'out'], ['T1', 'in'], { fluid: 'water' }),
-          pp(6, ['T1', 'out'], ['S', 'in'], { fluid: 'water' }),
-          pp(7, ['S', 'out2'], ['F', 'in2'], { fluid: 'water' }),
-          pp(8, ['S', 'out1'], ['T2', 'in'], { fluid: 'water' }),
-          pp(9, ['T2', 'out'], ['C', 'in'], { fluid: 'water' })
+          pp(1, ['C', 'out'], ['P1', 'in'], 'water', { P: 10, x: 0 }),
+          pp(2, ['P1', 'out'], ['F', 'in1'], 'water'),
+          pp(3, ['F', 'out'], ['P2', 'in'], 'water', { P: 1200, x: 0 }),
+          pp(4, ['P2', 'out'], ['B', 'in'], 'water'),
+          pp(5, ['B', 'out'], ['T1', 'in'], 'water', { P: 15000, T: 600 }),
+          pp(6, ['T1', 'out'], ['S', 'in'], 'water'),
+          pp(7, ['S', 'out2'], ['F', 'in2'], 'water'),
+          pp(8, ['S', 'out1'], ['T2', 'in'], 'water'),
+          pp(9, ['T2', 'out'], ['C', 'in'], 'water')
         ]
       };
     }
   },
   {
     id: 'wte', group: 'Power: steam', name: 'Waste-to-energy plant',
-    blurb: 'Burning municipal solid waste (7 MJ/kg) raises 56.7 kg/s of steam at 3.5 MPa and 370 °C.',
+    blurb: 'Burning municipal solid waste (7 MJ/kg, combustion efficiency 82.7 %) raises 56.67 kg/s of steam at 3.5 MPa and 370 °C.',
     build() {
       return {
         comps: [
-          mk('B', 'boiler', 300, 90, { Tout: 370, fuel: { on: true, id: 'msw', basis: 'LHV', eta: 0.827 } }, { label: 'Incinerator-boiler' }),
-          mk('T', 'turbine', 560, 230, { Pout: 10, eta: 0.85 }),
-          mk('C', 'condenser', 300, 400, { omode: 'x', xout: 0 }),
-          mk('P', 'pump', 100, 230, { Pout: 3500, eta: 1 })
+          mk('B', 'boiler', 300, 90, { fuel: { on: true, id: 'msw', basis: 'LHV', eta: 0.827 } }, { label: 'Incinerator-boiler' }),
+          mk('T', 'turbine', 560, 230, { eta: 0.85 }),
+          mk('C', 'condenser', 300, 400, {}, { flip: true }),
+          mk('P', 'pump', 100, 230, { eta: 1 }, { rot: 270 })
         ],
         pipes: [
-          pp(1, ['C', 'out'], ['P', 'in'], { fluid: 'water', mdot: 56.67 }),
-          pp(2, ['P', 'out'], ['B', 'in'], { fluid: 'water' }),
-          pp(3, ['B', 'out'], ['T', 'in'], { fluid: 'water' }),
-          pp(4, ['T', 'out'], ['C', 'in'], { fluid: 'water' })
+          pp(1, ['C', 'out'], ['P', 'in'], 'water', { P: 10, x: 0 }, { mdot: 56.67 }),
+          pp(2, ['P', 'out'], ['B', 'in'], 'water'),
+          pp(3, ['B', 'out'], ['T', 'in'], 'water', { P: 3500, T: 370 }),
+          pp(4, ['T', 'out'], ['C', 'in'], 'water')
         ]
       };
     }
@@ -1254,48 +1244,48 @@ const TEMPLATES = [
     build() {
       return {
         comps: [
-          mk('K', 'compressor', 110, 380, { pmode: 'P', Pout: 800, eta: 0.8 }),
-          mk('R', 'regenerator', 420, 90, { eps: 0.8 }),
-          mk('H', 'combustor', 600, 250, { Tout: 1300 - C2K }),
-          mk('T', 'turbine', 760, 380, { Pout: 100, eta: 0.85 }),
-          mk('X', 'gascooler', 200, 200, { Tout: 300 - C2K }, { label: 'Exhaust to air' })
+          mk('K', 'compressor', 110, 380, { ratio: 8, eta: 0.8 }),
+          mk('R', 'regenerator', 420, 90, { eps: 0.8 }, { flip: true }),
+          mk('H', 'combustor', 600, 250),
+          mk('T', 'turbine', 760, 380, { eta: 0.85 }),
+          mk('X', 'gascooler', 200, 200, {}, { label: 'Exhaust to air', flip: true })
         ],
         pipes: [
-          pp(1, ['X', 'out'], ['K', 'in'], { fluid: 'air' }),
-          pp(2, ['K', 'out'], ['R', 'cin'], { fluid: 'air' }),
-          pp(5, ['R', 'cout'], ['H', 'in'], { fluid: 'air' }),
-          pp(3, ['H', 'out'], ['T', 'in'], { fluid: 'air' }),
-          pp(4, ['T', 'out'], ['R', 'hin'], { fluid: 'air' }),
-          pp(6, ['R', 'hout'], ['X', 'in'], { fluid: 'air' })
+          pp(1, ['X', 'out'], ['K', 'in'], 'air', { P: 100, T: 300 - C2K }),
+          pp(2, ['K', 'out'], ['R', 'cin'], 'air'),
+          pp(5, ['R', 'cout'], ['H', 'in'], 'air'),
+          pp(3, ['H', 'out'], ['T', 'in'], 'air', { T: 1300 - C2K }),
+          pp(4, ['T', 'out'], ['R', 'hin'], 'air'),
+          pp(6, ['R', 'hout'], ['X', 'in'], 'air')
         ]
       };
     }
   },
   {
     id: 'combined', group: 'Power: gas turbine', name: 'Combined-cycle power plant',
-    blurb: 'Gas-turbine exhaust raises steam for a Rankine cycle (7 MPa, 500 °C, condenser 5 kPa).',
+    blurb: 'Gas-turbine exhaust (cooled to 450 K) raises steam at 7 MPa and 500 °C for a Rankine cycle with a 5 kPa condenser.',
     build() {
       return {
         comps: [
-          mk('K', 'compressor', 100, 200, { pmode: 'ratio', ratio: 8, eta: 0.8 }),
-          mk('H', 'combustor', 330, 60, { Tout: 1300 - C2K }),
-          mk('GT', 'turbine', 560, 200, { Pout: 100, eta: 0.85 }, { label: 'Gas turbine' }),
-          mk('X', 'gascooler', 200, 340, { Tout: 300 - C2K }, { label: 'Exhaust to air' }),
-          mk('HR', 'hx', 450, 340, { mode: 'spec', hspec: { mode: 'T', val: 450 - C2K }, cspec: { mode: 'T', val: 500 } }, { label: 'Heat recovery (HRSG)' }),
-          mk('ST', 'turbine', 680, 470, { Pout: 5, eta: 1 }, { label: 'Steam turbine' }),
-          mk('C', 'condenser', 470, 610, { omode: 'x', xout: 0 }),
-          mk('P', 'pump', 300, 480, { Pout: 7000, eta: 1 })
+          mk('K', 'compressor', 100, 200, { ratio: 8, eta: 0.8 }),
+          mk('H', 'combustor', 330, 60),
+          mk('GT', 'turbine', 560, 200, { eta: 0.85 }, { label: 'Gas turbine' }),
+          mk('X', 'gascooler', 200, 340, {}, { label: 'Exhaust to air', flip: true }),
+          mk('HR', 'hx', 450, 340, {}, { label: 'Heat recovery (HRSG)', flip: true }),
+          mk('ST', 'turbine', 680, 470, { eta: 1 }, { label: 'Steam turbine' }),
+          mk('C', 'condenser', 470, 610, {}, { flip: true }),
+          mk('P', 'pump', 300, 480, { eta: 1 }, { rot: 270 })
         ],
         pipes: [
-          pp(1, ['X', 'out'], ['K', 'in'], { fluid: 'air' }),
-          pp(2, ['K', 'out'], ['H', 'in'], { fluid: 'air' }),
-          pp(3, ['H', 'out'], ['GT', 'in'], { fluid: 'air' }),
-          pp(4, ['GT', 'out'], ['HR', 'hin'], { fluid: 'air' }),
-          pp(5, ['HR', 'hout'], ['X', 'in'], { fluid: 'air' }),
-          pp(6, ['C', 'out'], ['P', 'in'], { fluid: 'water' }),
-          pp(7, ['P', 'out'], ['HR', 'cin'], { fluid: 'water' }),
-          pp(8, ['HR', 'cout'], ['ST', 'in'], { fluid: 'water' }),
-          pp(9, ['ST', 'out'], ['C', 'in'], { fluid: 'water' })
+          pp(1, ['X', 'out'], ['K', 'in'], 'air', { P: 100, T: 300 - C2K }),
+          pp(2, ['K', 'out'], ['H', 'in'], 'air'),
+          pp(3, ['H', 'out'], ['GT', 'in'], 'air', { T: 1300 - C2K }),
+          pp(4, ['GT', 'out'], ['HR', 'hin'], 'air'),
+          pp(5, ['HR', 'hout'], ['X', 'in'], 'air', { T: 450 - C2K }),
+          pp(6, ['C', 'out'], ['P', 'in'], 'water', { P: 5, x: 0 }),
+          pp(7, ['P', 'out'], ['HR', 'cin'], 'water'),
+          pp(8, ['HR', 'cout'], ['ST', 'in'], 'water', { P: 7000, T: 500 }),
+          pp(9, ['ST', 'out'], ['C', 'in'], 'water')
         ]
       };
     }
@@ -1308,7 +1298,7 @@ const TEMPLATES = [
   {
     id: 'aircon', group: 'Refrigeration and heat pumps', name: 'Home air-con (cooling a bedroom)',
     blurb: 'R-134a; evaporator 0.40 MPa, condenser 1.2 MPa; removes 950 W from a room at 25 °C on a 32 °C day.',
-    build() { return vcBase({ Pevap: 400, Pcond: 1200, rate: 0.95, Tspace: 25, Tout: 32 }); }
+    build() { return vcBase({ Pevap: 400, Pcond: 1200, Qevap: 0.95, Tspace: 25, Tout: 32 }); }
   },
   {
     id: 'heatpump', group: 'Refrigeration and heat pumps', name: 'Heat-pump water heater',
@@ -1316,7 +1306,7 @@ const TEMPLATES = [
     build() {
       const m = vcBase({ Pevap: 400, Pcond: 1400, Tspace: 30, Tout: 45, etaC: 0.8 });
       const C = m.comps.find(c => c.id === 'C');
-      C.params.rate = { on: true, val: 3 }; C.label = 'Condenser (heats the water)';
+      C.params.Q = 3; C.label = 'Condenser (heats the water)';
       m.comps.find(c => c.id === 'E').label = 'Evaporator (outdoor air)';
       return m;
     }
@@ -1327,71 +1317,69 @@ const TEMPLATES = [
     build() {
       return {
         comps: [
-          mk('K', 'compressor', 560, 230, { pmode: 'ratio', ratio: 4, eta: 1 }),
-          mk('X', 'gascooler', 330, 70, { Tout: 300 - C2K, Tres: 300 - C2K }, { label: 'Heat rejection', flip: true }),
-          mk('T', 'turbine', 110, 230, { Pout: 100, eta: 1 }, { flip: true }),
-          mk('E', 'gasheater', 330, 400, { Tout: 255 - C2K, Tres: 255 - C2K }, { label: 'Refrigerated space HX' })
+          mk('K', 'compressor', 560, 230, { ratio: 4, eta: 1 }),
+          mk('X', 'gascooler', 330, 70, { Tres: 300 - C2K }, { label: 'Heat rejection', flip: true }),
+          mk('T', 'turbine', 110, 230, { eta: 1 }, { flip: true }),
+          mk('E', 'gasheater', 330, 400, { Tres: 255 - C2K }, { label: 'Refrigerated space HX' })
         ],
         pipes: [
-          pp(1, ['E', 'out'], ['K', 'in'], { fluid: 'air', mdot: 0.05 }),
-          pp(2, ['K', 'out'], ['X', 'in'], { fluid: 'air' }),
-          pp(3, ['X', 'out'], ['T', 'in'], { fluid: 'air' }),
-          pp(4, ['T', 'out'], ['E', 'in'], { fluid: 'air' })
+          pp(1, ['E', 'out'], ['K', 'in'], 'air', { P: 100, T: 255 - C2K }, { mdot: 0.05 }),
+          pp(2, ['K', 'out'], ['X', 'in'], 'air'),
+          pp(3, ['X', 'out'], ['T', 'in'], 'air', { T: 300 - C2K }),
+          pp(4, ['T', 'out'], ['E', 'in'], 'air')
         ]
       };
     }
   },
   {
     id: 'turbine', group: 'Single devices', name: 'A steam turbine on its own',
-    blurb: 'Steam in at 3 MPa, 400 °C; out at 50 kPa, 100 °C; the turbine delivers 2 MW.',
+    blurb: 'Steam in at 3 MPa, 400 °C; out at 50 kPa, 100 °C; the turbine delivers 2 MW. Find its efficiency and the mass flow.',
     build() {
       return {
         comps: [
-          mk('I', 'source', 150, 150, { P: 3000, smode: 'T', T: 400, mdot: '' }, { label: 'Steam in' }),
-          mk('T', 'turbine', 400, 250, { Pout: 50, omode: 'T', Tout: 100, rate: { on: true, val: 2000 } }),
+          mk('I', 'source', 150, 150, {}, { label: 'Steam in' }),
+          mk('T', 'turbine', 400, 250, { W: 2000 }),
           mk('O', 'sink', 650, 380, {}, { label: 'Steam out' })
         ],
         pipes: [
-          pp(1, ['I', 'out'], ['T', 'in'], { fluid: 'water' }),
-          pp(2, ['T', 'out'], ['O', 'in'], { fluid: 'water' })
+          pp(1, ['I', 'out'], ['T', 'in'], 'water', { P: 3000, T: 400 }),
+          pp(2, ['T', 'out'], ['O', 'in'], 'water', { P: 50, T: 100 })
         ]
       };
     }
-  },
-  { id: 'blank', group: 'Start from scratch', name: 'Blank canvas', blurb: 'Drag equipment in and connect it yourself.', build() { return { comps: [], pipes: [] }; } }
+  }
 ];
-// fix the source mdot for the single turbine (rate sizing sets it)
 function braytonBase(etaC, etaT) {
   return {
     comps: [
-      mk('K', 'compressor', 110, 230, { pmode: 'P', Pout: 800, eta: etaC }),
-      mk('H', 'combustor', 330, 70, { Tout: 1300 - C2K }),
-      mk('T', 'turbine', 560, 230, { Pout: 100, eta: etaT }),
-      mk('X', 'gascooler', 330, 400, { Tout: 300 - C2K }, { label: 'Exhaust to air' })
+      mk('K', 'compressor', 110, 230, { ratio: 8, eta: etaC }),
+      mk('H', 'combustor', 330, 70),
+      mk('T', 'turbine', 560, 230, { eta: etaT }),
+      mk('X', 'gascooler', 330, 400, {}, { label: 'Exhaust to air', flip: true })
     ],
     pipes: [
-      pp(1, ['X', 'out'], ['K', 'in'], { fluid: 'air' }),
-      pp(2, ['K', 'out'], ['H', 'in'], { fluid: 'air' }),
-      pp(3, ['H', 'out'], ['T', 'in'], { fluid: 'air' }),
-      pp(4, ['T', 'out'], ['X', 'in'], { fluid: 'air' })
+      pp(1, ['X', 'out'], ['K', 'in'], 'air', { P: 100, T: 300 - C2K }),
+      pp(2, ['K', 'out'], ['H', 'in'], 'air'),
+      pp(3, ['H', 'out'], ['T', 'in'], 'air', { T: 1300 - C2K }),
+      pp(4, ['T', 'out'], ['X', 'in'], 'air')
     ]
   };
 }
 function vcBase(o) {
-  const E = mk('E', 'evaporator', 330, 400, { omode: 'x', xout: 1, Tres: o.Tspace }, { label: 'Evaporator' });
-  if (o.rate) E.params.rate = { on: true, val: o.rate };
+  const E = mk('E', 'evaporator', 330, 400, { Tres: o.Tspace }, { label: 'Evaporator' });
+  if (o.Qevap) E.params.Q = o.Qevap;
   return {
     comps: [
-      mk('K', 'compressor', 560, 230, { pmode: 'P', Pout: o.Pcond, eta: o.etaC || 1 }),
-      mk('C', 'condenser', 330, 70, { omode: 'x', xout: 0, Tres: o.Tout }, { flip: true }),
-      mk('V', 'valve', 110, 230, { Pout: o.Pevap }, { flip: true }),
+      mk('K', 'compressor', 560, 230, { eta: o.etaC || 1 }),
+      mk('C', 'condenser', 330, 70, { Tres: o.Tout }, { flip: true }),
+      mk('V', 'valve', 110, 230, {}, { rot: 90 }),
       E
     ],
     pipes: [
-      pp(1, ['E', 'out'], ['K', 'in'], o.mdot ? { fluid: 'r134a', mdot: o.mdot } : { fluid: 'r134a' }),
-      pp(2, ['K', 'out'], ['C', 'in'], { fluid: 'r134a' }),
-      pp(3, ['C', 'out'], ['V', 'in'], { fluid: 'r134a' }),
-      pp(4, ['V', 'out'], ['E', 'in'], { fluid: 'r134a' })
+      pp(1, ['E', 'out'], ['K', 'in'], 'r134a', { P: o.Pevap, x: 1 }, o.mdot ? { mdot: o.mdot } : {}),
+      pp(2, ['K', 'out'], ['C', 'in'], 'r134a'),
+      pp(3, ['C', 'out'], ['V', 'in'], 'r134a', { P: o.Pcond, x: 0 }),
+      pp(4, ['V', 'out'], ['E', 'in'], 'r134a')
     ]
   };
 }
@@ -1402,7 +1390,6 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
   const fmt = PROPS.fmt;
   const $ = (s, el) => (el || document).querySelector(s);
   const NS = 'http://www.w3.org/2000/svg';
-  const STORE = 'cyclebuilder-v1';
   const FLUIDS = { water: 'Water / steam', r134a: 'R-134a', air: 'Air (ideal gas)' };
   const KIND_FLUID = { boiler: 'water', condenser: 'water', pump: 'water', process: 'water', evaporator: 'r134a', valve: 'r134a',
     gasheater: 'air', combustor: 'air', gascooler: 'air', regenerator: 'air', compressor: 'air' };
@@ -1516,8 +1503,6 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
   function doUndo() { if (!undo.length) return; redo.push(clone(model)); model = undo.pop(); fixSel(); update(); }
   function doRedo() { if (!redo.length) return; undo.push(clone(model)); model = redo.pop(); fixSel(); update(); }
   function fixSel() { if (sel && !(sel.kind === 'comp' ? model.comps.some(c => c.id === sel.id) : model.pipes.some(p => p.id === sel.id))) sel = null; }
-  function save() { try { localStorage.setItem(STORE, JSON.stringify({ model, practice })); } catch (e) { /* storage unavailable */ } }
-  function loadSaved() { try { const s = JSON.parse(localStorage.getItem(STORE) || 'null'); if (s && s.model && s.model.comps) { model = s.model; return true; } } catch (e) { } return false; }
 
   const compById = (id) => model.comps.find(c => c.id === id);
   const pipeAt = (cid, port) => model.pipes.find(p => (p.from[0] === cid && p.from[1] === port) || (p.to[0] === cid && p.to[1] === port));
@@ -1634,10 +1619,10 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
 
   function render() {
     layer.pipes.innerHTML = ''; layer.comps.innerHTML = ''; layer.over.innerHTML = '';
-    const ok = result && result.ok;
+    const ok = !!(result && result.states);
     let lo = 1e9, hi = -1e9;
     if (ok) model.pipes.forEach(p => { const s = result.states[p.id]; if (s) { lo = Math.min(lo, s.T); hi = Math.max(hi, s.T); } });
-    const errCid = result && !result.incomplete && result.errors && result.errors[0] && result.errors[0].cid;
+    const e0 = result && result.errors && result.errors[0]; const errCid = e0 && e0.ref && e0.ref.kind === 'comp' ? e0.ref.id : null;
     // pipes
     const boxes = compBoxes(), used = [];
     model.pipes.slice().sort((x, y) => x.n - y.n).forEach(p => {
@@ -1721,7 +1706,7 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
     const a = Math.abs(v);
     return (a >= 1000 ? fmt(v, 0) : a >= 10 ? fmt(v, 1) : a >= 1 ? fmt(v, 2) : fmt(v, 3)) + ' ' + u;
   }
-  function unitWord() { return result && result.ok && result.loops.every(L => L.unit) ? 'kJ/kg' : 'kW'; }
+  function unitWord() { return result && result.loops && result.loops.length && result.loops.every(L => L.unit) ? 'kJ/kg' : 'kW'; }
 
   // ---------- pointer interaction ----------
   let drag = null;
@@ -1781,7 +1766,7 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
     if (pinch) { if (pointers.size < 2) pinch = null; return; }
     if (!drag) return;
     if (drag.mode === 'pan' && !drag.moved) { sel = null; render(); renderInspector(); renderTables(); renderDiagram(); }
-    if (drag.mode === 'move' && drag.moved) { undo.push(drag.before); redo.length = 0; save(); }
+    if (drag.mode === 'move' && drag.moved) { undo.push(drag.before); redo.length = 0; }
     if (drag.mode === 'wire') {
       drag.line.remove();
       const tgt = portUnder(e.clientX, e.clientY);
@@ -1818,7 +1803,7 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
     const from = d.io === 'out' ? [d.cid, d.pt] : [cid2, pt2], to = d.io === 'out' ? [cid2, pt2] : [d.cid, d.pt];
     commit();
     const n = model.pipes.reduce((m, p) => Math.max(m, p.n), 0) + 1;
-    const p = { id: newId('p'), n, from, to };
+    const p = { id: newId('p'), n, from, to, given: {} };
     model.pipes.push(p);
     // fluid: take the loop's fluid if it already has one
     const lp = loopPipes(p).filter(q => q.fluid && q !== p);
@@ -1908,84 +1893,62 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
   }
 
   // ======================= inspector =======================
+  const ETA_SMALL = '1 = ideal (isentropic). Leave blank if you give the outlet state instead.';
   const FORMS = {
     pump: [
-      { k: 'Pout', l: 'Outlet pressure', u: 'kPa' },
-      { k: 'eta', l: 'Isentropic efficiency, η_P', small: '1 = ideal (isentropic)' },
-      RATE('Size by pump power', 'Ẇ_in')
+      { k: 'eta', l: 'Isentropic efficiency, η_P', small: ETA_SMALL },
+      { k: 'W', l: 'Pump power, Ẇ_in', u: 'kW', small: 'optional; with the states known it sets the mass flow' }
     ],
     compressor: [
-      { k: 'pmode', l: 'Outlet pressure set by', opts: [['P', 'Outlet pressure'], ['ratio', 'Pressure ratio']] },
-      { k: 'Pout', l: 'Outlet pressure', u: 'kPa', show: p => p.pmode !== 'ratio' },
-      { k: 'ratio', l: 'Pressure ratio, P₂/P₁', show: p => p.pmode === 'ratio' },
-      { k: 'omode', l: 'Outlet state set by', opts: [['eta', 'Isentropic efficiency'], ['T', 'Measured outlet temperature']] },
-      { k: 'eta', l: 'Isentropic efficiency, η_C', small: '1 = ideal', show: p => p.omode === 'eta' },
-      { k: 'Tout', l: 'Outlet temperature', T: true, show: p => p.omode === 'T' },
-      { k: 'qloss', l: 'Heat lost to surroundings', u: 'kJ/kg', small: '0 = adiabatic' },
+      { k: 'eta', l: 'Isentropic efficiency, η_C', small: ETA_SMALL },
+      { k: 'ratio', l: 'Pressure ratio, P₂/P₁', small: 'optional, instead of the outlet pressure' },
+      { k: 'qloss', l: 'Heat lost to surroundings', u: 'kJ/kg', small: 'blank = adiabatic' },
       { k: 'Tb', l: 'Surface temperature where heat is lost', T: true, small: 'blank = surroundings', show: p => +p.qloss > 0 },
-      RATE('Size by compressor power', 'Ẇ_in')
+      { k: 'W', l: 'Compressor power, Ẇ_in', u: 'kW', small: 'optional; with the states known it sets the mass flow' }
     ],
     turbine: [
-      { k: 'Pout', l: 'Outlet pressure', u: 'kPa' },
-      { k: 'omode', l: 'Outlet state set by', opts: [['eta', 'Isentropic efficiency'], ['T', 'Measured outlet temperature'], ['x', 'Measured outlet quality']] },
-      { k: 'eta', l: 'Isentropic efficiency, η_T', small: '1 = ideal', show: p => p.omode === 'eta' },
-      { k: 'Tout', l: 'Outlet temperature', T: true, show: p => p.omode === 'T' },
-      { k: 'xout', l: 'Outlet quality, x', show: p => p.omode === 'x' },
-      { k: 'qloss', l: 'Heat lost to surroundings', u: 'kJ/kg', small: '0 = adiabatic' },
+      { k: 'eta', l: 'Isentropic efficiency, η_T', small: ETA_SMALL },
+      { k: 'qloss', l: 'Heat lost to surroundings', u: 'kJ/kg', small: 'blank = adiabatic' },
       { k: 'Tb', l: 'Surface temperature where heat is lost', T: true, small: 'blank = surroundings', show: p => +p.qloss > 0 },
-      RATE('Size by turbine power', 'Ẇ_out')
+      { k: 'W', l: 'Turbine power, Ẇ_out', u: 'kW', small: 'optional; with the states known it sets the mass flow' }
     ],
-    valve: [{ k: 'Pout', l: 'Outlet pressure', u: 'kPa' }],
+    valve: [],
     heater: [
-      { k: 'omode', l: 'Outlet state set by', opts: [['T', 'Outlet temperature'], ['x', 'Outlet quality, x'], ['dT', 'Superheat above Tsat'], ['q', 'Heat added per kg, q_in'], ['Q', 'Heat added, Q̇_in']] },
-      { k: 'Tout', l: 'Outlet temperature', T: true, show: p => p.omode === 'T' },
-      { k: 'xout', l: 'Outlet quality, x', small: '1 = saturated vapour', show: p => p.omode === 'x' },
-      { k: 'dT', l: 'Superheat', u: 'K', show: p => p.omode === 'dT' },
-      { k: 'q', l: 'q_in', u: 'kJ/kg', show: p => p.omode === 'q' },
-      { k: 'Q', l: 'Q̇_in', u: 'kW', show: p => p.omode === 'Q' },
+      { k: 'q', l: 'Heat added per kg, q_in', u: 'kJ/kg', small: 'optional, instead of a property at the outlet' },
+      { k: 'Q', l: 'Heat added, Q̇_in', u: 'kW', small: 'optional; with the mass flow it fixes the outlet, or with both states it sets the mass flow' },
       { k: 'Tres', l: 'Heat comes from a source at', T: true, small: 'for entropy generation and the Carnot limit' },
       { k: 'fuel.on', l: 'Heat comes from burning fuel', check: true },
       { k: 'fuel.id', l: 'Fuel', opts: FUELS.map(f => [f.id, f.name]), show: p => p.fuel && p.fuel.on },
       { k: 'fuel.hv', l: 'Heating value', u: 'kJ/kg', show: p => p.fuel && p.fuel.on && p.fuel.id === 'custom' },
       { k: 'fuel.basis', l: 'Heating value used', opts: [['LHV', 'Lower (LHV)'], ['HHV', 'Higher (HHV)']], show: p => p.fuel && p.fuel.on && !(FUELS.find(f => f.id === p.fuel.id) || {}).waste && p.fuel.id !== 'custom' },
-      { k: 'fuel.eta', l: 'Combustion efficiency', small: 'heat to the fluid ÷ heating value of fuel burned', show: p => p.fuel && p.fuel.on },
-      RATE('Size by heat input', 'Q̇_in')
+      { k: 'fuel.eta', l: 'Combustion efficiency', small: 'heat to the fluid ÷ heating value of fuel burned; blank = 1', show: p => p.fuel && p.fuel.on }
     ],
     cooler: [
-      { k: 'omode', l: 'Outlet state set by', opts: [['T', 'Outlet temperature'], ['x', 'Outlet quality, x'], ['dT', 'Subcooling below Tsat'], ['q', 'Heat removed per kg, q_out'], ['Q', 'Heat removed, Q̇_out']] },
-      { k: 'Tout', l: 'Outlet temperature', T: true, show: p => p.omode === 'T' },
-      { k: 'xout', l: 'Outlet quality, x', small: '0 = saturated liquid', show: p => p.omode === 'x' },
-      { k: 'dT', l: 'Subcooling', u: 'K', show: p => p.omode === 'dT' },
-      { k: 'q', l: 'q_out', u: 'kJ/kg', show: p => p.omode === 'q' },
-      { k: 'Q', l: 'Q̇_out', u: 'kW', show: p => p.omode === 'Q' },
-      { k: 'Tres', l: 'Heat goes to a sink at', T: true, small: 'blank = surroundings' },
-      RATE('Size by heat output', 'Q̇_out')
+      { k: 'q', l: 'Heat removed per kg, q_out', u: 'kJ/kg', small: 'optional, instead of a property at the outlet' },
+      { k: 'Q', l: 'Heat removed, Q̇_out', u: 'kW', small: 'optional; with the mass flow it fixes the outlet, or with both states it sets the mass flow' },
+      { k: 'Tres', l: 'Heat goes to a sink at', T: true, small: 'blank = surroundings' }
     ],
     hx: [
-      { k: 'mode', l: 'Set by', opts: [['eps', 'Effectiveness, ε'], ['spec', 'Outlet temperatures']] },
-      { k: 'eps', l: 'Effectiveness, ε', small: 'Q̇ ÷ Q̇max; 1 = ideal', show: p => p.mode === 'eps' },
-      { k: 'hspec.mode', l: 'Hot outlet', opts: [['none', 'From energy balance'], ['T', 'Temperature'], ['x', 'Quality, x']], show: p => p.mode === 'spec' },
-      { k: 'hspec.val', l: 'Hot outlet value', side: 'h', show: p => p.mode === 'spec' && p.hspec.mode !== 'none' },
-      { k: 'cspec.mode', l: 'Cold outlet', opts: [['none', 'From energy balance'], ['T', 'Temperature'], ['x', 'Quality, x']], show: p => p.mode === 'spec' },
-      { k: 'cspec.val', l: 'Cold outlet value', side: 'c', show: p => p.mode === 'spec' && p.cspec.mode !== 'none' }
+      { k: 'eps', l: 'Effectiveness, ε', small: 'Q̇ ÷ Q̇max, 1 = ideal. Optional: or give an outlet temperature.' }
     ],
-    mixer: [
-      { k: 'omode', l: 'Outlet', opts: [['balance', 'From energy balance'], ['satliq', 'Saturated liquid (sets the bleed fraction)']] }
-    ],
+    mixer: [],
     splitter: [
-      { k: 'fmode', l: 'Split', opts: [['fixed', 'Fixed fraction'], ['auto', 'Set by a feedwater heater']] },
-      { k: 'y', l: 'Fraction to outlet 2, y', show: p => p.fmode !== 'auto' }
+      { k: 'y', l: 'Fraction to outlet 2, y', small: 'optional; a feedwater heater state can fix it instead' }
     ],
-    source: [
-      { k: 'P', l: 'Pressure', u: 'kPa' },
-      { k: 'smode', l: 'State set by', opts: [['T', 'Temperature'], ['x', 'Quality, x']] },
-      { k: 'T', l: 'Temperature', T: true, show: p => p.smode !== 'x' },
-      { k: 'x', l: 'Quality, x', show: p => p.smode === 'x' },
-      { k: 'mdot', l: 'Mass flow rate', u: 'kg/s', small: 'blank = per kg' }
-    ],
+    source: [],
     sink: []
   };
-  function RATE(l, sym) { return { k: 'rate.on', l: l, check: true, small: `give ${sym} in kW; the mass flow follows`, rate: true }; }
+  const FORM_NOTES = {
+    valve: 'An expansion valve keeps h the same (throttling). Set the outlet pressure on the state after it.',
+    mixer: 'Mixing is adiabatic and all three streams share one pressure. If you set the outlet state (for example x = 0 for an open feedwater heater), the energy balance fixes how much flow comes from each inlet.',
+    splitter: 'Both outlets have the same state as the inlet. Outlet 2 is the bottom port.',
+    source: 'Set the inlet state (P and T, or P and x) and the mass flow on the pipe leaving here.',
+    sink: 'The flow leaves the system here.',
+    hx: 'Hot fluid flows along the top (red line), cold fluid along the bottom (blue). Pressure stays the same on each side. If you set both outlet states, the energy balance fixes the ratio of the two mass flows.',
+    heater: 'Pressure stays the same through it (no pressure drop). Give the outlet state on the pipe leaving it.',
+    cooler: 'Pressure stays the same through it (no pressure drop). Give the outlet state on the pipe leaving it.'
+  };
+  function RATE(l, sym) { return { k: 'rate.on', l: l, check: true, small: `give ${sym} in kW and the mass flow follows`, rate: true }; }
   const getK = (o, k) => k.split('.').reduce((a, b) => a == null ? a : a[b], o);
   const setK = (o, k, v) => { const ks = k.split('.'); let a = o; for (let i = 0; i < ks.length - 1; i++) { if (a[ks[i]] == null) a[ks[i]] = {}; a = a[ks[i]]; } a[ks[ks.length - 1]] = v; };
 
@@ -1999,8 +1962,9 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
   function h(html) { const d = document.createElement('div'); d.innerHTML = html; return d.firstElementChild; }
   function renderCycleSettings() {
     insp.appendChild(h(`<div><h2>Build a cycle</h2>
-      <p class="note">Drag equipment from the equipment panel onto the canvas (or tap it to add). Drag from an outlet (filled dot) to an inlet (open dot) to connect them with a pipe; each pipe is one state. Tap a piece of equipment or a pipe to see and change it.</p>
-      <p class="note">Every loop needs a fluid (set it on any pipe) and at least one fixed state, such as a condenser giving saturated liquid. Pressures come from pumps, compressors, turbines and valves; heaters, coolers and heat exchangers keep the pressure constant.</p></div>`));
+      <p class="note"><b>1. Lay out the equipment.</b> Drag it from the equipment panel onto the canvas (or tap it to add). Drag from an outlet (filled dot) to an inlet (open dot) to connect them. Each pipe is one state.</p>
+      <p class="note"><b>2. Enter what you know.</b> Tap a pipe to give that state's properties (for example P and T, or P and x) and choose the fluid. Tap equipment for its isentropic efficiency, pressure ratio, fuel and so on. Nothing is assumed for you.</p>
+      <p class="note"><b>3. Read what is missing.</b> The solver uses each device's relation (pump and turbine efficiency, throttling at constant h, no pressure drop in heat exchangers, energy balances) to find every state it can, and lists what it still needs below the canvas.</p></div>`));
     insp.appendChild(h(`<div class="section-t">Surroundings</div>`));
     const f = h(`<div class="field"><label for="f-T0">Surroundings temperature, T₀<small>used for heat lost and for coolers with no sink set</small></label><div class="unit-in"><input id="f-T0" type="number" step="any" value="${model.T0}"><span>°C</span></div></div>`);
     f.querySelector('input').addEventListener('change', (e) => { commit(); model.T0 = +e.target.value; update(); });
@@ -2028,9 +1992,8 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
       const id = 'f-' + fd.k.replace('.', '-');
       let ctrl;
       const val = getK(c.params, fd.k);
-      let flx = fl;
-      if (fd.side) flx = compFluid(c, fd.side);
-      const isT = fd.T || (fd.side && getK(c.params, fd.side + 'spec.mode') === 'T');
+      const flx = fl;
+      const isT = !!fd.T;
       if (fd.opts) ctrl = `<select id="${id}">${fd.opts.map(([v, t]) => `<option value="${v}"${String(val) === v ? ' selected' : ''}>${t}</option>`).join('')}</select>`;
       else if (fd.check) ctrl = `<input id="${id}" type="checkbox"${val ? ' checked' : ''}>`;
       else {
@@ -2057,10 +2020,11 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
         insp.appendChild(r2);
       }
     });
-    if (c.type === 'hx') insp.appendChild(h(`<p class="note">Hot fluid flows along the top (red line), cold fluid along the bottom (blue). If you set both outlets, the energy balance fixes the ratio of the two mass flows.</p>`));
-    if (c.type === 'splitter') insp.appendChild(h(`<p class="note">Outlet 2 is the bottom port. Choose "set by a feedwater heater" when an open feedwater heater with a saturated-liquid outlet decides how much steam is bled.</p>`));
+    if (FORM_NOTES[c.type]) insp.appendChild(h(`<p class="note">${FORM_NOTES[c.type]}</p>`));
+    const mine = result && (result.missing || []).filter(m => m.ref && m.ref.kind === 'comp' && m.ref.id === c.id);
+    if (mine && mine.length) insp.appendChild(h(`<div class="msg warn" style="margin-top:8px"><b>Needed</b><span>${mine.map(m => esc(m.msg)).join('<br>')}</span></div>`));
     // results for this component
-    if (result && result.ok && !practice) {
+    if (result && result.rows && !practice) {
       const row = result.rows.find(r => r.c.id === c.id);
       if (row) insp.appendChild(compResultBox(row));
     }
@@ -2106,29 +2070,54 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
     const acts = h(`<div class="insp-actions"><button class="btn small danger" id="b-delp" type="button">Delete pipe</button></div>`);
     acts.querySelector('#b-delp').onclick = () => deleteSel();
     insp.appendChild(acts);
-    const fr = h(`<div class="field"><label for="f-fluid">Fluid in this loop</label><select id="f-fluid">${Object.entries(FLUIDS).map(([k, v]) => `<option value="${k}"${p.fluid === k ? ' selected' : ''}>${v}</option>`).join('')}</select></div>`);
+    const fr = h(`<div class="field wide"><label for="f-fluid">Fluid in this loop</label><select id="f-fluid">${Object.entries(FLUIDS).map(([k, v]) => `<option value="${k}"${p.fluid === k ? ' selected' : ''}>${v}</option>`).join('')}</select></div>`);
     fr.querySelector('select').addEventListener('change', (e) => { commit(); loopPipes(p).forEach(q => q.fluid = e.target.value); update(); });
     insp.appendChild(fr);
-    const mr = h(`<div class="field"><label for="f-mdot">Mass flow rate here<small>blank = work per kg of fluid</small></label><div class="unit-in"><input id="f-mdot" type="number" step="any" value="${p.mdot == null ? '' : p.mdot}"><span>kg/s</span></div></div>`);
-    mr.querySelector('input').addEventListener('change', (e) => { commit(); const v = e.target.value; if (v === '') delete p.mdot; else { loopPipes(p).forEach(q => { if (q !== p) delete q.mdot; }); p.mdot = +v; } update(); });
+    const fl = p.fluid || 'water', air = isAir(fl);
+    const s = result && result.states ? result.states[p.id] : null;
+    const kn = result && result.known ? (result.known[p.id] || {}) : {};
+    insp.appendChild(h(`<div class="section-t">Values you know at state ${p.n}</div>`));
+    insp.appendChild(h(`<p class="note">Type only what the problem gives you. Two independent properties fix a state; the solver fills in the rest from the equipment.</p>`));
+    const g = p.given || (p.given = {});
+    const fields = [['P', 'Pressure, P', 'kPa'], ['T', 'Temperature, T', tUnit(fl)]];
+    if (!air) fields.push(['x', 'Quality, x', '0 to 1']);
+    fields.push(['h', 'Enthalpy, h', 'kJ/kg']);
+    if (!air) fields.push(['s', 'Entropy, s', 'kJ/kg·K']);
+    fields.forEach(([k, lab, u]) => {
+      const gv = g[k];
+      const shown = gv === '' || gv == null ? '' : (k === 'T' ? toDisp(gv, fl) : gv);
+      let ph = '';
+      if (!practice && kn[k] && kn[k].src !== 'given') ph = k === 'T' ? fmt(air ? kn[k].v + 273.15 : kn[k].v, 2) : k === 'P' ? fmt(kn[k].v) : k === 'x' ? fmt(kn[k].v, 4) : fmt(kn[k].v, k === 's' ? 4 : 2);
+      const row = h(`<div class="field"><label for="g-${k}">${lab}${ph ? `<small>found: ${ph}</small>` : ''}</label><div class="unit-in"><input id="g-${k}" type="number" step="any" value="${shown}" placeholder="${ph}" class="${ph ? 'derived' : ''}"><span>${u === '0 to 1' ? '' : u}</span></div></div>`);
+      row.querySelector('input').addEventListener('change', (e) => {
+        commit();
+        const v = e.target.value;
+        if (v === '') delete g[k]; else g[k] = k === 'T' ? fromDisp(v, fl) : +v;
+        update();
+      });
+      insp.appendChild(row);
+    });
+    const mr = h(`<div class="field"><label for="f-mdot">Mass flow rate, ṁ<small>${result && result.flowKnown && result.flowKnown[p.id] && !practice ? 'found: ' + fmt(result.flows[p.id], 4) + ' kg/s' + (result.loopOf(p).unit ? ' (per kg basis)' : '') : 'blank = results per kg'}</small></label><div class="unit-in"><input id="f-mdot" type="number" step="any" value="${p.mdot == null ? '' : p.mdot}"><span>kg/s</span></div></div>`);
+    mr.querySelector('input').addEventListener('change', (e) => { commit(); const v = e.target.value; if (v === '') delete p.mdot; else p.mdot = +v; update(); });
     insp.appendChild(mr);
-    if (!(result && result.ok)) return;
-    const s = result.states[p.id];
+    const mine = result && (result.missing || []).filter(m => m.ref && m.ref.kind === 'pipe' && m.ref.id === p.id);
+    const errs = result && (result.errors || []).filter(m => m.ref && m.ref.kind === 'pipe' && m.ref.id === p.id);
+    if (errs && errs.length) insp.appendChild(h(`<div class="msg err" style="margin-top:8px"><b>Problem</b><span>${errs.map(m => esc(m.msg)).join('<br>')}</span></div>`));
+    if (mine && mine.length) insp.appendChild(h(`<div class="msg warn" style="margin-top:8px"><b>Needed</b><span>${mine.map(m => esc(m.msg)).join('<br>')}</span></div>`));
     if (!s) return;
-    const fl = s.fluid, air = isAir(fl);
     if (practice) {
-      insp.appendChild(h(`<p class="note">Practice mode is on: the state values and the table look-ups are hidden. Check your numbers in the state table below.</p>`));
+      insp.appendChild(h(`<p class="note">Practice mode is on: the calculated values and the table look-ups are hidden. Check your numbers in the state table below.</p>`));
       return;
     }
+    const tag = (k) => kn[k] && kn[k].src === 'given' ? ' <span class="given-tag">given</span>' : '';
     const kv = [
-      ['Pressure, P', fmt(s.P) + ' kPa'],
-      ['Temperature, T', air ? `${fmt(s.TK, 2)} K` : `${fmt(s.T, 2)} °C`],
+      ['Pressure, P' + tag('P'), fmt(s.P) + ' kPa'],
+      ['Temperature, T' + tag('T'), air ? `${fmt(s.TK, 2)} K` : `${fmt(s.T, 2)} °C`],
       ['Specific volume, v', fmt(s.v) + ' m³/kg'],
-      ['Enthalpy, h', fmt(s.h, 2) + ' kJ/kg'],
-      [air ? 's° (Table A-17)' : 'Entropy, s', fmt(air ? s.s0 : s.s, 4) + ' kJ/kg·K'],
-      air ? ['Relative pressure, Pr', fmt(s.Pr)] : ['Quality, x', s.x == null ? '–' : fmt(s.x, 4)],
-      ['Phase', s.phase],
-      ['Mass flow, ṁ', fmt(result.flows[p.id], 4) + ' kg/s' + (result.loopOf(p).unit ? ' (per kg)' : '')]
+      ['Enthalpy, h' + tag('h'), fmt(s.h, 2) + ' kJ/kg'],
+      [air ? 's° (Table A-17)' : 'Entropy, s' + tag('s'), fmt(air ? s.s0 : s.s, 4) + ' kJ/kg·K'],
+      air ? ['Relative pressure, Pr', fmt(s.Pr)] : ['Quality, x' + tag('x'), s.x == null ? '–' : fmt(s.x, 4)],
+      ['Phase', s.phase]
     ];
     insp.appendChild(h(`<div><div class="section-t">State ${p.n}</div><dl class="kv">${kv.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl></div>`));
     if (air) insp.appendChild(h(`<p class="note">For air, entropy changes come from s° in Table A-17: s₂ − s₁ = s°₂ − s°₁ − R ln(P₂/P₁), with R = 0.287 kJ/kg·K.</p>`));
@@ -2199,22 +2188,45 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
   });
 
   // ======================= results =======================
+  function goRef(ref) {
+    if (!ref) return;
+    if (ref.kind === 'comp' && compById(ref.id)) sel = { kind: 'comp', id: ref.id };
+    else if (ref.kind === 'pipe' && model.pipes.some(p => p.id === ref.id)) sel = { kind: 'pipe', id: ref.id };
+    render(); renderInspector(); renderTables(); renderDiagram();
+    const ins = $('#inspector'); if (ins && window.innerWidth < 1180) ins.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function msgEl(cls, label, msg, ref) {
+    const m = h(`<div class="msg ${cls}"><b>${label}</b><span>${esc(msg)}</span></div>`);
+    if (ref) { const b = h(`<button class="btn small" type="button">Show</button>`); b.onclick = () => goRef(ref); m.appendChild(b); }
+    return m;
+  }
   function renderMessages() {
     const box = $('#msgs'); box.innerHTML = '';
-    if (!result) return;
-    const add = (cls, label, msg, cid) => {
-      const m = h(`<div class="msg ${cls}"><b>${label}</b><span>${esc(msg)}</span></div>`);
-      if (cid && compById(cid)) { const b = h(`<button class="btn small" type="button">Show</button>`); b.onclick = () => { sel = { kind: 'comp', id: cid }; render(); renderInspector(); }; m.appendChild(b); }
+    if (!result || result.empty) return;
+    (result.errors || []).slice(0, 2).forEach(e => box.appendChild(msgEl('err', 'Problem', e.msg, e.ref)));
+    if (!(result.errors || []).length) (result.warnings || []).slice(0, 2).forEach(w => box.appendChild(msgEl('warn', 'Check', w.msg, w.ref)));
+    const n = (result.missing || []).length;
+    if (n && !(result.errors || []).length) {
+      const m = h(`<div class="msg warn"><b>Still needed</b><span>${n === 1 ? esc(result.missing[0].msg) : n + ' items. The list is under the canvas.'}</span></div>`);
+      if (n === 1 && result.missing[0].ref) { const b = h(`<button class="btn small" type="button">Show</button>`); b.onclick = () => goRef(result.missing[0].ref); m.appendChild(b); }
       box.appendChild(m);
-    };
-    if (result.empty) return;
-    (result.errors || []).forEach(e => add(result.incomplete ? 'warn' : 'err', result.incomplete ? 'Not finished' : 'Cannot solve', e.msg, e.cid));
-    (result.warnings || []).slice(0, 3).forEach(w => add('warn', 'Check', w.msg, w.cid));
+    }
   }
 
   function renderPerf() {
     const host = $('#perf'); host.innerHTML = '';
-    if (!(result && result.ok)) { host.innerHTML = `<p class="note">Results appear here once the cycle is connected and solved.</p>`; return; }
+    if (!(result && result.ok)) {
+      host.appendChild(h(`<h2>${result && !result.empty ? 'Still needed' : 'Results'}</h2>`));
+      if (!result || result.empty) { host.appendChild(h(`<p class="note">Add equipment, connect it into a cycle and enter the values you know. The performance appears here once every state is known.</p>`)); return; }
+      const list = h(`<div style="display:flex;flex-direction:column;gap:6px;margin-top:10px"></div>`);
+      (result.errors || []).forEach(e => list.appendChild(msgEl('err', 'Problem', e.msg, e.ref)));
+      (result.missing || []).forEach(e => list.appendChild(msgEl('warn', e.state ? 'State' : 'Needed', e.msg, e.ref)));
+      if (!list.children.length) list.appendChild(h(`<p class="note">Nothing is missing, but the cycle could not be finished. Check the warnings on the canvas.</p>`));
+      host.appendChild(list);
+      const nf = model.pipes.filter(p => result.states && result.states[p.id]).length;
+      host.appendChild(h(`<p class="basis">${nf} of ${model.pipes.length} states known so far. Performance (efficiency, COP, net work) appears once every state and mass flow is known.</p>`));
+      return;
+    }
     const P = result.perf, u = unitWord();
     const tiles = [];
     const T = (t, v, s, key) => tiles.push(`<div class="tile${key ? ' key' : ''}"><div class="t">${t}</div><div class="v">${v}</div>${s ? `<div class="s">${s}</div>` : ''}</div>`);
@@ -2261,39 +2273,65 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
   function renderTables() {
     const host = $('#tableBody'); host.innerHTML = '';
     document.querySelectorAll('#tableTabs .tab').forEach(t => t.setAttribute('aria-selected', t.dataset.tab === tab ? 'true' : 'false'));
-    if (!(result && result.ok)) { host.innerHTML = `<p class="note">The state and equipment tables appear once the cycle solves.</p>`; return; }
+    if (!result || result.empty || !model.pipes.length) { host.innerHTML = `<p class="note">Connect equipment with pipes; each pipe becomes a row here where you can type the values you know.</p>`; return; }
     if (tab === 'states') host.appendChild(stateTable());
     else host.appendChild(equipTable());
   }
+  function loopsForTable() {
+    if (result.loops && result.loops.length) return result.loops;
+    return [{ fluid: (model.pipes[0] || {}).fluid || 'water', pipes: model.pipes.slice() }];
+  }
   function stateTable() {
-    const anyAir = result.loops.some(L => L.fluid === 'air');
-    const anyVap = result.loops.some(L => L.fluid !== 'air');
-    const cols = [['n', 'State', 'l'], ['P', 'P (kPa)'], ['T', 'T'], ['v', 'v (m³/kg)'], ['h', 'h (kJ/kg)'], ['s', 's (kJ/kg·K)']];
+    const loops = loopsForTable();
+    const anyAir = loops.some(L => L.fluid === 'air');
+    const anyVap = loops.some(L => L.fluid !== 'air');
+    const cols = [['n', 'State', 'l'], ['P', 'P (kPa)'], ['T', 'T']];
     if (anyVap) cols.push(['x', 'x']);
+    cols.push(['h', 'h (kJ/kg)'], ['s', 's (kJ/kg·K)'], ['v', 'v (m³/kg)']);
     if (anyAir) cols.push(['Pr', 'Pr']);
     cols.push(['m', 'ṁ (kg/s)'], ['phase', 'Phase', 'l']);
     const wrap = h(`<div class="tbl-wrap"><table class="data"><thead><tr>${cols.map(c => `<th class="${c[2] || ''}">${c[1]}</th>`).join('')}</tr></thead><tbody></tbody></table></div>`);
     const tb = wrap.querySelector('tbody');
-    result.loops.forEach(L => {
-      if (result.loops.length > 1) tb.appendChild(h(`<table><tr class="loophead"><td colspan="${cols.length}">${FLUIDS[L.fluid]} loop</td></tr></table>`).querySelector('tr'));
+    loops.forEach(L => {
+      if (loops.length > 1) tb.appendChild(h(`<table><tr class="loophead"><td colspan="${cols.length}">${FLUIDS[L.fluid]} loop</td></tr></table>`).querySelector('tr'));
       L.pipes.slice().sort((a, b) => a.n - b.n).forEach(p => {
         const mp = model.pipes.find(q => q.id === p.id) || p;
-        const s = result.states[p.id];
-        const air = s.fluid === 'air';
+        const s = result.states ? result.states[p.id] : null;
+        const fl = L.fluid, air = fl === 'air';
+        const g = mp.given || {};
         const tr = document.createElement('tr');
         if (sel && sel.kind === 'pipe' && sel.id === p.id) tr.className = 'sel';
+        const val = (k) => {
+          if (!s) return null;
+          if (k === 'T') return air ? s.TK : s.T;
+          if (k === 's') return air ? s.s0 : s.s;
+          return s[k];
+        };
+        const dec = { P: null, T: 2, x: 4, h: 2, s: 4 };
+        const editable = (k) => {
+          if (air && (k === 'x' || k === 's')) return `<td class="n">${k === 'x' ? '–' : (s && !practice ? fmt(s.s0, 4) + '°' : '')}</td>`;
+          const gv = g[k];
+          const has = gv !== '' && gv != null;
+          const shown = has ? (k === 'T' ? toDisp(gv, fl) : gv) : '';
+          const v = val(k);
+          if (practice) {
+            if (has) return `<td class="n"><span class="given-val">${shown}</span></td>`;
+            if (v == null) return `<td class="n"></td>`;
+            if (k === 'x' && s.x == null) return '<td class="n">–</td>';
+            if (k === 'P') return `<td class="n">${fmt(v)}</td>`;
+            return pcell(p, k, v, '', dec[k]);
+          }
+          const ph = v == null ? '' : (k === 'x' && s.x == null ? '–' : fmt(v, dec[k]));
+          return `<td class="n"><input class="gin${has ? ' has' : ''}" data-pipe="${p.id}" data-k="${k}" data-fl="${fl}" inputmode="decimal" aria-label="${k} at state ${mp.n}" value="${shown}" placeholder="${ph}"></td>`;
+        };
         const cell = (k) => {
           switch (k) {
             case 'n': return `<td class="l"><b>${mp.n}</b></td>`;
-            case 'P': return `<td class="n">${fmt(s.P)}</td>`;
-            case 'T': return pcell(p, 'T', air ? s.TK : s.T, air ? ' K' : ' °C', 2);
-            case 'v': return `<td class="n">${practice ? '' : fmt(s.v)}</td>`;
-            case 'h': return pcell(p, 'h', s.h, '', 2);
-            case 's': return pcell(p, 's', air ? s.s0 : s.s, air ? '°' : '', 4);
-            case 'x': return s.x == null ? '<td class="n">–</td>' : pcell(p, 'x', s.x, '', 4);
-            case 'Pr': return `<td class="n">${air && !practice ? fmt(s.Pr) : '–'}</td>`;
-            case 'm': return `<td class="n">${fmt(result.flows[p.id], 4)}</td>`;
-            case 'phase': return `<td class="l">${practice ? '' : s.phase}</td>`;
+            case 'P': case 'T': case 'x': case 'h': case 's': return editable(k);
+            case 'v': return `<td class="n">${s && !practice ? fmt(s.v) : ''}</td>`;
+            case 'Pr': return `<td class="n">${s && air && !practice ? fmt(s.Pr) : '–'}</td>`;
+            case 'm': return `<td class="n">${result.flowKnown && result.flowKnown[p.id] ? fmt(result.flows[p.id], 4) : (mp.mdot ? mp.mdot : '')}</td>`;
+            case 'phase': return `<td class="l">${s ? (practice ? '' : s.phase) : '<span class="unknown">not known yet</span>'}</td>`;
           }
         };
         tr.innerHTML = cols.map(c => cell(c[0])).join('');
@@ -2301,13 +2339,24 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
         tb.appendChild(tr);
       });
     });
+    wrap.querySelectorAll('input.gin').forEach(inp => {
+      inp.addEventListener('change', () => {
+        const p = model.pipes.find(q => q.id === inp.dataset.pipe); if (!p) return;
+        commit();
+        const g = p.given || (p.given = {});
+        const k = inp.dataset.k, v = inp.value.trim();
+        if (v === '' || isNaN(+v)) delete g[k]; else g[k] = k === 'T' ? fromDisp(+v, inp.dataset.fl) : +v;
+        update();
+      });
+      inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') inp.blur(); });
+    });
     wrap.querySelectorAll('input.chk').forEach(inp => {
       inp.addEventListener('change', () => checkAnswer(inp));
       inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkAnswer(inp); });
     });
     wrap.querySelectorAll('button.reveal').forEach(b => b.addEventListener('click', () => { practiceAns[b.dataset.key] = { state: 'revealed' }; renderTables(); }));
-    if (anyAir) wrap.appendChild(h(`<p class="note">For air the s column shows s° from Table A-17 (marked °). T is in K for air and °C for water and R-134a.</p>`));
-    if (practice) wrap.appendChild(h(`<p class="note">Practice mode: work out T, h, s and x from your tables, type them in and press Enter. A tick means you are within about 0.5 %. "Show" reveals one value.</p>`));
+    if (!practice) wrap.appendChild(h(`<p class="note">Type the values the problem gives you straight into the table (bold). Grey numbers are what the solver found from the equipment; type over one only if it is given. ${anyAir ? 'For air, T is in K and the s column shows s° from Table A-17 (marked °).' : ''}</p>`));
+    else wrap.appendChild(h(`<p class="note">Practice mode: the given values are shown; work out the rest from your tables, type them in and press Enter. A tick means you are within about 0.5 %. "Show" reveals one value.</p>`));
     return wrap;
   }
   function pcell(p, k, v, suf, d) {
@@ -2343,7 +2392,8 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
       tb.appendChild(tr);
       sQ += r.Q; sW += r.W; if (r.sg == null) sOK = false; else sS += r.sg;
     });
-    if (!practice) tb.appendChild(h(`<table><tr class="total"><td class="l">Whole cycle</td><td></td><td class="n">${(sQ >= 0 ? '+' : '−') + kwRaw(Math.abs(sQ))}</td><td class="n">${(sW >= 0 ? '+' : '−') + kwRaw(Math.abs(sW))}</td><td class="n">${sOK ? fmt(sS, 4) : '–'}</td><td class="l">Q̇ + Ẇ = ${fmt(Math.abs(sQ + sW) < 1e-3 ? 0 : sQ + sW, 3)} for a cycle</td></tr></table>`).querySelector('tr'));
+    if (!result.ok) { wrap.appendChild(h(`<p class="note">Only equipment whose states and mass flow are all known is listed.</p>`)); }
+    if (!practice && result.ok) tb.appendChild(h(`<table><tr class="total"><td class="l">Whole cycle</td><td></td><td class="n">${(sQ >= 0 ? '+' : '−') + kwRaw(Math.abs(sQ))}</td><td class="n">${(sW >= 0 ? '+' : '−') + kwRaw(Math.abs(sW))}</td><td class="n">${sOK ? fmt(sS, 4) : '–'}</td><td class="l">Q̇ + Ẇ = ${fmt(Math.abs(sQ + sW) < 1e-3 ? 0 : sQ + sW, 3)} for a cycle</td></tr></table>`).querySelector('tr'));
     wrap.appendChild(h(`<p class="note">Signs follow ΔE = Q + W with Q = Q_in − Q_out and W = W_in − W_out: a positive Q̇ is net heat into the fluid, a positive Ẇ is net work done on the fluid. Ṡgen = Σṁ_out s_out − Σṁ_in s_in − Σ Q̇/T_boundary.</p>`));
     return wrap;
   }
@@ -2354,8 +2404,8 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
     const svgd = $('#diagram'); svgd.innerHTML = '';
     const tabs = $('#dgTabs'); tabs.innerHTML = '';
     const leg = $('#dgLegend'); leg.innerHTML = '';
-    if (!(result && result.ok)) { el('text', { x: 20, y: 40, class: 'dg-tick' }, svgd).textContent = 'The diagram appears once the cycle solves.'; return; }
-    const loops = result.loops;
+    const loops = (result && result.loops || []).filter(L => L.pipes.some(p => result.states[p.id]));
+    if (!loops.length) { svgd.setAttribute('viewBox', '0 0 640 120'); el('text', { x: 20, y: 40, class: 'dg-tick' }, svgd).textContent = 'States appear here as soon as they are known.'; return; }
     if (dgLoop >= loops.length) dgLoop = 0;
     const L = loops[dgLoop];
     const kinds = L.fluid === 'air' ? [['Ts', 'T-s']] : [['Ts', 'T-s'], ['Ph', 'P-h']];
@@ -2376,7 +2426,7 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
     const W = 640, H = 400, m = { l: 62, r: 18, t: 16, b: 46 };
     svgd.setAttribute('viewBox', `0 0 ${W} ${H}`);
     const fl = L.fluid, air = fl === 'air';
-    const pipes = L.pipes;
+    const pipes = L.pipes.filter(p => result.states[p.id]);
     const st = (p) => result.states[p.id];
     const Tof = (s) => air ? s.TK : s.T;
     // collect process curves
@@ -2387,7 +2437,7 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
       const pairs = c.type === 'hx' ? [['hin', 'hout'], ['cin', 'cout']] : c.type === 'mixer' ? [] : c.type === 'splitter' ? [] : [['in', 'out']];
       pairs.forEach(([a, b]) => {
         const pa = pipeAt(c.id, a), pb = pipeAt(c.id, b);
-        if (!pa || !pb || !inLoop.has(pa.id)) return;
+        if (!pa || !pb || !inLoop.has(pa.id) || !inLoop.has(pb.id)) return;
         const s1 = st(pa), s2 = st(pb);
         if (['heater', 'cooler', 'hx'].includes(c.type)) {
           const pts = [];
@@ -2480,7 +2530,6 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
   // ======================= update cycle =======================
   let tmr = null;
   function update() {
-    save();
     try { result = SOLVER.solve(Object.assign({}, model, { comps: model.comps.map(c => Object.assign({}, c)) })); }
     catch (e) { console.error(e); result = { errors: [{ msg: 'Something went wrong while solving: ' + e.message }], warnings: [] }; }
     render(); renderInspector(); renderMessages(); renderPerf(); renderTables(); renderDiagram();
@@ -2512,23 +2561,9 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
     if (!noCommit) commit();
     const b = t.build();
     model = { comps: b.comps.map(c => Object.assign({ rot: 0 }, c)), pipes: b.pipes, T0: 25 };
-    applyLayout(id);
     sel = null; Object.keys(practiceAns).forEach(k => delete practiceAns[k]);
     dgLoop = 0;
     update(); requestAnimationFrame(fitView);
-  }
-  // per-template orientation tweaks (rotations) so the drawings read like the textbook figures
-  function applyLayout(id) {
-    const c = (k) => model.comps.find(x => x.id === k);
-    const set = (k, o) => { const x = c(k); if (x) Object.assign(x, o); };
-    if (['rankine', 'wte'].includes(id)) { set('P', { rot: 270 }); set('C', { flip: true }); }
-    if (id === 'reheat') { set('P', { rot: 270 }); set('C', { flip: true }); set('R', { rot: 90 }); }
-    if (id === 'regen') { set('P2', { rot: 270 }); set('P1', { rot: 270 }); set('C', { flip: true }); set('S', { rot: 90 }); set('F', { flip: true }); }
-    if (['brayton', 'braytonreal'].includes(id)) { set('X', { flip: true }); }
-    if (id === 'braytonregen') { set('X', { flip: true }); set('R', { flip: true }); }
-    if (['fridge', 'aircon', 'heatpump'].includes(id)) { set('V', { rot: 90, flip: false }); set('C', { flip: true }); }
-    if (id === 'aircycle') { set('T', { flip: true }); set('X', { flip: true }); }
-    if (id === 'combined') { set('P', { rot: 270 }); set('C', { flip: true }); set('HR', { flip: true }); set('X', { flip: true }); }
   }
   function openCode() {
     const code = JSON.stringify({ app: 'cycle-builder', v: 1, model });
@@ -2558,15 +2593,14 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
   function init() {
     setupSvg(); buildPalette();
     $('#bExamples').onclick = openTemplates;
-    $('#bNew').onclick = () => { commit(); model = { comps: [], pipes: [], T0: model.T0 }; sel = null; update(); fitView(); };
+    $('#bReset').onclick = () => { if (!model.comps.length) return; commit(); model = { comps: [], pipes: [], T0: 25 }; sel = null; practice = false; Object.keys(practiceAns).forEach(k => delete practiceAns[k]); update(); fitView(); flash('Canvas cleared. Undo brings it back.'); };
     $('#bUndo').onclick = doUndo; $('#bRedo').onclick = doRedo;
     $('#bCode').onclick = openCode;
     $('#bFit').onclick = fitView;
     $('#bZin').onclick = () => zoomBy(1.2); $('#bZout').onclick = () => zoomBy(1 / 1.2);
     $('#bPractice').onclick = () => { practice = !practice; update(); };
     document.querySelectorAll('#tableTabs .tab').forEach(t => t.addEventListener('click', () => { tab = t.dataset.tab; renderTables(); }));
-    if (!loadSaved()) loadTemplate('rankine', true);
-    else { update(); requestAnimationFrame(fitView); }
+    update(); fitView();
     window.addEventListener('resize', () => { clearTimeout(tmr); tmr = setTimeout(fitView, 150); });
   }
   function zoomBy(f) { const r = svg.getBoundingClientRect(); const k2 = Math.max(0.3, Math.min(2.5, view.k * f)); const mx = r.width / 2, my = r.height / 2; view.x = mx - (mx - view.x) * k2 / view.k; view.y = my - (my - view.y) * k2 / view.k; view.k = k2; applyView(); }
@@ -2575,5 +2609,4 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
 })();
 </script>
 
-</body>
-</html>
+</body></html>
