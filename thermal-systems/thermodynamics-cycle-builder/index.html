@@ -1,8 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Cycle Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -213,10 +209,14 @@ input.gin.has { font-weight: 700; color: var(--ink); background: color-mix(in sr
 .given-tag { font: 600 10px var(--f-head); letter-spacing: .06em; text-transform: uppercase; color: var(--warm); margin-left: 4px; }
 .given-val { font-weight: 700; }
 .unknown { color: var(--muted); font-style: italic; }
-</style>
-</head>
-<body>
 
+.mid { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.needed { padding: 12px 14px; }
+.needed h2 { font-size: 16px; }
+.needed .nlist { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; max-height: 340px; overflow: auto; }
+.needed .basis { margin-top: 8px; }
+.needed.done { padding: 10px 14px; }
+</style>
 
 <header class="top">
   <div>
@@ -239,6 +239,7 @@ input.gin.has { font-weight: 700; color: var(--ink); background: color-mix(in sr
     <div class="pal-groups" id="palGroups"></div>
     <p class="pal-hint">Drag onto the canvas, or tap to add.</p>
   </aside>
+  <div class="mid">
   <section class="card canvas-wrap" aria-label="Cycle canvas">
     <svg id="canvas" role="img" aria-label="Cycle diagram"></svg>
     <div class="empty-hint" id="emptyHint" hidden><div><b>Empty canvas</b><br>Drag equipment in from the equipment panel, or open an example.</div></div>
@@ -249,6 +250,8 @@ input.gin.has { font-weight: 700; color: var(--ink); background: color-mix(in sr
     </div>
     <div class="canvas-msg" id="msgs" aria-live="polite"></div>
   </section>
+    <div class="card needed" id="needed" aria-live="polite" hidden></div>
+  </div>
   <aside class="card inspector" id="inspector" aria-label="Selected item"></aside>
 </main>
 
@@ -2210,28 +2213,33 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
   function renderMessages() {
     const box = $('#msgs'); box.innerHTML = '';
     if (!result || result.empty) return;
-    (result.errors || []).slice(0, 2).forEach(e => box.appendChild(msgEl('err', 'Problem', e.msg, e.ref)));
     if (!(result.errors || []).length) (result.warnings || []).slice(0, 2).forEach(w => box.appendChild(msgEl('warn', 'Check', w.msg, w.ref)));
-    const n = (result.missing || []).length;
-    if (n && !(result.errors || []).length) {
-      const m = h(`<div class="msg warn"><b>Still needed</b><span>${n === 1 ? esc(result.missing[0].msg) : n + ' items. The list is under the canvas.'}</span></div>`);
-      if (n === 1 && result.missing[0].ref) { const b = h(`<button class="btn small" type="button">Show</button>`); b.onclick = () => goRef(result.missing[0].ref); m.appendChild(b); }
-      box.appendChild(m);
-    }
   }
 
+  function renderNeeded() {
+    const box = $('#needed'); box.innerHTML = ''; box.className = 'card needed';
+    if (!result || result.empty || !model.comps.length) { box.hidden = true; return; }
+    box.hidden = false;
+    const nf = model.pipes.filter(p => result.states && result.states[p.id]).length;
+    if (result.ok) {
+      box.classList.add('done');
+      box.appendChild(h(`<p class="note" style="margin:0"><b style="color:var(--good)">✓ Every state is found</b> (${nf} of ${model.pipes.length}). The results are below.</p>`));
+      return;
+    }
+    box.appendChild(h(`<h2>Still needed</h2>`));
+    const list = h(`<div class="nlist"></div>`);
+    (result.errors || []).forEach(e => list.appendChild(msgEl('err', 'Problem', e.msg, e.ref)));
+    (result.missing || []).forEach(e => list.appendChild(msgEl('warn', 'Needed', e.msg, e.ref)));
+    if (!list.children.length) list.appendChild(h(`<p class="note">Nothing is missing, but the cycle could not be finished. Check the warnings on the canvas.</p>`));
+    box.appendChild(list);
+    box.appendChild(h(`<p class="basis">${nf} of ${model.pipes.length} states known so far.</p>`));
+  }
   function renderPerf() {
     const host = $('#perf'); host.innerHTML = '';
+    renderNeeded();
     if (!(result && result.ok)) {
-      host.appendChild(h(`<h2>${result && !result.empty ? 'Still needed' : 'Results'}</h2>`));
-      if (!result || result.empty) { host.appendChild(h(`<p class="note">Add equipment, connect it into a cycle and enter the values you know. The performance appears here once every state is known.</p>`)); return; }
-      const list = h(`<div style="display:flex;flex-direction:column;gap:6px;margin-top:10px"></div>`);
-      (result.errors || []).forEach(e => list.appendChild(msgEl('err', 'Problem', e.msg, e.ref)));
-      (result.missing || []).forEach(e => list.appendChild(msgEl('warn', e.state ? 'State' : 'Needed', e.msg, e.ref)));
-      if (!list.children.length) list.appendChild(h(`<p class="note">Nothing is missing, but the cycle could not be finished. Check the warnings on the canvas.</p>`));
-      host.appendChild(list);
-      const nf = model.pipes.filter(p => result.states && result.states[p.id]).length;
-      host.appendChild(h(`<p class="basis">${nf} of ${model.pipes.length} states known so far. Performance (efficiency, COP, net work) appears once every state and mass flow is known.</p>`));
+      host.appendChild(h(`<h2>Results</h2>`));
+      host.appendChild(h(`<p class="note">${!result || result.empty ? 'Add equipment, connect it into a cycle and enter the values you know.' : 'See "Still needed" under the canvas.'} Efficiency, COP and net work appear here once every state and mass flow is known.</p>`));
       return;
     }
     const P = result.perf, u = unitWord();
@@ -2616,5 +2624,4 @@ if (false) module.exports = { KINDS, TEMPLATES, PALETTE_GROUPS, mk };
 })();
 </script>
 
-</body>
-</html>
+</body></html>
